@@ -1,0 +1,90 @@
+import React from "react";
+import { Layout, Menu } from "antd";
+import {
+  DashboardOutlined,
+  ApartmentOutlined,
+  HomeOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const { Sider } = Layout;
+
+const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  return (
+    <Sider breakpoint="lg" collapsedWidth="0">
+      <div
+        style={{
+          height: 64,
+          color: "#fff",
+          textAlign: "center",
+          lineHeight: "64px",
+          fontSize: 20,
+          fontWeight: "bold",
+        }}
+      >
+        Society App
+      </div>
+
+      <Menu
+        theme="dark"
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        onClick={({ key }) => navigate(key)}
+        items={[
+          {
+            key: "/clientdashboard",
+            icon: <DashboardOutlined />,
+            label: "Dashboard",
+          },
+          {
+            key: "/wings",
+            icon: <ApartmentOutlined />,
+            label: "Wings",
+          },
+          {
+            key: "/flats",
+            icon: <HomeOutlined />,
+            label: "Flats",
+          },
+          {
+            key: "members",
+            icon: <TeamOutlined />,
+            label: "Members",
+            children: [
+              {
+                key: "/members",
+                label: "Member List",
+              },
+              {
+                key: "/create-member",
+                label: "Create Member",
+              },
+            ],
+          },
+          {
+            key: "users",
+            icon: <UserOutlined />,
+            label: "Users",
+            children: [
+              {
+                key: "/users",
+                label: "User List",
+              },
+              {
+                key: "/create-user",
+                label: "Create User",
+              },
+            ],
+          },
+        ]}
+      />
+    </Sider>
+  );
+};
+
+export default Sidebar;

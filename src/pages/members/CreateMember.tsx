@@ -1,0 +1,187 @@
+import React, { useEffect, useState } from "react";
+import { Form, Input, Button, Row, Col, message, Select } from "antd";
+import { apiGet, apiPost } from "../../api/axios";
+import { focusNext } from "../../utils/FocusNext";
+
+interface MemberFormValues {
+  name: string;
+  mobile: string;
+  email?: string;
+  address?: string;
+  gender?: string;
+  occupation?: string;
+  memberType?: string;
+  flatId?: number;
+}
+
+
+const CreateMember: React.FC = () => {
+  const [form] = Form.useForm<MemberFormValues>();
+  const [flats, setFlats] = useState<any[]>([]);
+
+  const societyId = sessionStorage.getItem("societyId");
+
+  useEffect(() => {
+    loadFlats();
+  }, []);
+
+  const loadFlats = async () => {
+    try {
+      const res = await apiGet("/flats");
+      setFlats(res);
+    } catch (err) {
+      message.error("Failed to load flats");
+    }
+  };
+
+  const handleSelectEnter = (e: any) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const form = e.target.form;
+    const elements = Array.from(form.elements) as HTMLElement[];
+
+    const index = elements.indexOf(e.target);
+    const next = elements[index + 1];
+
+    if (next) next.focus();
+  }
+};
+
+  const onFinish = async (values: MemberFormValues) => {
+    try {
+      if (!societyId) {
+        message.error("Society not found in session");
+        return;
+      }
+
+      const payload = {
+        name: values.name,
+        mobile: values.mobile,
+        email: values.email,
+        address: values.address,
+        gender: values.gender,
+        occupation: values.occupation,
+        memberType: values.memberType,
+        active: true,
+
+        society: { id: Number(societyId) },
+        flat: values.flatId ? { id: values.flatId } : null,
+      };
+
+      await apiPost("/members", payload);
+
+      message.success("Member created successfully");
+      form.resetFields();
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to create member");
+    }
+  };
+
+  return (
+    <div style={{ padding: 20, background: "#fff", borderRadius: 8 }}>
+      <h2>Create Member</h2>
+
+      {/* Optional display */}
+      <p>
+        Society ID: <b>{societyId}</b>
+      </p>
+
+      <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label="Full Name"
+              name="name"
+              rules={[{ required: true, message: "Enter name" }]}
+            >
+              <Input placeholder="Enter full name" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+
+          <Col span={12}>
+            <Form.Item
+              label="Mobile"
+              name="mobile"
+              rules={[
+                { required: true, message: "Enter mobile" },
+                { pattern: /^[0-9]{10}$/, message: "Invalid mobile" },
+              ]}
+            >
+              <Input maxLength={10} placeholder="Enter mobile" onPressEnter={focusNext}/>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item label="Email" name="email">
+              <Input placeholder="Enter email" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+
+          <Col span={12}>
+            <Form.Item label="Flat" name="flatId">
+              <Select placeholder="Select flat" onKeyDown={handleSelectEnter}>
+                {flats.map((f) => (
+                  <Select.Option key={f.id} value={f.id}>
+                    {f.flatNo}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item label="Gender" name="gender">
+              <Select placeholder="Select gender" onKeyDown={handleSelectEnter}>
+                <Select.Option value="Male">Male</Select.Option>
+                <Select.Option value="Female">Female</Select.Option>
+                <Select.Option value="Other">Other</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col span={12}>
+            <Form.Item label="Occupation" name="occupation">
+              <Input placeholder="Enter occupation" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              label="Member Type"
+              name="memberType"
+              rules={[{ required: true, message: "Select member type" }]}
+            >
+              <Select placeholder="Select type" onKeyDown={handleSelectEnter}>
+                <Select.Option value="OWNER">OWNER</Select.Option>
+                <Select.Option value="TENANT">TENANT</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item label="Address" name="address">
+              <Input.TextArea rows={2} placeholder="Enter address" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Button type="primary" htmlType="submit">
+          Save Member
+        </Button>
+      </Form>
+    </div>
+  );
+};
+
+export default CreateMember;

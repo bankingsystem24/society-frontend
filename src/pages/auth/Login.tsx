@@ -6,13 +6,8 @@ import { useNavigate } from "react-router-dom";
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-    console.log(import.meta.env.VITE_API_URL);
-
   const onFinish = async (values: any) => {
     setLoading(true);
-
-    console.log("Login values:", values);
-
     try {
         const res = await axios.post(
         import.meta.env.VITE_API_URL + "/auth/login",
@@ -23,11 +18,16 @@ const Login: React.FC = () => {
             },
         }
         );
-      // Example: store token (if you use JWT later)
-      // localStorage.setItem("token", res.data.token);
 
       message.success("Login successful");
-      navigate("/dashboard"); // redirect to dashboard
+
+      sessionStorage.setItem("token", res.data.token);
+      sessionStorage.setItem(
+        "societyId",
+        String(res.data.societyId)
+      );
+      navigate("/clientdashboard");
+
     } catch (error: any) {
       message.error(
         error?.response?.data?.message || "Invalid username or password"
