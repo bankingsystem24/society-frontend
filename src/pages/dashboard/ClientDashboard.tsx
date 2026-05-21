@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Statistic, Typography } from "antd";
-import { HomeOutlined, TeamOutlined, BankOutlined } from "@ant-design/icons";
+import { HomeOutlined, TeamOutlined } from "@ant-design/icons";
 import { apiGet } from "../../api/axios";
 
 const { Title } = Typography;
 
 const ClientDashboard: React.FC = () => {
   const [stats, setStats] = useState({
-    // societies: 0,
     wings: 0,
     flats: 0,
     members: 0,
@@ -27,51 +26,61 @@ const ClientDashboard: React.FC = () => {
         apiGet(`/members?societyId=${societyId}`),
       ]);
 
-      const wings = Array.isArray(wingRes) ? wingRes : [];
-      const flats = Array.isArray(flatRes) ? flatRes : [];
-      const members = Array.isArray(memRes) ? memRes : [];
-
       setStats({
-        wings: wings.length,
-        flats: flats.length,
-        members: members.length,
+        wings: Array.isArray(wingRes) ? wingRes.length : 0,
+        flats: Array.isArray(flatRes) ? flatRes.length : 0,
+        members: Array.isArray(memRes) ? memRes.length : 0,
       });
     } catch (error) {
       console.error("Error loading dashboard stats", error);
     }
   };
 
+  const cardStyle: React.CSSProperties = {
+    borderRadius: 12,
+    boxShadow: "0 4px 12px rgba(22, 119, 255, 0.15)",
+    border: "1px solid #d6e4ff",
+  };
+
   return (
-    <div style={{ padding: 20 }}>
-      <Title level={2}>Society Dashboard</Title>
+    <div style={{ padding: 24, background: "#f0f5ff", minHeight: "100vh" }}>
+      <Title
+        level={2}
+        style={{ color: "#1677ff", marginBottom: 24 }}
+      >
+        Society Dashboard
+      </Title>
 
       <Row gutter={16}>
-        <Col span={6}>
-          <Card>
+        <Col span={8}>
+          <Card style={cardStyle}>
             <Statistic
-              title="Wings"
+              title={<span style={{ color: "#1677ff" }}>Wings</span>}
               value={stats.wings}
-              prefix={<HomeOutlined />}
+              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+              valueStyle={{ color: "#1677ff" }}
             />
           </Card>
         </Col>
 
-        <Col span={6}>
-          <Card>
+        <Col span={8}>
+          <Card style={cardStyle}>
             <Statistic
-              title="Flats"
+              title={<span style={{ color: "#1677ff" }}>Flats</span>}
               value={stats.flats}
-              prefix={<HomeOutlined />}
+              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+              valueStyle={{ color: "#1677ff" }}
             />
           </Card>
         </Col>
 
-        <Col span={6}>
-          <Card>
+        <Col span={8}>
+          <Card style={cardStyle}>
             <Statistic
-              title="Members"
+              title={<span style={{ color: "#1677ff" }}>Members</span>}
               value={stats.members}
-              prefix={<TeamOutlined />}
+              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
+              valueStyle={{ color: "#1677ff" }}
             />
           </Card>
         </Col>

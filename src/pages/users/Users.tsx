@@ -36,6 +36,7 @@ const Users: React.FC = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      hidden: true,
     },
     {
       title: "Username",

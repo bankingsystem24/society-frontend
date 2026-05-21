@@ -22,10 +22,9 @@ const Login: React.FC = () => {
       message.success("Login successful");
 
       sessionStorage.setItem("token", res.data.token);
-      sessionStorage.setItem(
-        "societyId",
-        String(res.data.societyId)
-      );
+      sessionStorage.setItem("societyId",String(res.data.societyId));
+      sessionStorage.setItem("societyName", res.data.societyName);
+
       navigate("/clientdashboard");
 
     } catch (error: any) {

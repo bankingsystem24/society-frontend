@@ -22,6 +22,8 @@ const Members: React.FC = () => {
         `/members?societyId=${societyId}`
       );
 
+      console.log("Members data:", res);
+
       setData(res || []);
 
     } catch (error) {
@@ -36,6 +38,7 @@ const Members: React.FC = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      hidden: true,
     },
     {
       title: "Member Name",

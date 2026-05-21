@@ -1,17 +1,16 @@
 import React from "react";
-import { Layout, Dropdown, Avatar, Space } from "antd";
-import {
-  UserOutlined,
-  LogoutOutlined,
-} from "@ant-design/icons";
+import { Layout, Dropdown, Avatar, Space, Typography } from "antd";
+import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 const { Header } = Layout;
+const { Text } = Typography;
 
 const HeaderBar: React.FC = () => {
   const navigate = useNavigate();
 
   const username = sessionStorage.getItem("username");
+  const societyName = sessionStorage.getItem("societyName");
 
   const items = [
     {
@@ -28,20 +27,65 @@ const HeaderBar: React.FC = () => {
   return (
     <Header
       style={{
-        background: "#fff",
-        padding: "0 20px",
+        height: 64,
+        padding: "0 24px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        background: "linear-gradient(90deg, #1677ff, #4096ff)",
+        boxShadow: "0 4px 12px rgba(22, 119, 255, 0.25)",
       }}
     >
-      <h2 style={{ margin: 0 }}>Society Management System</h2>
+      {/* LEFT SIDE */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: 600,
+            lineHeight: 1.2,
+          }}
+        >
+          {societyName || "Society Management System"}
+        </Text>
 
+        <Text
+          style={{
+            color: "rgba(255,255,255,0.75)",
+            fontSize: 12,
+          }}
+        >
+          Dashboard
+        </Text>
+      </div>
+
+      {/* RIGHT SIDE */}
       <Dropdown menu={{ items }} placement="bottomRight">
-        <Space style={{ cursor: "pointer" }}>
-          <Avatar icon={<UserOutlined />} />
-          {username || "Admin"}
+        <Space
+          style={{
+            cursor: "pointer",
+            padding: "6px 10px",
+            borderRadius: 10,
+            transition: "0.3s",
+          }}
+        >
+          <Avatar
+            size={38}
+            style={{
+              backgroundColor: "#ffffff20",
+              border: "1px solid rgba(255,255,255,0.3)",
+            }}
+            icon={<UserOutlined />}
+          />
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <Text style={{ color: "#fff", fontWeight: 500 }}>
+              {username || "Admin"}
+            </Text>
+            <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>
+              Online
+            </Text>
+          </div>
         </Space>
       </Dropdown>
     </Header>

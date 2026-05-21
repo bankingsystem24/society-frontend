@@ -27,7 +27,7 @@ const Sidebar: React.FC = () => {
           fontWeight: "bold",
         }}
       >
-        Society App
+        Logo
       </div>
 
       <Menu
