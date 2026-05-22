@@ -18,9 +18,8 @@ const Wings: React.FC = () => {
 
       const societyId = sessionStorage.getItem("societyId");
 
-      const res = await apiGet(
-        `/wings?societyId=${societyId}`
-      );
+      const res = await apiGet(`/wings?societyId=${societyId}`)
+     
 
       setData(res || []);
 

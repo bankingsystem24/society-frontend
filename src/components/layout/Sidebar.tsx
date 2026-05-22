@@ -57,9 +57,20 @@ const Sidebar: React.FC = () => {
             ],
           },
           {
-            key: "/flats",
+            key: "flats",
             icon: <HomeOutlined />,
             label: "Flats",
+            children :[
+              {
+                key:"/flats",
+                label: "Flat List"
+              },
+              {
+                key:"/create-flat",
+                label:"Create Flat",
+              }
+
+            ],
           },
           {
             key: "members",

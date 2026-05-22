@@ -60,11 +60,7 @@ const CreateWings: React.FC = () => {
         total_floors: values.total_floors,
         society: { id: Number(societyId) },
       };
-
-      console.log("Creating wing with payload:", payload);
-
       await apiPost("/wings", payload);
-
       message.success("Wing created successfully");
       form.resetFields();
       loadWings();

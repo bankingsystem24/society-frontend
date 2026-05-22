@@ -18,12 +18,9 @@ const Flats: React.FC = () => {
 
       const societyId = sessionStorage.getItem("societyId");
 
-      const res = await apiGet(
-        `/flats?societyId=${societyId}`
+      const res = await apiGet(`/flats?societyId=${societyId}`
       );
-
       setData(res || []);
-
     } catch (error) {
       console.error("Error loading flats", error);
     } finally {
@@ -46,11 +43,13 @@ const Flats: React.FC = () => {
       title: "Wing",
       dataIndex: "wingName",
       key: "wingName",
+      render : (_: any , record : any ) => record?.wing?.wingName || "-"
     },
     {
       title: "Owner",
       dataIndex: "ownerName",
       key: "ownerName",
+      render :(_: any, record : any ) => record?.owner?.name || "-"
     },
   ];
 

@@ -10,6 +10,7 @@ import Users from "./pages/users/Users";
 import CreateUser from "./pages/users/CreateUser";
 import CreateMember from "./pages/members/CreateMember";
 import CreateWings from "./pages/society/CreateWings";
+import CreateFlat from "./pages/society/CreateFlats";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/wings" element={<Wings />} />
         <Route path="/create-wing" element={<CreateWings />} />
         <Route path="/flats" element={<Flats />} />
+        <Route path="/create-flat" element={<CreateFlat />}/>
         <Route path="/members" element={<Members />} />
         <Route path="/create-member" element={<CreateMember />} />
         <Route path="/users" element={<Users />} />

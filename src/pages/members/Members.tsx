@@ -25,13 +25,8 @@ const Members: React.FC = () => {
   const loadMembers = async () => {
     try {
       setLoading(true);
-
       const societyId = sessionStorage.getItem("societyId");
-
       const res = await apiGet(`/members?societyId=${societyId}`);
-
-      console.log("Members data:", res);
-
       setData(res || []);
     } catch (error) {
       console.error("Error loading members", error);
