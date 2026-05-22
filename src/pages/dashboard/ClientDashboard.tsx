@@ -10,6 +10,7 @@ const ClientDashboard: React.FC = () => {
     wings: 0,
     flats: 0,
     members: 0,
+    users: 0,
   });
 
   useEffect(() => {
@@ -20,16 +21,18 @@ const ClientDashboard: React.FC = () => {
     try {
       const societyId = sessionStorage.getItem("societyId");
 
-      const [wingRes, flatRes, memRes] = await Promise.all([
+      const [wingRes, flatRes, memRes, userRes] = await Promise.all([
         apiGet(`/wings?societyId=${societyId}`),
         apiGet(`/flats?societyId=${societyId}`),
         apiGet(`/members?societyId=${societyId}`),
+        apiGet(`/users?societyId=${societyId}`),
       ]);
 
       setStats({
         wings: Array.isArray(wingRes) ? wingRes.length : 0,
         flats: Array.isArray(flatRes) ? flatRes.length : 0,
         members: Array.isArray(memRes) ? memRes.length : 0,
+        users: Array.isArray(userRes) ? userRes.length : 0, 
       });
     } catch (error) {
       console.error("Error loading dashboard stats", error);
@@ -52,7 +55,7 @@ const ClientDashboard: React.FC = () => {
       </Title>
 
       <Row gutter={16}>
-        <Col span={8}>
+        <Col span={6}>
           <Card style={cardStyle}>
             <Statistic
               title={<span style={{ color: "#1677ff" }}>Wings</span>}
@@ -63,7 +66,7 @@ const ClientDashboard: React.FC = () => {
           </Card>
         </Col>
 
-        <Col span={8}>
+        <Col span={6}>
           <Card style={cardStyle}>
             <Statistic
               title={<span style={{ color: "#1677ff" }}>Flats</span>}
@@ -74,7 +77,7 @@ const ClientDashboard: React.FC = () => {
           </Card>
         </Col>
 
-        <Col span={8}>
+        <Col span={6}>
           <Card style={cardStyle}>
             <Statistic
               title={<span style={{ color: "#1677ff" }}>Members</span>}
@@ -84,7 +87,19 @@ const ClientDashboard: React.FC = () => {
             />
           </Card>
         </Col>
+
+        <Col span={6}>
+          <Card style={cardStyle}>
+            <Statistic
+              title={<span style={{ color: "#1677ff" }}>Users</span>}
+              value={stats.users}
+              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
+              valueStyle={{ color: "#1677ff" }}
+            />
+          </Card>
+        </Col>
       </Row>
+
     </div>
   );
 };

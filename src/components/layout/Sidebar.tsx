@@ -42,9 +42,19 @@ const Sidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key: "/wings",
+            key: "wings",
             icon: <ApartmentOutlined />,
             label: "Wings",
+            children: [
+              {
+                key: "/wings",
+                label: "Wing List",
+              },
+              {
+                key: "/create-wing",
+                label: "Create Wing",
+              },
+            ],
           },
           {
             key: "/flats",

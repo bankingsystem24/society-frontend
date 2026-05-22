@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Row, Col, message, Select } from "antd";
+import { Form, Input, Button, Row, Col, message, Select, Card } from "antd";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
 
@@ -70,7 +70,10 @@ const CreateMember: React.FC = () => {
         flat: values.flatId ? { id: values.flatId } : null,
       };
 
+      console.log("Creating member with payload:", payload);
+      
       await apiPost("/members", payload);
+
 
       message.success("Member created successfully");
       form.resetFields();
@@ -81,13 +84,7 @@ const CreateMember: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: 20, background: "#fff", borderRadius: 8 }}>
-      <h2>Create Member</h2>
-
-      {/* Optional display */}
-      <p>
-        Society ID: <b>{societyId}</b>
-      </p>
+    <Card title="Create Member" style={{ marginBottom: 20 }}>
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Row gutter={16}>
@@ -180,7 +177,7 @@ const CreateMember: React.FC = () => {
           Save Member
         </Button>
       </Form>
-    </div>
+    </Card>
   );
 };
 
