@@ -102,6 +102,11 @@ const Sidebar: React.FC = () => {
               },
             ],
           },
+          {
+            key:"/bill-generate",
+            label:"Generate Bill",
+            icon:<HomeOutlined />
+          }
         ]}
       />
     </Sider>

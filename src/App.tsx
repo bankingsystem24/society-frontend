@@ -11,6 +11,7 @@ import CreateUser from "./pages/users/CreateUser";
 import CreateMember from "./pages/members/CreateMember";
 import CreateWings from "./pages/society/CreateWings";
 import CreateFlat from "./pages/society/CreateFlats";
+import BillingGenerate from "./pages/billing/BillGenerate";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/create-member" element={<CreateMember />} />
         <Route path="/users" element={<Users />} />
         <Route path="/create-user" element={<CreateUser />} />
+        <Route path="/generate-bill" element={<BillingGenerate />}/>
       </Route>
 
     </Routes>
