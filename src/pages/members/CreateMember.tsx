@@ -66,9 +66,10 @@ const CreateMember: React.FC = () => {
         memberType: values.memberType,
         active: true,
 
-        society: { id: Number(societyId) },
-        flat: values.flatId ? { id: values.flatId } : null,
+        societyId: societyId,
+        flatId: values.flatId ? values.flatId  : null,
       };
+
       await apiPost("/members", payload);
       message.success("Member created successfully");
       form.resetFields();
