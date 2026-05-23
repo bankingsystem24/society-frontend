@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Table, Card, Typography, Select, Switch, message, Button, Popconfirm, Space } from "antd";
 import { apiDelete, apiGet, apiPut } from "../../api/axios";
 import { DeleteOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const Members: React.FC = () => {
+
+  const navigate = useNavigate();
+
   const [data, setData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -204,6 +208,11 @@ const Members: React.FC = () => {
             pageSize: 10,
             responsive: true,
           }}
+          onRow={(record) => ({
+          onClick: () =>
+            navigate(`/edit-member/${record.id}`),
+          style: { cursor: "pointer" },
+        })}
           scroll={{ x: 850 }}
         />
       </div>
