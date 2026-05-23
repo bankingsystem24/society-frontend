@@ -153,7 +153,7 @@ const Members: React.FC = () => {
   ];
 
   return (
-    <Card style={{ width: "100%" }} bodyStyle={{ padding: 16 }}>
+    <Card style={{ width: "100%", padding:16 }} >
       {/* Header */}
       <div
         style={{
