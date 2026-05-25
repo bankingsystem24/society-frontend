@@ -135,9 +135,6 @@ const EditFlat: React.FC = () => {
             }
           : null,
       };
-
-      console.log("payload", payload);
-
       await apiPut(`/flats/${id}`, payload);
 
       message.success("Flat updated successfully");

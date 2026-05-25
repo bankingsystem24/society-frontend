@@ -90,9 +90,6 @@ const EditWing: React.FC = () => {
           id: Number(societyId),
         },
       };
-
-      console.log("payload",payload);
-
       await apiPut(`/wings/${id}`, payload);
 
       message.success("Wing updated successfully");

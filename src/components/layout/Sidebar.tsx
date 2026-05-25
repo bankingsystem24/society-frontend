@@ -109,9 +109,14 @@ const Sidebar: React.FC = () => {
             label:"Generate Bill",
             icon:<HomeOutlined />
           },
-                    {
+          {
             key:"/view-bills",
             label:"View Bills",
+            icon:<HomeOutlined />
+          },
+          {
+            key:"/generate-receipt",
+            label:"Generate Receipt",
             icon:<HomeOutlined />
           },
         ]}

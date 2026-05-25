@@ -17,6 +17,7 @@ import EditUser from "./pages/users/EditUser";
 import EditMember from "./pages/members/EditMember";
 import BillGenerate from "./pages/billing/BillGenerate";
 import ViewBills from "./pages/billing/ViewBills";
+import GenerateReceipt from "./pages/billing/GenerateReceipt";
 
 export default function App() {
   return (
@@ -46,6 +47,8 @@ export default function App() {
 
         <Route path="/bill-generate" element={<BillGenerate />}/>
         <Route path="/view-bills" element={<ViewBills />} />
+        <Route path="/generate-receipt" element={<GenerateReceipt />} />
+
       </Route>
 
     </Routes>

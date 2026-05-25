@@ -125,9 +125,6 @@ const EditMember: React.FC = () => {
           ? values.flatId
           : null,
       };
-
-      console.log("payload", payload);
-
       await apiPut(`/members/${id}`, payload);
 
       message.success(

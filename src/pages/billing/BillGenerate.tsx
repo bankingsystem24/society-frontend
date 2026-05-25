@@ -46,8 +46,6 @@ const BillGenerate: React.FC = () => {
         societyId: Number(societyId),
       };
 
-      console.log("payload", payload);
-
       await apiPost(
         "/billing/generate",
         payload
