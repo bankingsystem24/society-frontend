@@ -1,6 +1,7 @@
 import { Button, Card, Col, Form, Row, Select, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import type { ColumnsType } from "antd/es/table";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -8,6 +9,7 @@ interface Flat {
   id: number;
   flatNo: string;
 }
+
 
 interface Bill {
   id: number;
@@ -19,9 +21,9 @@ interface Bill {
   status: string;
   dueDate: string;
   createdDate: string;
-  flat: {
-    flatNo: string;
-  };
+  flatNo: string;
+  memberName:string;
+
 }
 
 const months = [
@@ -39,16 +41,24 @@ const months = [
   "MARCH",
 ];
 
+interface Members {
+  id:number;
+  name:string;
+}
+
 export default function ViewBills() {
   const [loading, setLoading] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
   const [flats, setFlats] = useState<Flat[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [members, setMembers] = useState<Members[]>([]);
 
   const societyId = sessionStorage.getItem("societyId");
 
   useEffect(() => {
     loadFlats();
     loadBills();
+    loadMembers();
   }, []);
 
   const loadFlats = async () => {
@@ -69,6 +79,7 @@ export default function ViewBills() {
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
         societyId: Number(societyId),
       });
+
       console.log("society Id", societyId);
       console.log("Bills by SocietyId Response", res);
 
@@ -77,6 +88,33 @@ export default function ViewBills() {
       message.error("Failed to load bills");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMembers = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/members?societyId=${societyId}`);
+      setMembers(res.data);
+    } catch {
+      message.error("Failed to load members");
+    }
+  };
+
+  const handlePay = async () => {
+    try {
+      const billIds = selectedRowKeys.map(Number); // 🔥 IMPORTANT FIX
+
+      const res = await axios.put(`${BASE_URL}/billing/pay`, {
+        billIds,
+        paymentMode: "CASH",
+      });
+
+      message.success(res.data);
+
+      setSelectedRowKeys([]);
+      loadBills();
+    } catch (err) {
+      message.error("Payment failed");
     }
   };
 
@@ -92,6 +130,7 @@ export default function ViewBills() {
         fromYear: values.fromYear || null,
         month: values.month || null,
         status: values.status || null,
+        memberId: values.memberId || null, // 🔥 ADD THIS
       };
 
       console.log("payload", payload);
@@ -107,10 +146,14 @@ export default function ViewBills() {
   };
   const [form] = Form.useForm();
 
-  const columns = [
+  const columns: ColumnsType<Bill> = [
     {
       title: "Flat",
       dataIndex: ["flat", "flatNo"],
+    },
+    {
+      title: "Member",
+      dataIndex: "memberName",
     },
     {
       title: "Month",
@@ -135,6 +178,16 @@ export default function ViewBills() {
     {
       title: "Status",
       dataIndex: "status",
+      render: (text: string) => (
+        <span
+          style={{
+            color:
+              text === "PAID" ? "green" : text === "PENDING" ? "orange" : "red",
+          }}
+        >
+          {text}
+        </span>
+      ),
     },
     {
       title: "Due Date",
@@ -216,6 +269,19 @@ export default function ViewBills() {
               />
             </Form.Item>
           </Col>
+          <Col xs={24} sm={12} md={12} lg={6}>
+            <Form.Item label="Member" name="memberId">
+              <Select
+                allowClear
+                placeholder="Select Member"
+                onChange={filterBills}
+                options={members.map((m) => ({
+                  label: m.name,
+                  value: m.id,
+                }))}
+              />
+            </Form.Item>
+          </Col>
         </Row>
       </Form>
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
@@ -267,9 +333,27 @@ export default function ViewBills() {
           </Card>
         </Col>
       </Row>
+      <Row style={{ marginBottom: 12 }}>
+        <Col>
+          <Button
+            type="primary"
+            disabled={selectedRowKeys.length === 0}
+            onClick={handlePay}
+          >
+            Pay Selected Bills ({selectedRowKeys.length})
+          </Button>
+        </Col>
+      </Row>
       <Table
         rowKey="id"
         columns={columns}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys),
+          getCheckboxProps: (record) => ({
+            disabled: record.status !== "PENDING", // only pending selectable
+          }),
+        }}
         dataSource={bills}
         loading={loading}
         size="small"
