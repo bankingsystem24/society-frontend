@@ -1,4 +1,12 @@
-import { Button, Card, Col, Form, Row, Select, Table, message } from "antd";
+import {
+  Button,
+  Card,
+  Form,
+  Modal,
+  Select,
+  Table,
+  message,
+} from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
@@ -9,7 +17,6 @@ interface Flat {
   id: number;
   flatNo: string;
 }
-
 
 interface Bill {
   id: number;
@@ -22,37 +29,29 @@ interface Bill {
   dueDate: string;
   createdDate: string;
   flatNo: string;
-  memberName:string;
+  memberName: string;
+}
 
+interface Members {
+  id: number;
+  name: string;
 }
 
 const months = [
-  "APRIL",
-  "MAY",
-  "JUNE",
-  "JULY",
-  "AUGUST",
-  "SEPTEMBER",
-  "OCTOBER",
-  "NOVEMBER",
-  "DECEMBER",
-  "JANUARY",
-  "FEBRUARY",
-  "MARCH",
+  "APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER",
+  "OCTOBER","NOVEMBER","DECEMBER","JANUARY","FEBRUARY","MARCH",
 ];
-
-interface Members {
-  id:number;
-  name:string;
-}
 
 export default function ViewBills() {
   const [loading, setLoading] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
   const [flats, setFlats] = useState<Flat[]>([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [members, setMembers] = useState<Members[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<string>("CASH");
 
+  const [form] = Form.useForm();
   const societyId = sessionStorage.getItem("societyId");
 
   useEffect(() => {
@@ -64,8 +63,6 @@ export default function ViewBills() {
   const loadFlats = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/flats?societyId=${societyId}`);
-      console.log("flats", res);
-
       setFlats(res.data);
     } catch {
       message.error("Failed to load flats");
@@ -75,14 +72,9 @@ export default function ViewBills() {
   const loadBills = async () => {
     try {
       setLoading(true);
-
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
         societyId: Number(societyId),
       });
-
-      console.log("society Id", societyId);
-      console.log("Bills by SocietyId Response", res);
-
       setBills(res.data);
     } catch {
       message.error("Failed to load bills");
@@ -102,18 +94,18 @@ export default function ViewBills() {
 
   const handlePay = async () => {
     try {
-      const billIds = selectedRowKeys.map(Number); // 🔥 IMPORTANT FIX
+      const billIds = selectedRowKeys.map(Number);
 
       const res = await axios.put(`${BASE_URL}/billing/pay`, {
         billIds,
-        paymentMode: "CASH",
+        paymentMode,
       });
 
       message.success(res.data);
-
       setSelectedRowKeys([]);
+      setPaymentModalOpen(false);
       loadBills();
-    } catch (err) {
+    } catch {
       message.error("Payment failed");
     }
   };
@@ -130,13 +122,10 @@ export default function ViewBills() {
         fromYear: values.fromYear || null,
         month: values.month || null,
         status: values.status || null,
-        memberId: values.memberId || null, // 🔥 ADD THIS
+        memberId: values.memberId || null,
       };
 
-      console.log("payload", payload);
-
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, payload);
-
       setBills(res.data);
     } catch {
       message.error("Failed to filter bills");
@@ -144,37 +133,15 @@ export default function ViewBills() {
       setLoading(false);
     }
   };
-  const [form] = Form.useForm();
 
   const columns: ColumnsType<Bill> = [
-    {
-      title: "Flat",
-      dataIndex: ["flat", "flatNo"],
-    },
-    {
-      title: "Member",
-      dataIndex: "memberName",
-    },
-    {
-      title: "Month",
-      dataIndex: "month",
-    },
-    {
-      title: "Year",
-      dataIndex: "year",
-    },
-    {
-      title: "Maintenance",
-      dataIndex: "maintenanceAmount",
-    },
-    {
-      title: "Penalty",
-      dataIndex: "penaltyAmount",
-    },
-    {
-      title: "Total",
-      dataIndex: "totalAmount",
-    },
+    { title: "Flat", dataIndex: "flatNo" },
+    { title: "Member", dataIndex: "memberName" },
+    { title: "Month", dataIndex: "month" },
+    { title: "Year", dataIndex: "year" },
+    { title: "Maintenance", dataIndex: "maintenanceAmount" },
+    { title: "Penalty", dataIndex: "penaltyAmount" },
+    { title: "Total", dataIndex: "totalAmount" },
     {
       title: "Status",
       dataIndex: "status",
@@ -182,55 +149,67 @@ export default function ViewBills() {
         <span
           style={{
             color:
-              text === "PAID" ? "green" : text === "PENDING" ? "orange" : "red",
+              text === "PAID"
+                ? "green"
+                : text === "PENDING"
+                ? "orange"
+                : "red",
           }}
         >
           {text}
         </span>
       ),
     },
-    {
-      title: "Due Date",
-      dataIndex: "dueDate",
-    },
+    { title: "Due Date", dataIndex: "dueDate" },
   ];
+
   const totalMaintenance = bills.reduce(
-    (sum, bill) => sum + (bill.maintenanceAmount || 0),
-    0,
+    (s, b) => s + (b.maintenanceAmount || 0),
+    0
   );
-
   const totalPenalty = bills.reduce(
-    (sum, bill) => sum + (bill.penaltyAmount || 0),
-    0,
+    (s, b) => s + (b.penaltyAmount || 0),
+    0
+  );
+  const grandTotal = bills.reduce(
+    (s, b) => s + (b.totalAmount || 0),
+    0
   );
 
-  const grandTotal = bills.reduce(
-    (sum, bill) => sum + (bill.totalAmount || 0),
-    0,
-  );
   return (
     <Card title="View Bills">
+
+      {/* ================= FILTER SECTION ================= */}
       <Form form={form} layout="vertical">
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={12} lg={6}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 16,
+            marginBottom: 16,
+          }}
+        >
+
+          {/* Flat */}
+          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
             <Form.Item label="Flat" name="flatId">
               <Select
                 allowClear
                 placeholder="Select Flat"
                 onChange={filterBills}
-                options={flats.map((f) => ({
+                options={flats.map(f => ({
                   label: f.flatNo,
                   value: f.id,
                 }))}
               />
             </Form.Item>
-          </Col>
+          </div>
 
-          <Col xs={24} sm={12} md={12} lg={6}>
+          {/* Year */}
+          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
             <Form.Item label="Financial Year" name="fromYear">
               <Select
                 allowClear
-                placeholder="Select Year"
                 onChange={filterBills}
                 options={[
                   { label: "2024-2025", value: 2024 },
@@ -239,27 +218,24 @@ export default function ViewBills() {
                 ]}
               />
             </Form.Item>
-          </Col>
+          </div>
 
-          <Col xs={24} sm={12} md={12} lg={6}>
+          {/* Month */}
+          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
             <Form.Item label="Month" name="month">
               <Select
                 allowClear
-                placeholder="Select Month"
                 onChange={filterBills}
-                options={months.map((m) => ({
-                  label: m,
-                  value: m,
-                }))}
+                options={months.map(m => ({ label: m, value: m }))}
               />
             </Form.Item>
-          </Col>
+          </div>
 
-          <Col xs={24} sm={12} md={12} lg={6}>
+          {/* Status */}
+          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
             <Form.Item label="Status" name="status">
               <Select
                 allowClear
-                placeholder="Select Status"
                 onChange={filterBills}
                 options={[
                   { label: "PENDING", value: "PENDING" },
@@ -268,98 +244,114 @@ export default function ViewBills() {
                 ]}
               />
             </Form.Item>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
+          </div>
+
+          {/* Member */}
+          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
             <Form.Item label="Member" name="memberId">
               <Select
                 allowClear
-                placeholder="Select Member"
                 onChange={filterBills}
-                options={members.map((m) => ({
+                options={members.map(m => ({
                   label: m.name,
                   value: m.id,
                 }))}
               />
             </Form.Item>
-          </Col>
-        </Row>
+          </div>
+
+        </div>
       </Form>
-      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
-        <Col xs={24} sm={24} md={8}>
+
+      {/* ================= SUMMARY CARDS ================= */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 16,
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
-            {" "}
             <div style={{ fontSize: 13 }}>Total Maintenance</div>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                lineHeight: 1.2,
-              }}
-            >
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
               ₹ {totalMaintenance.toFixed(2)}
             </div>
           </Card>
-        </Col>
+        </div>
 
-        <Col xs={24} sm={24} md={8}>
+        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Total Penalty</div>
-
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                lineHeight: 1.2,
-              }}
-            >
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
               ₹ {totalPenalty.toFixed(2)}
             </div>
           </Card>
-        </Col>
+        </div>
 
-        <Col xs={24} sm={24} md={8}>
+        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Grand Total</div>
-
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                lineHeight: 1.2,
-              }}
-            >
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
               ₹ {grandTotal.toFixed(2)}
             </div>
           </Card>
-        </Col>
-      </Row>
-      <Row style={{ marginBottom: 12 }}>
-        <Col>
-          <Button
-            type="primary"
-            disabled={selectedRowKeys.length === 0}
-            onClick={handlePay}
-          >
-            Pay Selected Bills ({selectedRowKeys.length})
-          </Button>
-        </Col>
-      </Row>
+        </div>
+      </div>
+
+      {/* ================= BUTTON ================= */}
+      <div style={{ marginBottom: 12 }}>
+        <Button
+          type="primary"
+          disabled={selectedRowKeys.length === 0}
+          onClick={() => setPaymentModalOpen(true)}
+        >
+          Pay Selected Bills ({selectedRowKeys.length})
+        </Button>
+      </div>
+
+      {/* ================= TABLE ================= */}
       <Table
         rowKey="id"
         columns={columns}
-        rowSelection={{
-          selectedRowKeys,
-          onChange: (keys) => setSelectedRowKeys(keys),
-          getCheckboxProps: (record) => ({
-            disabled: record.status !== "PENDING", // only pending selectable
-          }),
-        }}
         dataSource={bills}
         loading={loading}
         size="small"
-        className="compact-table"
         scroll={{ x: 800 }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: setSelectedRowKeys,
+          getCheckboxProps: record => ({
+            disabled: record.status !== "PENDING",
+          }),
+        }}
       />
+
+      {/* ================= PAYMENT MODAL ================= */}
+      <Modal
+        title="Select Payment Method"
+        open={paymentModalOpen}
+        onCancel={() => setPaymentModalOpen(false)}
+        onOk={handlePay}
+        okText="Pay Now"
+      >
+        <Form layout="vertical">
+          <Form.Item label="Payment Method">
+            <Select
+              value={paymentMode}
+              onChange={setPaymentMode}
+              options={[
+                { label: "CASH", value: "CASH" },
+                { label: "UPI", value: "UPI" },
+                { label: "CARD", value: "CARD" },
+                { label: "NETBANKING", value: "NETBANKING" },
+              ]}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
     </Card>
   );
 }
