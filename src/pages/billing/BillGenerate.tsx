@@ -1,82 +1,191 @@
+// src/pages/billing/BillingGenerate.tsx
+
 import React, { useState } from "react";
-import { Button, Select, Input, message, Card, Table } from "antd";
-import axios from "axios";
+import {
+  Button,
+  Select,
+  Input,
+  message,
+  Card,
+  Form,
+  Row,
+  Col,
+} from "antd";
+
+import { apiPost } from "../../api/axios";
 
 const { Option } = Select;
 
-const BillingGenerate = () => {
-  const [month, setMonth] = useState<string>("");
-  const [year, setYear] = useState<number>(new Date().getFullYear());
+interface BillingFormValues {
+  month: string;
+  year: number;
+}
+
+const BillGenerate: React.FC = () => {
+  const [form] = Form.useForm<BillingFormValues>();
+
   const [loading, setLoading] = useState(false);
 
-  const societyId = sessionStorage.getItem("societyId");
+  const onFinish = async (
+    values: BillingFormValues
+  ) => {
+    try {
+      setLoading(true);
 
-  const generateBills = async () => {
-    if (!month || !year) {
-      message.error("Please select month and year");
-      return;
+      const societyId =
+        sessionStorage.getItem("societyId");
+
+      if (!societyId) {
+        message.error("Society not found");
+        return;
+      }
+
+      const payload = {
+        month: values.month,
+        year: values.year,
+        societyId: Number(societyId),
+      };
+
+      console.log("payload", payload);
+
+      await apiPost(
+        "/billing/generate",
+        payload
+      );
+
+      message.success(
+        "Bills generated successfully"
+      );
+
+      form.resetFields();
+
+    } catch (error) {
+      console.error(error);
+
+      message.error(
+        "Failed to generate bills"
+      );
+    } finally {
+      setLoading(false);
     }
-
-    // try {
-    //   setLoading(true);
-
-    //   await axios.post("http://localhost:8080/api/billing/generate", {
-    //     societyId: societyId,
-    //     month: month,
-    //     year: year,
-    //   });
-
-    //   message.success("Bills generated successfully");
-    // } catch (error) {
-    //   message.error("Error generating bills");
-    // } finally {
-    //   setLoading(false);
-    // }
   };
 
   return (
-    <Card title="Generate Monthly Bills">
+    <Card
+      title="Generate Monthly Bills"
+      style={{ marginBottom: 20 }}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        initialValues={{
+          year: new Date().getFullYear(),
+        }}
+      >
+        <Row gutter={16}>
+          <Col xs={24} md={10}>
+            <Form.Item
+              label="Month"
+              name="month"
+              rules={[
+                {
+                  required: true,
+                  message: "Select month",
+                },
+              ]}
+            >
+              <Select placeholder="Select Month">
+                <Option value="JANUARY">
+                  JANUARY
+                </Option>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+                <Option value="FEBRUARY">
+                  FEBRUARY
+                </Option>
 
-        <Select
-          placeholder="Select Month"
-          style={{ width: 150 }}
-          onChange={(value) => setMonth(value)}
-        >
-          <Option value="JANUARY">JANUARY</Option>
-          <Option value="FEBRUARY">FEBRUARY</Option>
-          <Option value="MARCH">MARCH</Option>
-          <Option value="APRIL">APRIL</Option>
-          <Option value="MAY">MAY</Option>
-          <Option value="JUNE">JUNE</Option>
-          <Option value="JULY">JULY</Option>
-          <Option value="AUGUST">AUGUST</Option>
-          <Option value="SEPTEMBER">SEPTEMBER</Option>
-          <Option value="OCTOBER">OCTOBER</Option>
-          <Option value="NOVEMBER">NOVEMBER</Option>
-          <Option value="DECEMBER">DECEMBER</Option>
-        </Select>
+                <Option value="MARCH">
+                  MARCH
+                </Option>
 
-        <Input
-          type="number"
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          style={{ width: 120 }}
-        />
+                <Option value="APRIL">
+                  APRIL
+                </Option>
 
-        <Button
-          type="primary"
-          loading={loading}
-          onClick={generateBills}
-        >
-          Generate Bills
-        </Button>
+                <Option value="MAY">
+                  MAY
+                </Option>
 
-      </div>
+                <Option value="JUNE">
+                  JUNE
+                </Option>
 
+                <Option value="JULY">
+                  JULY
+                </Option>
+
+                <Option value="AUGUST">
+                  AUGUST
+                </Option>
+
+                <Option value="SEPTEMBER">
+                  SEPTEMBER
+                </Option>
+
+                <Option value="OCTOBER">
+                  OCTOBER
+                </Option>
+
+                <Option value="NOVEMBER">
+                  NOVEMBER
+                </Option>
+
+                <Option value="DECEMBER">
+                  DECEMBER
+                </Option>
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <Form.Item
+              label="Year"
+              name="year"
+              rules={[
+                {
+                  required: true,
+                  message: "Enter year",
+                },
+              ]}
+            >
+              <Input
+                type="number"
+                placeholder="Enter year"
+              />
+            </Form.Item>
+          </Col>
+
+          <Col
+            xs={24}
+            md={6}
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              block
+            >
+              Generate Bills
+            </Button>
+          </Col>
+        </Row>
+      </Form>
     </Card>
   );
 };
 
-export default BillingGenerate;
+export default BillGenerate;

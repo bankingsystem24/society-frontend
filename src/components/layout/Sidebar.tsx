@@ -15,6 +15,8 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  
+
   return (
     <Sider breakpoint="lg" collapsedWidth="0">
       <div
@@ -106,7 +108,12 @@ const Sidebar: React.FC = () => {
             key:"/bill-generate",
             label:"Generate Bill",
             icon:<HomeOutlined />
-          }
+          },
+                    {
+            key:"/view-bills",
+            label:"View Bills",
+            icon:<HomeOutlined />
+          },
         ]}
       />
     </Sider>

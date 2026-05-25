@@ -11,11 +11,12 @@ import CreateUser from "./pages/users/CreateUser";
 import CreateMember from "./pages/members/CreateMember";
 import CreateWings from "./pages/society/CreateWings";
 import CreateFlat from "./pages/society/CreateFlats";
-import BillingGenerate from "./pages/billing/BillGenerate";
 import EditWing from "./pages/society/EditWing";
 import EditFlat from "./pages/society/EditFlat";
 import EditUser from "./pages/users/EditUser";
 import EditMember from "./pages/members/EditMember";
+import BillGenerate from "./pages/billing/BillGenerate";
+import ViewBills from "./pages/billing/ViewBills";
 
 export default function App() {
   return (
@@ -43,7 +44,8 @@ export default function App() {
         <Route path="/create-user" element={<CreateUser />} />
         <Route path="/edit-user/:id" element={<EditUser />} />
 
-        <Route path="/generate-bill" element={<BillingGenerate />}/>
+        <Route path="/bill-generate" element={<BillGenerate />}/>
+        <Route path="/view-bills" element={<ViewBills />} />
       </Route>
 
     </Routes>
