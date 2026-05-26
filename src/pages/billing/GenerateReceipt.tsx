@@ -18,7 +18,8 @@ interface Bill {
   year: number;
   totalAmount: number;
   status: string;
-  flatId:number;
+  flatId: number;
+  receiptNo: string;
 }
 
 export default function GenerateReceipt() {
@@ -33,6 +34,7 @@ export default function GenerateReceipt() {
   const [receiptNo, setReceiptNo] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selectedFlatId, setSelectedFlatId] = useState<number>();
 
   const societyId = sessionStorage.getItem("societyId");
 
@@ -58,8 +60,11 @@ export default function GenerateReceipt() {
         flatId: flatId || null,
         status: "PAID",
       });
-
-      setBills(res.data);
+      
+      console.log("Paid Bills", res);
+      setBills(
+        res.data.filter((bill: Bill) => !bill.receiptNo)
+      );
     } catch {
       message.error("Failed to load paid bills");
     } finally {
@@ -94,13 +99,13 @@ export default function GenerateReceipt() {
         try {
           setSaving(true);
 
-            await axios.post(`${BASE_URL}/receipts/create`, {
+          await axios.post(`${BASE_URL}/receipts/create`, {
             receiptNo: rcpNo,
             societyId: Number(societyId),
             flatId: selected[0].flatId,
             totalAmount: selected.reduce((s, b) => s + (b.totalAmount || 0), 0),
-            billIds: selected.map((b) => b.id)
-            });
+            billIds: selected.map((b) => b.id),
+          });
 
           setReceiptData(selected);
           setReceiptOpen(true);
@@ -122,6 +127,7 @@ export default function GenerateReceipt() {
     { title: "Month", dataIndex: "month" },
     { title: "Year", dataIndex: "year" },
     { title: "Amount", dataIndex: "totalAmount" },
+    { title: "Receipt No", dataIndex: "receiptNo" },
   ];
 
   const totalAmount = receiptData.reduce((s, b) => s + (b.totalAmount || 0), 0);
@@ -131,7 +137,10 @@ export default function GenerateReceipt() {
       {/* ================= FILTER (RESPONSIVE) ================= */}
       <Form form={form} layout="vertical">
         <div style={{ maxWidth: 250, marginBottom: 12 }}>
-          <Form.Item label="Select Flat" style={{ maxWidth: 250 }}>
+          <Form.Item
+            label="Select Flat (Paid Maintenance)"
+            style={{ maxWidth: 250 }}
+          >
             <Select
               allowClear
               placeholder="Select Flat"
@@ -139,7 +148,10 @@ export default function GenerateReceipt() {
                 label: f.flatNo,
                 value: f.id,
               }))}
-              onChange={(val) => loadPaidBills(val)}
+              onChange={(val) => {
+                setSelectedFlatId(val);
+                loadPaidBills(val);
+              }}
             />
           </Form.Item>
         </div>
@@ -169,6 +181,10 @@ export default function GenerateReceipt() {
         rowSelection={{
           selectedRowKeys,
           onChange: setSelectedRowKeys,
+
+          getCheckboxProps: (record) => ({
+            disabled: !!record.receiptNo, // disable if receipt exists
+          }),
         }}
       />
 

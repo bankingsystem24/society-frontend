@@ -15,8 +15,6 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  
-
   return (
     <Sider breakpoint="lg" collapsedWidth="0">
       <div
@@ -62,16 +60,15 @@ const Sidebar: React.FC = () => {
             key: "flats",
             icon: <HomeOutlined />,
             label: "Flats",
-            children :[
+            children: [
               {
-                key:"/flats",
-                label: "Flat List"
+                key: "/flats",
+                label: "Flat List",
               },
               {
-                key:"/create-flat",
-                label:"Create Flat",
-              }
-
+                key: "/create-flat",
+                label: "Create Flat",
+              },
             ],
           },
           {
@@ -105,19 +102,38 @@ const Sidebar: React.FC = () => {
             ],
           },
           {
-            key:"/bill-generate",
-            label:"Generate Bill",
-            icon:<HomeOutlined />
+            key: "Bills",
+            icon: <UserOutlined />,
+            label: "Bills",
+            children: [
+              {
+                key: "/bill-generate",
+                label: "Generate Bill",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-bills",
+                label: "View Bills",
+                icon: <HomeOutlined />,
+              },
+            ],
           },
           {
-            key:"/view-bills",
-            label:"View Bills",
-            icon:<HomeOutlined />
-          },
-          {
-            key:"/generate-receipt",
-            label:"Generate Receipt",
-            icon:<HomeOutlined />
+            key: "Receipts",
+            icon: <UserOutlined />,
+            label: "Receipts",
+            children: [
+              {
+                key: "/generate-receipt",
+                label: "Generate Receipt",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-receipts",
+                label: "View Receipts",
+                icon: <HomeOutlined />,
+              },              
+            ],
           },
         ]}
       />
