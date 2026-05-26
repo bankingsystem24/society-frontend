@@ -19,6 +19,8 @@ import BillGenerate from "./pages/billing/BillGenerate";
 import ViewBills from "./pages/billing/ViewBills";
 import GenerateReceipt from "./pages/billing/GenerateReceipt";
 import ViewReceipts from "./pages/billing/ViewReceipts";
+import MemberLogin from "./pages/auth/MemberLogin";
+import MemberDashboard from "./pages/dashboard/MemberDashboard";
 
 export default function App() {
   return (
@@ -26,6 +28,8 @@ export default function App() {
 
       {/* Login Page */}
       <Route path="/" element={<Login />} />
+      <Route path="/member-login" element={<MemberLogin />} />
+      <Route path="/member-dashboard" element={<MemberDashboard />} />
 
       {/* Layout Pages */}
       <Route element={<Layout />}>
