@@ -21,6 +21,8 @@ import GenerateReceipt from "./pages/billing/GenerateReceipt";
 import ViewReceipts from "./pages/billing/ViewReceipts";
 import MemberLogin from "./pages/auth/MemberLogin";
 import MemberDashboard from "./pages/dashboard/MemberDashboard";
+import MemberBills from "./pages/members/MemberBills";
+import MemberReceipts from "./pages/members/MemberReceipts";
 
 export default function App() {
   return (
@@ -30,6 +32,9 @@ export default function App() {
       <Route path="/" element={<Login />} />
       <Route path="/member-login" element={<MemberLogin />} />
       <Route path="/member-dashboard" element={<MemberDashboard />} />
+      <Route path="/member-bills" element={<MemberBills />} />
+      <Route path="/member-receipts" element={<MemberReceipts />} />
+
 
       {/* Layout Pages */}
       <Route element={<Layout />}>

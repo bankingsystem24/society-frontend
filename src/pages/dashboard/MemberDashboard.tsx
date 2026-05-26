@@ -90,10 +90,18 @@ const MemberDashboard: React.FC = () => {
   return (
   <Layout style={{ minHeight: "100vh" }}>
 
-    {/* SIDEBAR */}
-    <MemberSidebar />
+    {/* SIDEBAR (RESPONSIVE) */}
+    <Layout.Sider
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        background: "#001529",
+      }}
+    >
+      <MemberSidebar />
+    </Layout.Sider>
 
-    {/* MAIN AREA */}
+    {/* MAIN LAYOUT */}
     <Layout>
 
       {/* HEADER */}
@@ -104,12 +112,16 @@ const MemberDashboard: React.FC = () => {
         style={{
           padding: 24,
           background: "#f0f5ff",
+          minHeight: "100vh",
         }}
       >
 
         <Title
           level={2}
-          style={{ color: "#1677ff", marginBottom: 8 }}
+          style={{
+            color: "#1677ff",
+            marginBottom: 8,
+          }}
         >
           Member Dashboard
         </Title>
@@ -124,8 +136,9 @@ const MemberDashboard: React.FC = () => {
           <div><b>Member:</b> {memberName}</div>
         </div>
 
+        {/* RESPONSIVE GRID */}
         <Row gutter={[16, 16]}>
-
+          
           <Col xs={24} sm={12} md={8}>
             <Card style={cardStyle}>
               <Statistic
@@ -165,7 +178,6 @@ const MemberDashboard: React.FC = () => {
     </Layout>
   </Layout>
 );
-
 
 };
 
