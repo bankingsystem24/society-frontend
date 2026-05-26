@@ -33,7 +33,6 @@ export default function App() {
       <Route path="/member-login" element={<MemberLogin />} />
       <Route path="/member-dashboard" element={<MemberDashboard />} />
       <Route path="/member-bills" element={<MemberBills />} />
-      <Route path="/member-receipts" element={<MemberReceipts />} />
 
 
       {/* Layout Pages */}

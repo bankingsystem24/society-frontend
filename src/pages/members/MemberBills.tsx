@@ -8,9 +8,24 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
 const { Title } = Typography;
 
+type Billing = {
+  id: number;
+  month: string;
+  year: number;
+  totalAmount: number;
+  status: string;
+  paidDate?: string;
+  paymentMode?: string;
+  receiptNo?: string;
+  receiptId?: number;
+  flat?: {
+    flatNo?: string;
+  };
+};
+
 const MemberBills: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [bills, setBills] = useState<any[]>([]);
+  const [groupedBills, setGroupedBills] = useState<any[]>([]);
 
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
@@ -25,16 +40,13 @@ const MemberBills: React.FC = () => {
 
       // 1. GET FLATS
       const flatsRes = await axios.get(`${BASE_URL}/members/flats`, {
-        params: {
-          societyId,
-          memberId,
-        },
+        params: { societyId, memberId },
       });
 
       const flatIds = flatsRes.data.map((f: any) => Number(f.id));
 
       if (flatIds.length === 0) {
-        setBills([]);
+        setGroupedBills([]);
         return;
       }
 
@@ -43,12 +55,34 @@ const MemberBills: React.FC = () => {
         flatIds,
       });
 
-      const billData = billsRes.data || [];
+      const bills: Billing[] = (billsRes.data || []).sort(
+        (a: Billing, b: Billing) =>
+          new Date(b.paidDate ?? 0).getTime() -
+          new Date(a.paidDate ?? 0).getTime(),
+      );
 
-      setBills(billData);
+      // 3. GROUP BY RECEIPT NO
+      const grouped = bills.reduce((acc: any, item: Billing) => {
+        const key = item.receiptNo || "NO_RECEIPT";
 
-      // ✅ correct logging
-      console.log("Bills API Response:", billData);
+        if (!acc[key]) {
+          acc[key] = {
+            receiptNo: key,
+            paidDate: item.paidDate,
+            totalAmount: 0,
+            items: [],
+          };
+        }
+
+        acc[key].items.push(item);
+        acc[key].totalAmount += item.totalAmount || 0;
+
+        return acc;
+      }, {});
+
+      setGroupedBills(Object.values(grouped));
+
+      console.log("Grouped Bills:", Object.values(grouped));
     } catch (error) {
       console.error("Error fetching bills", error);
     } finally {
@@ -56,55 +90,56 @@ const MemberBills: React.FC = () => {
     }
   };
 
-  // TABLE COLUMNS
+  // MAIN TABLE COLUMNS (Receipt Level)
   const columns = [
     {
+      title: "Receipt No",
+      dataIndex: "receiptNo",
+      key: "receiptNo",
+    },
+    {
+      title: "Total Amount",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
+      title: "Paid Date",
+      dataIndex: "paidDate",
+      key: "paidDate",
+      render: (v: string) =>
+        v ? new Date(v).toLocaleDateString("en-GB") : "-",
+    },
+  ];
+
+  const innerColumns = [
+    {
       title: "Flat No",
-      dataIndex: "flatNo",
-      key: "flatNo",
-      render: (_: any, record: any) => record.flat?.flatNo,
+      render: (_: any, r: any) => r.flat?.flatNo,
     },
     {
       title: "Month",
       dataIndex: "month",
-      key: "month",
     },
     {
       title: "Year",
       dataIndex: "year",
-      key: "year",
     },
     {
       title: "Amount",
       dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (value: number) => `₹ ${value}`,
+      render: (v: number) => `₹ ${v}`,
     },
     {
       title: "Status",
       dataIndex: "status",
-      key: "status",
       render: (status: string) => (
         <Tag color={status === "PAID" ? "green" : "red"}>{status}</Tag>
       ),
     },
     {
-      title: "Paid On",
-      dataIndex: "paidDate",
-      key: "paidDate",
-      render: (value: string) => {
-        if (!value) return "-";
-
-        const date = new Date(value);
-
-        return date.toLocaleDateString("en-GB");
-        // en-GB = dd/mm/yyyy
-      },
-    },
-    {
       title: "Mode",
       dataIndex: "paymentMode",
-      key: "paymentMode",
     },
   ];
 
@@ -117,10 +152,8 @@ const MemberBills: React.FC = () => {
 
       {/* MAIN */}
       <Layout>
-        {/* HEADER */}
         <MemberHeader />
 
-        {/* CONTENT */}
         <Content
           style={{
             padding: 24,
@@ -128,7 +161,7 @@ const MemberBills: React.FC = () => {
             minHeight: "100vh",
           }}
         >
-          <Title level={3}>Member Bills</Title>
+          <Title level={3}>Member Bills (Grouped by Receipt)</Title>
 
           {loading ? (
             <div style={{ textAlign: "center", marginTop: 50 }}>
@@ -136,12 +169,25 @@ const MemberBills: React.FC = () => {
             </div>
           ) : (
             <Table
-              dataSource={bills}
+              dataSource={groupedBills}
               columns={columns}
-              rowKey="id"
+              rowKey="receiptNo"
               bordered
               pagination={{ pageSize: 10 }}
               size="small"
+              scroll={{ x: "max-content" }}
+              expandable={{
+                expandedRowRender: (record: any) => (
+                  <Table
+                    dataSource={record.items}
+                    rowKey="id"
+                    pagination={false}
+                    size="small"
+                    scroll={{ x: "max-content" }}
+                    columns={innerColumns}
+                  />
+                ),
+              }}
             />
           )}
         </Content>

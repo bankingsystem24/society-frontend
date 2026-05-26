@@ -34,11 +34,6 @@ const MemberSidebar: React.FC = () => {
             label: "Bills",
           },
           {
-            key: "/member-receipts",
-            icon: <FileTextOutlined />,
-            label: "Receipts",
-          },
-          {
             key: "/member-login",
             icon: <LogoutOutlined />,
             label: "Logout",

@@ -15,7 +15,6 @@ import {
 import {
   FileDoneOutlined,
   DollarOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 
 import axios from "axios";
@@ -125,16 +124,6 @@ const MemberDashboard: React.FC = () => {
         >
           Member Dashboard
         </Title>
-
-        <div
-          style={{
-            marginBottom: 24,
-            color: "#555",
-          }}
-        >
-          <div><b>Society:</b> {societyName}</div>
-          <div><b>Member:</b> {memberName}</div>
-        </div>
 
         {/* RESPONSIVE GRID */}
         <Row gutter={[16, 16]}>
