@@ -31,7 +31,12 @@ const MemberSidebar: React.FC = () => {
           {
             key: "/member-bills",
             icon: <DollarOutlined />,
-            label: "Bills",
+            label: "Paid Bills",
+          },
+          {
+            key: "/member-pending-bills",
+            icon: <DollarOutlined />,
+            label: "Pending Bills",
           },
           {
             key: "/member-login",

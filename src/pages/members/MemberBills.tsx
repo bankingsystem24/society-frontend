@@ -17,10 +17,7 @@ type Billing = {
   paidDate?: string;
   paymentMode?: string;
   receiptNo?: string;
-  receiptId?: number;
-  flat?: {
-    flatNo?: string;
-  };
+  flat?: { flatNo?: string };
 };
 
 const MemberBills: React.FC = () => {
@@ -38,7 +35,6 @@ const MemberBills: React.FC = () => {
     try {
       setLoading(true);
 
-      // 1. GET FLATS
       const flatsRes = await axios.get(`${BASE_URL}/members/flats`, {
         params: { societyId, memberId },
       });
@@ -50,18 +46,18 @@ const MemberBills: React.FC = () => {
         return;
       }
 
-      // 2. GET BILLS
       const billsRes = await axios.post(`${BASE_URL}/members/bills`, {
         flatIds,
       });
 
-      const bills: Billing[] = (billsRes.data || []).sort(
-        (a: Billing, b: Billing) =>
+      const bills: Billing[] = (billsRes.data || [])
+      .filter((b: any) => b.status === "PAID")
+      .sort(
+        (a :any, b:any) =>
           new Date(b.paidDate ?? 0).getTime() -
-          new Date(a.paidDate ?? 0).getTime(),
+          new Date(a.paidDate ?? 0).getTime()
       );
 
-      // 3. GROUP BY RECEIPT NO
       const grouped = bills.reduce((acc: any, item: Billing) => {
         const key = item.receiptNo || "NO_RECEIPT";
 
@@ -69,6 +65,7 @@ const MemberBills: React.FC = () => {
           acc[key] = {
             receiptNo: key,
             paidDate: item.paidDate,
+            paymentMode: item.paymentMode,
             totalAmount: 0,
             items: [],
           };
@@ -81,37 +78,135 @@ const MemberBills: React.FC = () => {
       }, {});
 
       setGroupedBills(Object.values(grouped));
-
-      console.log("Grouped Bills:", Object.values(grouped));
-    } catch (error) {
-      console.error("Error fetching bills", error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // MAIN TABLE COLUMNS (Receipt Level)
-  const columns = [
-    {
-      title: "Receipt No",
-      dataIndex: "receiptNo",
-      key: "receiptNo",
-    },
-    {
-      title: "Total Amount",
-      dataIndex: "totalAmount",
-      key: "totalAmount",
-      render: (v: number) => `₹ ${v}`,
-    },
-    {
-      title: "Paid Date",
-      dataIndex: "paidDate",
-      key: "paidDate",
-      render: (v: string) =>
-        v ? new Date(v).toLocaleDateString("en-GB") : "-",
-    },
-  ];
+  // ================= PRINT =================
+  const handlePrint = (receipt: any) => {
+    if (!receipt) return;
 
+    const rows = receipt.items
+      .map(
+        (b: any) => `
+        <tr>
+          <td>${b.month}</td>
+          <td>${b.year}</td>
+          <td>${b.totalAmount}</td>
+          <td>${b.status}</td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const societyName = sessionStorage.getItem("societyName") || "";
+
+    const content = `
+      <html>
+        <head>
+          <title>Receipt</title>
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th, td { border: 1px solid #ccc; padding: 8px; }
+            h2 { text-align: center; }
+          </style>
+        </head>
+
+        <body>
+
+          <h2>${societyName}</h2>
+          <h2>Maintenance Receipt</h2>
+
+          <hr />
+
+          <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+            <tbody>
+              <tr>
+                <td style="padding:6px; font-weight:bold; width:180px; background:#f5f5f5;">
+                  Receipt No
+                </td>
+                <td style="padding:6px;">
+                  ${receipt.receiptNo}
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
+                  Flat
+                </td>
+                <td style="padding:6px;">
+                  ${receipt.items?.[0]?.flat?.flatNo || "-"}
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
+                  Total Amount
+                </td>
+                <td style="padding:6px;">
+                  ₹ ${receipt.totalAmount}
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
+                  Payment Mode
+                </td>
+                <td style="padding:6px;">
+                  ${receipt.paymentMode || ""}
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
+                  Date
+                </td>
+                <td style="padding:6px;">
+                  ${
+                    receipt.paidDate
+                      ? new Date(receipt.paidDate).toLocaleDateString("en-GB")
+                      : "-"
+                  }
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+
+          <br/><br/>
+          <p><b>Authorized Signatory</b></p>
+
+        </body>
+      </html>
+    `;
+
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.write(content);
+      win.document.close();
+      win.print();
+    }
+  };
+
+  // ================= INNER TABLE =================
   const innerColumns = [
     {
       title: "Flat No",
@@ -137,36 +232,62 @@ const MemberBills: React.FC = () => {
         <Tag color={status === "PAID" ? "green" : "red"}>{status}</Tag>
       ),
     },
+  ];
+
+  // ================= MAIN TABLE =================
+  const columns = [
+{
+  title: "Receipt No",
+  dataIndex: "receiptNo",
+  render: (_: any, record: any) => {
+    const isValid = record.receiptNo && record.receiptNo !== "NO_RECEIPT";
+
+    return (
+      <span
+        style={{
+          color: isValid ? "#1677ff" : "#999",
+          cursor: isValid ? "pointer" : "not-allowed",
+          fontWeight: 500,
+          textDecoration: isValid ? "underline" : "none",
+        }}
+        onClick={() => {
+          if (isValid) {
+            handlePrint(record);
+          }
+        }}
+      >
+        {record.receiptNo || "NO_RECEIPT"}
+      </span>
+    );
+  },
+},
     {
-      title: "Mode",
-      dataIndex: "paymentMode",
+      title: "Total Amount",
+      dataIndex: "totalAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
+      title: "Paid Date",
+      dataIndex: "paidDate",
+      render: (v: string) =>
+        v ? new Date(v).toLocaleDateString("en-GB") : "-",
     },
   ];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      {/* SIDEBAR */}
       <Layout.Sider breakpoint="lg" collapsedWidth="0">
         <MemberSidebar />
       </Layout.Sider>
 
-      {/* MAIN */}
       <Layout>
         <MemberHeader />
 
-        <Content
-          style={{
-            padding: 24,
-            background: "#f0f5ff",
-            minHeight: "100vh",
-          }}
-        >
-          <Title level={3}>Member Bills (Grouped by Receipt)</Title>
+        <Content style={{ padding: 24, background: "#f0f5ff" }}>
+          <Title level={3}>Paid Bills</Title>
 
           {loading ? (
-            <div style={{ textAlign: "center", marginTop: 50 }}>
-              <Spin size="large" />
-            </div>
+            <Spin size="large" />
           ) : (
             <Table
               dataSource={groupedBills}
@@ -174,17 +295,14 @@ const MemberBills: React.FC = () => {
               rowKey="receiptNo"
               bordered
               pagination={{ pageSize: 10 }}
-              size="small"
-              scroll={{ x: "max-content" }}
               expandable={{
                 expandedRowRender: (record: any) => (
                   <Table
                     dataSource={record.items}
-                    rowKey="id"
-                    pagination={false}
-                    size="small"
-                    scroll={{ x: "max-content" }}
                     columns={innerColumns}
+                    pagination={false}
+                    rowKey="id"
+                    size="small"
                   />
                 ),
               }}
