@@ -123,11 +123,11 @@ const Sidebar: React.FC = () => {
             icon: <UserOutlined />,
             label: "Receipts",
             children: [
-              {
-                key: "/generate-receipt",
-                label: "Generate Receipt",
-                icon: <HomeOutlined />,
-              },
+              // {
+              //   key: "/generate-receipt",
+              //   label: "Generate Receipt",
+              //   icon: <HomeOutlined />,
+              // },
               {
                 key: "/view-receipts",
                 label: "View Receipts",

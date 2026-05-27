@@ -232,6 +232,16 @@ const MemberBills: React.FC = () => {
         <Tag color={status === "PAID" ? "green" : "red"}>{status}</Tag>
       ),
     },
+    {
+      title:"Transaction Id",
+      dataIndex:"transactionId",
+
+    },
+    {
+      title:"Payment Mode",
+      dataIndex:"paymentMode",
+    },
+
   ];
 
   // ================= MAIN TABLE =================

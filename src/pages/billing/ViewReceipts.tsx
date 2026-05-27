@@ -71,6 +71,7 @@ export default function ViewReceipts() {
       });
 
       setReceipts(res.data);
+      console.log("data",res.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -286,6 +287,14 @@ export default function ViewReceipts() {
       dataIndex: "createdAt",
       render: (value) =>
         value ? new Date(value).toLocaleDateString("en-GB") : "-",
+    },
+    {
+      title:"Payment Mode",
+      dataIndex:"paymentMode",
+    },
+    {
+      title:"Transaction Id",
+      dataIndex:"transactionId",
     },
   ];
 
