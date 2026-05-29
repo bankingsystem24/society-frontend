@@ -24,6 +24,7 @@ import MemberBills from "./pages/members/MemberBills";
 import MemberPendingBills from "./pages/members/MemberPendingBills";
 import JournalView from "./pages/accounting/JournalView";
 import LedgerView from "./pages/accounting/LedgerView";
+import TrialBalance from "./pages/accounting/TrialBalance";
 
 export default function App() {
   return (
@@ -62,6 +63,8 @@ export default function App() {
 
         <Route path="/view-journal" element={<JournalView />} />
         <Route path="/view-ledger" element={<LedgerView />} />
+        <Route path="/trial-balance" element={<TrialBalance />} />
+
 
 
       </Route>

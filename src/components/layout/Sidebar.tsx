@@ -142,29 +142,28 @@ const Sidebar: React.FC = () => {
             ],
           },
           {
-            key: "Journal",
+            key: "Reports 1",
             icon: <UserOutlined />,
-            label: "Journal",
+            label: "Reports 1",
             children: [
               {
                 key: "/view-journal",
                 label: "View Journal",
                 icon: <HomeOutlined />,
               },
-            ],
-          },
-          {
-            key: "Ledger",
-            icon: <UserOutlined />,
-            label: "Ledger",
-            children: [
               {
                 key: "/view-ledger",
                 label: "View Ledger",
                 icon: <HomeOutlined />,
               },
+              {
+                key: "/trial-balance",
+                label: "Trial Balance",
+                icon: <HomeOutlined />,
+              },
             ],
           },
+
         ]}
       />
     </Sider>
