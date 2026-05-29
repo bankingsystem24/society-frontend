@@ -22,6 +22,7 @@ import MemberLogin from "./pages/auth/MemberLogin";
 import MemberDashboard from "./pages/dashboard/MemberDashboard";
 import MemberBills from "./pages/members/MemberBills";
 import MemberPendingBills from "./pages/members/MemberPendingBills";
+import JournalView from "./pages/accounting/JournalView";
 
 export default function App() {
   return (
@@ -57,6 +58,8 @@ export default function App() {
         <Route path="/bill-generate" element={<BillGenerate />}/>
         <Route path="/view-bills" element={<ViewBills />} />
         <Route path="/view-receipts" element={<ViewReceipts />} />
+
+        <Route path="/view-journal" element={<JournalView />} />
 
       </Route>
 

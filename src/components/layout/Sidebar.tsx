@@ -135,6 +135,18 @@ const Sidebar: React.FC = () => {
               },              
             ],
           },
+          {
+            key: "Journal",
+            icon: <UserOutlined />,
+            label: "Journal",
+            children: [
+              {
+                key: "/view-journal",
+                label: "View Journal",
+                icon: <HomeOutlined />,
+              },              
+            ],
+          },
         ]}
       />
     </Sider>
