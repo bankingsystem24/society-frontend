@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Layout, Menu } from "antd";
 import {
   DashboardOutlined,
@@ -14,9 +14,15 @@ const { Sider } = Layout;
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Sider breakpoint="lg" collapsedWidth="0">
+    <Sider
+      breakpoint="lg"
+      collapsedWidth="0"
+      collapsible
+      onCollapse={(collapsed) => setCollapsed(collapsed)}
+    >
       <div
         style={{
           height: 64,
@@ -132,7 +138,7 @@ const Sidebar: React.FC = () => {
                 key: "/view-receipts",
                 label: "View Receipts",
                 icon: <HomeOutlined />,
-              },              
+              },
             ],
           },
           {
@@ -144,7 +150,19 @@ const Sidebar: React.FC = () => {
                 key: "/view-journal",
                 label: "View Journal",
                 icon: <HomeOutlined />,
-              },              
+              },
+            ],
+          },
+          {
+            key: "Ledger",
+            icon: <UserOutlined />,
+            label: "Ledger",
+            children: [
+              {
+                key: "/view-ledger",
+                label: "View Ledger",
+                icon: <HomeOutlined />,
+              },
             ],
           },
         ]}

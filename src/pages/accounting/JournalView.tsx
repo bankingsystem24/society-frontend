@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Card,
-  Typography,
-  message,
-  Tag,
-  Row,
-  Col,
-} from "antd";
+import { Table, Card, Typography, message, Tag, Row, Col } from "antd";
 
 import axios from "axios";
 import dayjs from "dayjs";
@@ -27,7 +19,6 @@ interface JournalData {
 }
 
 const JournalView: React.FC = () => {
-
   const [data, setData] = useState<JournalData[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -43,25 +34,19 @@ const JournalView: React.FC = () => {
   // =====================================================
 
   const fetchJournal = async () => {
-
     try {
-
       setLoading(true);
 
       const response = await axios.get(
-        `http://localhost:7777/api/journal/${societyId}`
+        `http://localhost:7777/api/journal/${societyId}`,
       );
 
       setData(response.data);
-
     } catch (error) {
-
       console.error(error);
 
       message.error("Failed to load journal data");
-
     } finally {
-
       setLoading(false);
     }
   };
@@ -71,7 +56,6 @@ const JournalView: React.FC = () => {
   // =====================================================
 
   const columns = [
-
     // HIDDEN COLUMN
     {
       title: "Journal ID",
@@ -84,7 +68,7 @@ const JournalView: React.FC = () => {
       title: "Voucher No",
       dataIndex: "voucherNo",
       key: "voucherNo",
-      width: 150,
+      width: 100,
     },
 
     {
@@ -94,7 +78,6 @@ const JournalView: React.FC = () => {
       width: 110,
 
       render: (type: string) => {
-
         let color = "blue";
 
         if (type === "RECEIPT") color = "green";
@@ -113,14 +96,14 @@ const JournalView: React.FC = () => {
       key: "entryDate",
       width: 130,
 
-      render: (date: string) =>
-        dayjs(date).format("DD-MMM-YYYY"),
+      render: (date: string) => dayjs(date).format("DD-MMM-YYYY"),
     },
 
     {
       title: "Narration",
       dataIndex: "narration",
       key: "narration",
+      width:200
     },
 
     {
@@ -134,19 +117,18 @@ const JournalView: React.FC = () => {
       title: "Account Head",
       dataIndex: "accountHead",
       key: "accountHead",
-      width: 250,
+      width: 150,
     },
 
     {
       title: "Debit",
       dataIndex: "debitAmount",
       key: "debitAmount",
-      width: 140,
+      width: 100,
 
       align: "right" as const,
 
       render: (value: number) =>
-
         value > 0
           ? value.toLocaleString("en-IN", {
               minimumFractionDigits: 2,
@@ -158,43 +140,35 @@ const JournalView: React.FC = () => {
       title: "Credit",
       dataIndex: "creditAmount",
       key: "creditAmount",
-      width: 140,
+      width: 100,
 
       align: "right" as const,
 
       render: (value: number) =>
-
         value > 0
           ? value.toLocaleString("en-IN", {
               minimumFractionDigits: 2,
             })
           : "-",
     },
-
   ].filter((item: any) => !item.hidden);
 
   // =====================================================
   // TOTALS
   // =====================================================
 
-  const totalDebit = data.reduce(
-    (sum, row) => sum + (row.debitAmount || 0),
-    0
-  );
+  const totalDebit = data.reduce((sum, row) => sum + (row.debitAmount || 0), 0);
 
   const totalCredit = data.reduce(
     (sum, row) => sum + (row.creditAmount || 0),
-    0
+    0,
   );
 
   return (
-
-    <Card style={{ margin: 20 }}>
-
+    <Card style={{ margin: 10 }}>
       {/* HEADER */}
 
       <Row justify="space-between" align="middle">
-
         <Col>
           <Title level={3} style={{ margin: 0 }}>
             Journal View
@@ -202,27 +176,18 @@ const JournalView: React.FC = () => {
         </Col>
 
         <Col>
-
           <div style={{ fontWeight: 600 }}>
-
-            Debit :
-            {" "}
+            Debit :{" "}
             {totalDebit.toLocaleString("en-IN", {
               minimumFractionDigits: 2,
             })}
-
             {" | "}
-
-            Credit :
-            {" "}
+            Credit :{" "}
             {totalCredit.toLocaleString("en-IN", {
               minimumFractionDigits: 2,
             })}
-
           </div>
-
         </Col>
-
       </Row>
 
       <br />
@@ -230,61 +195,42 @@ const JournalView: React.FC = () => {
       {/* TABLE */}
 
       <Table
-
         bordered
-
         size="small"
-
         loading={loading}
-
         columns={columns}
-
         dataSource={data}
-
         scroll={{ x: 1200 }}
-
         rowKey={(record) =>
           `${record.journalId}-${record.glCode}-${record.accountHead}`
         }
-
         pagination={{
           pageSize: 15,
         }}
-
         summary={() => (
-
           <Table.Summary.Row>
-
             <Table.Summary.Cell index={0} colSpan={6}>
-
               <b>Total</b>
-
             </Table.Summary.Cell>
 
             <Table.Summary.Cell index={1} align="right">
-
               <b>
                 {totalDebit.toLocaleString("en-IN", {
                   minimumFractionDigits: 2,
                 })}
               </b>
-
             </Table.Summary.Cell>
 
             <Table.Summary.Cell index={2} align="right">
-
               <b>
                 {totalCredit.toLocaleString("en-IN", {
                   minimumFractionDigits: 2,
                 })}
               </b>
-
             </Table.Summary.Cell>
-
           </Table.Summary.Row>
         )}
       />
-
     </Card>
   );
 };
