@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Typography,
-  message,
-} from "antd";
+import { Card, Form, Input, Button, Typography, message } from "antd";
 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -29,29 +22,25 @@ const MemberLogin: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       message.success("Login successful");
 
       // ================= SESSION =================
-      console.log("res",res.data);
+      console.log("res", res.data);
 
-      sessionStorage.setItem("memberToken",res.data.token);
-      sessionStorage.setItem("memberId",String(res.data.memberId));
-      sessionStorage.setItem("memberName",res.data.memberName);
-      sessionStorage.setItem("societyId",String(res.data.societyId));
-      sessionStorage.setItem("societyName",res.data.societyName);
-      sessionStorage.setItem("role",res.data.role);
+      sessionStorage.setItem("memberToken", res.data.token);
+      sessionStorage.setItem("memberId", String(res.data.memberId));
+      sessionStorage.setItem("memberName", res.data.memberName);
+      sessionStorage.setItem("societyId", String(res.data.societyId));
+      sessionStorage.setItem("societyName", res.data.societyName);
+      sessionStorage.setItem("role", res.data.role);
       navigate("/member-dashboard");
-
     } catch (error: any) {
-
       message.error(
-        error?.response?.data?.message ||
-          "Invalid username or password"
+        error?.response?.data?.message ?? "Invalid username or password",
       );
-
     } finally {
       setLoading(false);
     }
@@ -81,15 +70,10 @@ const MemberLogin: React.FC = () => {
             marginBottom: 20,
           }}
         >
-          <Title level={3}>
-            Member Login
-          </Title>
+          <Title level={3}>Member Login</Title>
         </div>
 
-        <Form
-          layout="vertical"
-          onFinish={onFinish}
-        >
+        <Form layout="vertical" onFinish={onFinish}>
           <Form.Item
             label="Username"
             name="username"
@@ -117,12 +101,7 @@ const MemberLogin: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-            >
+            <Button type="primary" htmlType="submit" loading={loading} block>
               Login
             </Button>
           </Form.Item>

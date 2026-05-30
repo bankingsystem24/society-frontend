@@ -48,6 +48,10 @@ const Sidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
+            key:"/financial-year",
+            label:"Set Financial Year"
+          },
+          {
             key: "wings",
             icon: <ApartmentOutlined />,
             label: "Wings",

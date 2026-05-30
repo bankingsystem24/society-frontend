@@ -25,6 +25,7 @@ import MemberPendingBills from "./pages/members/MemberPendingBills";
 import JournalView from "./pages/accounting/JournalView";
 import LedgerView from "./pages/accounting/LedgerView";
 import TrialBalance from "./pages/accounting/TrialBalance";
+import FinancialYear from "./pages/admin/accounting/financial-year/FinancialYear";
 
 export default function App() {
   return (
@@ -41,6 +42,8 @@ export default function App() {
       {/* Layout Pages */}
       <Route element={<Layout />}>
         <Route path="/clientdashboard" element={<ClientDashboard />} />
+        <Route path="/financial-year" element={<FinancialYear/>} />
+        
         <Route path="/wings" element={<Wings />} />
         <Route path="/create-wing" element={<CreateWings />} />
         <Route path="/edit-wing/:id" element={<EditWing />} />
