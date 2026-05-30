@@ -20,22 +20,32 @@ const Login: React.FC = () => {
       );
 
       message.success("Login successful");
-
-      // Get active financial year
-      const fyRes = await axios.get(
-        `${import.meta.env.VITE_API_URL}/accounting-year/${res.data.societyId}/active`,
-        {
-          headers: {
-            Authorization: `Bearer ${res.data.token}`,
+      console.log("Response",res);
+      if (res.data.societyId !== null){
+        const fyRes = await axios.get(
+          `${import.meta.env.VITE_API_URL}/accounting-year/${res.data.societyId}/active`,
+          {
+            headers: {
+              Authorization: `Bearer ${res.data.token}`,
+            },
           },
-        },
-      );
-
-      sessionStorage.setItem("financialYear", fyRes.data.fyCode);
+        );
+        sessionStorage.setItem("financialYear", fyRes.data.fyCode);
+        }
+      
       sessionStorage.setItem("token", res.data.token);
-      sessionStorage.setItem("societyId", String(res.data.societyId));
+      if (res.data.societyId !== null && res.data.societyId !== undefined) {
+        sessionStorage.setItem("societyId", String(res.data.societyId));
+      } else {
+        sessionStorage.removeItem("societyId");
+      }
       sessionStorage.setItem("societyName", res.data.societyName);
-      navigate("/clientdashboard");
+      if(res.data.role === "SUPER_ADMIN"){
+          navigate("/superadmindashboard");
+      }
+      if(res.data.role === "ADMIN"){
+          navigate("/clientdashboard");
+      }
     } catch (error: any) {
       message.error(
         error?.response?.data?.message || "Invalid username or password",

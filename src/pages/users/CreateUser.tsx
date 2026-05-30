@@ -146,6 +146,7 @@ const CreateUser: React.FC = () => {
                   { label: "Secretary", value: "SECRETARY" },
                   { label: "Member", value: "MEMBER" },
                   { label: "Manager", value: "MANAGER" },
+                  { label: "Auditor", value:"AUDITOR"},
                 ]}
                 onKeyDown={handleSelectEnter}
               />

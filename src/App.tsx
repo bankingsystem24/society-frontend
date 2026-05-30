@@ -26,6 +26,11 @@ import JournalView from "./pages/accounting/JournalView";
 import LedgerView from "./pages/accounting/LedgerView";
 import TrialBalance from "./pages/accounting/TrialBalance";
 import FinancialYear from "./pages/admin/accounting/financial-year/FinancialYear";
+import SuperAdminDashboard from "./pages/dashboard/SuperAdminDashboard";
+import SuperAdminLayout from "./components/layout/SuperAdminLayout";
+import CreateSociety from "./pages/society/CreateSociety";
+import Societies from "./pages/society/Societies";
+import EditSociety from "./pages/society/EditSociety";
 
 export default function App() {
   return (
@@ -38,10 +43,20 @@ export default function App() {
       <Route path="/member-bills" element={<MemberBills />} />
       <Route path="/member-pending-bills" element={<MemberPendingBills />} />
 
+      <Route element={<SuperAdminLayout />}>
+        <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
+        <Route path="/superadminusers" element={<Users />} />
+        <Route path="/superadmin-create-user" element={<CreateUser />} />
+        <Route path="/superadmin-create-society" element={<CreateSociety />} />
+        <Route path="/superadmin-view-societies" element={<Societies />} />
+        <Route path="/superadmin-edit-society/:id" element={<EditSociety />} />
+
+      </Route>
 
       {/* Layout Pages */}
       <Route element={<Layout />}>
         <Route path="/clientdashboard" element={<ClientDashboard />} />
+
         <Route path="/financial-year" element={<FinancialYear/>} />
         
         <Route path="/wings" element={<Wings />} />
