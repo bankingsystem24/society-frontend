@@ -9,27 +9,36 @@ const Login: React.FC = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-        const res = await axios.post(
+      const res = await axios.post(
         import.meta.env.VITE_API_URL + "/auth/login",
         values,
         {
-            headers: {
+          headers: {
             "Content-Type": "application/json",
-            },
-        }
-        );
+          },
+        },
+      );
 
       message.success("Login successful");
 
+      // Get active financial year
+      const fyRes = await axios.get(
+        `${import.meta.env.VITE_API_URL}/accounting-year/${res.data.societyId}/active`,
+        {
+          headers: {
+            Authorization: `Bearer ${res.data.token}`,
+          },
+        },
+      );
+
+      sessionStorage.setItem("financialYear", fyRes.data.fyCode);
       sessionStorage.setItem("token", res.data.token);
-      sessionStorage.setItem("societyId",String(res.data.societyId));
+      sessionStorage.setItem("societyId", String(res.data.societyId));
       sessionStorage.setItem("societyName", res.data.societyName);
-
       navigate("/clientdashboard");
-
     } catch (error: any) {
       message.error(
-        error?.response?.data?.message || "Invalid username or password"
+        error?.response?.data?.message || "Invalid username or password",
       );
     } finally {
       setLoading(false);
@@ -48,7 +57,6 @@ const Login: React.FC = () => {
     >
       <Card title="Society Management Login" style={{ width: 350 }}>
         <Form layout="vertical" onFinish={onFinish}>
-          
           <Form.Item
             label="Username"
             name="username"
@@ -66,16 +74,10 @@ const Login: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-            >
+            <Button type="primary" htmlType="submit" loading={loading} block>
               Login
             </Button>
           </Form.Item>
-
         </Form>
       </Card>
     </div>

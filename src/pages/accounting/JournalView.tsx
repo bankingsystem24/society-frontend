@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Table, Card, Typography, message, Tag, Row, Col, Collapse } from "antd";
+import {
+  Table,
+  Card,
+  Typography,
+  message,
+  Tag,
+  Row,
+  Col,
+  Collapse,
+} from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -33,7 +42,8 @@ const JournalView: React.FC = () => {
       setLoading(true);
 
       const response = await axios.get(
-        `http://localhost:7777/api/journal/${societyId}`
+        `http://localhost:7777/api/journal/${societyId}`,
+
       );
 
       setData(response.data);
@@ -129,7 +139,7 @@ const JournalView: React.FC = () => {
         acc.credit += r.creditAmount || 0;
         return acc;
       },
-      { debit: 0, credit: 0 }
+      { debit: 0, credit: 0 },
     );
   };
 
@@ -178,8 +188,8 @@ const JournalView: React.FC = () => {
                         type === "RECEIPT"
                           ? "green"
                           : type === "PAYMENT"
-                          ? "red"
-                          : "orange"
+                            ? "red"
+                            : "orange"
                       }
                     >
                       {type}

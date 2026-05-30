@@ -95,8 +95,23 @@ const FinancialYear: React.FC = () => {
         }
       );
 
+
       message.success("Active financial year updated");
       fetchYears();
+
+      const token = sessionStorage.getItem("token");
+      const fyRes = await axios.get(
+              `${import.meta.env.VITE_API_URL}/accounting-year/${societyId}/active`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            );
+      
+      sessionStorage.setItem("financialYear", fyRes.data.fyCode);
+      window.dispatchEvent(new Event("financialYearChanged"));
+
     } catch (err) {
       message.error("Failed to activate year");
     }

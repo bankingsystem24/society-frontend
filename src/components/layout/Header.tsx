@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Dropdown, Avatar, Space, Typography } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,21 @@ const HeaderBar: React.FC = () => {
 
   const username = sessionStorage.getItem("username");
   const societyName = sessionStorage.getItem("societyName");
+  const [financialYear, setFinancialYear] = useState(
+    sessionStorage.getItem("financialYear") || "",
+  );
 
+  useEffect(() => {
+    const updateFinancialYear = () => {
+      setFinancialYear(sessionStorage.getItem("financialYear") || "");
+    };
+
+    window.addEventListener("financialYearChanged", updateFinancialYear);
+
+    return () => {
+      window.removeEventListener("financialYearChanged", updateFinancialYear);
+    };
+  }, []);
   const items = [
     {
       key: "logout",
@@ -52,10 +66,10 @@ const HeaderBar: React.FC = () => {
         <Text
           style={{
             color: "rgba(255,255,255,0.75)",
-            fontSize: 12,
+            fontSize: 16,
           }}
         >
-          Dashboard
+          Dashboard {financialYear && `| FY: ${financialYear}`}
         </Text>
       </div>
 

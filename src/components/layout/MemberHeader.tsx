@@ -26,6 +26,7 @@ const MemberHeader: React.FC = () => {
   const memberName = sessionStorage.getItem("memberName");
   const societyName = sessionStorage.getItem("societyName");
   const role = sessionStorage.getItem("role");
+  const financialYear = sessionStorage.getItem("financialYear");
 
   const items = [
     {
@@ -88,10 +89,10 @@ const MemberHeader: React.FC = () => {
         <Text
           style={{
             color: "rgba(255,255,255,0.75)",
-            fontSize: 12,
+            fontSize: 16,
           }}
         >
-          Member Portal
+          Member Portal {financialYear && `| FY: ${financialYear}`}
         </Text>
       </div>
 

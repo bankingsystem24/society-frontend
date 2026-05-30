@@ -61,23 +61,50 @@ export default function ViewReceipts() {
     }
   };
 
-  const loadReceipts = async (flatId?: number) => {
-    try {
-      setLoading(true);
+const loadReceipts = async (flatId?: number) => {
+  try {
+    setLoading(true);
 
-      const res = await axios.post(`${BASE_URL}/receipts/viewReceipts`, {
+    const res = await axios.post(
+      `${BASE_URL}/receipts/viewReceipts`,
+      {
         societyId: Number(societyId),
         flatId: flatId || null,
-      });
+      }
+    );
 
+    const financialYear =
+      sessionStorage.getItem("financialYear");
+
+    if (!financialYear) {
       setReceipts(res.data);
-      console.log("data",res.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    const [startYear, endYear] = financialYear
+      .split("-")
+      .map(Number);
+
+    const filtered = res.data.filter((r: any) => {
+      const receiptDate = new Date(r.createdAt);
+
+      const year = receiptDate.getFullYear();
+      const month = receiptDate.getMonth() + 1; // Jan=1
+
+      return (
+        (year === startYear && month >= 4) ||
+        (year === endYear && month <= 3)
+      );
+    });
+
+    setReceipts(filtered);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loadReceiptDetails = async (receiptId: number) => {
     try {

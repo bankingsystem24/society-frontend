@@ -26,6 +26,16 @@ const MemberLogin: React.FC = () => {
       );
 
       message.success("Login successful");
+            const fyRes = await axios.get(
+              `${import.meta.env.VITE_API_URL}/accounting-year/${res.data.societyId}/active`,
+              {
+                headers: {
+                  Authorization: `Bearer ${res.data.token}`,
+                },
+              },
+            );
+      
+      sessionStorage.setItem("financialYear", fyRes.data.fyCode);
 
       // ================= SESSION =================
       console.log("res", res.data);
