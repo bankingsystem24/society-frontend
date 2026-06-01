@@ -20,7 +20,8 @@ const Login: React.FC = () => {
       );
 
       message.success("Login successful");
-      console.log("Response",res);
+      console.log("Response:",res);
+
       if (res.data.societyId !== null){
         const fyRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/accounting-year/${res.data.societyId}/active`,
@@ -31,8 +32,10 @@ const Login: React.FC = () => {
           },
         );
         sessionStorage.setItem("financialYear", fyRes.data.fyCode);
+              console.log("fyRes", fyRes);
+
         }
-      
+
       sessionStorage.setItem("token", res.data.token);
       if (res.data.societyId !== null && res.data.societyId !== undefined) {
         sessionStorage.setItem("societyId", String(res.data.societyId));
@@ -40,11 +43,20 @@ const Login: React.FC = () => {
         sessionStorage.removeItem("societyId");
       }
       sessionStorage.setItem("societyName", res.data.societyName);
+
+      console.log("User Role:", res.data.role);
+
       if(res.data.role === "SUPER_ADMIN"){
           navigate("/superadmindashboard");
-      }
-      if(res.data.role === "ADMIN"){
+
+      } else if(res.data.role === "ADMIN"){
           navigate("/clientdashboard");
+
+      } else if(res.data.role === "AUDITOR"){
+          sessionStorage.setItem("username", "Auditor");
+          console.log("Response",res);
+          sessionStorage.setItem("auditorId", res.data.auditorId);
+          navigate("/auditordashboard");
       }
     } catch (error: any) {
       message.error(

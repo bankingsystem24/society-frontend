@@ -8,9 +8,8 @@ import {
   message,
   Button,
   Popconfirm,
-  Space,
 } from "antd";
-import { apiDelete, apiGet, apiPut } from "../../api/axios";
+import { apiDelete, apiGet, apiPut } from "../../../api/axios";
 import { DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 const { Title } = Typography;
 const { Option } = Select;
 
-const Users: React.FC = () => {
+const AuditorUsers: React.FC = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState<any[]>([]);
@@ -39,30 +38,57 @@ const Users: React.FC = () => {
       setLoading(true);
 
       const societyId = sessionStorage.getItem("societyId");
+      const auditorId = Number(sessionStorage.getItem("auditorId"));
 
-      console.log("Loading users for societyId:", societyId);
-      if (!societyId) {
-        const res = await apiGet("/users");
-        const filtered = (res || [])
-          .filter((user: any) => user.role !== "SUPER_ADMIN")
-          .sort((a: any, b: any) => {
-            const societyCompare = (a.societyName || "").localeCompare(
-              b.societyName || "",
-            );
+      // Get all societies
+      const societies = await apiGet("/societies");
 
-            if (societyCompare !== 0) {
-              return societyCompare;
-            }
+      console.log("All Societies:", societies);
+      console.log("Auditor ID:", auditorId);
 
-            return (a.role || "").localeCompare(b.role || "");
-          });
+      // Get society IDs assigned to this auditor
+      const auditorSocietyIds = (societies || [])
+        .filter((s: any) => Number(s.auditor?.id) === Number(auditorId))
+        .map((s: any) => Number(s.id));
 
-        setData(filtered || []);
-        return;
+      console.log("Auditor Society IDs:", auditorSocietyIds);
+
+      // Get users
+      let users = [];
+
+      if (societyId) {
+        users = await apiGet(`/users?societyId=${societyId}`);
       } else {
-        const res = await apiGet(`/users?societyId=${societyId}`);
-        setData(res || []);
+        users = await apiGet("/users");
       }
+
+      // Keep only users belonging to auditor's societies
+      const filtered = (users || [])
+        .filter(
+          (user: any) =>
+            (user.role !== "SUPER_ADMIN" &&
+            auditorSocietyIds.includes(Number(user.societyId)) || user.id === auditorId))
+        .sort((a: any, b: any) => {
+          const societyCompare = (a.societyName || "").localeCompare(
+            b.societyName || "",
+          );
+
+          if (societyCompare !== 0) {
+            return societyCompare;
+          }
+
+          const roleCompare = (a.role || "").localeCompare(b.role || "");
+
+          if (roleCompare !== 0) {
+            return roleCompare;
+          }
+
+          return (a.username || "").localeCompare(b.username || "");
+        });
+
+      console.log("Filtered Users:", filtered);
+
+      setData(filtered);
     } catch (error) {
       console.error("Error loading users", error);
     } finally {
@@ -86,7 +112,6 @@ const Users: React.FC = () => {
 
       message.success(checked ? "User Activated" : "User Deactivated");
 
-      // update only clicked row
       setData((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, active: checked } : item,
@@ -94,10 +119,8 @@ const Users: React.FC = () => {
       );
     } catch (error) {
       console.error(error);
-
       message.error("Failed to update status");
     }
-    navigate(`/users`);
   };
 
   const deleteUser = async (id: number) => {
@@ -106,11 +129,9 @@ const Users: React.FC = () => {
 
       message.success("User deleted successfully");
 
-      // remove deleted row instantly
       setData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error(error);
-
       message.error("Failed to delete user");
     }
   };
@@ -127,14 +148,6 @@ const Users: React.FC = () => {
       key: "role",
     },
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 80,
-      responsive: ["md"],
-      hidden: true,
-    },
-    {
       title: "Username",
       dataIndex: "username",
       key: "username",
@@ -144,31 +157,43 @@ const Users: React.FC = () => {
       dataIndex: "memberName",
       key: "memberName",
     },
+
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
     },
+
     {
       title: "Status",
       dataIndex: "active",
       key: "active",
       width: 180,
       render: (_: any, record: any) => (
-        <Switch
-          checked={record.active}
-          checkedChildren="Active"
-          unCheckedChildren="Inactive"
-          onChange={(checked) => updateStatus(record.id, checked)}
-        />
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <Switch
+            checked={record.active}
+            checkedChildren="Active"
+            unCheckedChildren="Inactive"
+            onChange={(checked) => updateStatus(record.id, checked)}
+          />
+        </div>
       ),
     },
     {
       title: "Action",
       key: "action",
-      width: 120,
+      width: 140,
       render: (_: any, record: any) => (
-        <Space>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <Popconfirm
             title="Delete User"
             description="Are you sure to delete this user?"
@@ -176,11 +201,17 @@ const Users: React.FC = () => {
             cancelText="No"
             onConfirm={() => deleteUser(record.id)}
           >
-            <Button danger icon={<DeleteOutlined />}>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
               Delete
             </Button>
           </Popconfirm>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -192,7 +223,6 @@ const Users: React.FC = () => {
         padding: 16,
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -203,12 +233,7 @@ const Users: React.FC = () => {
           marginBottom: 16,
         }}
       >
-        <Title
-          level={4}
-          style={{
-            margin: 0,
-          }}
-        >
+        <Title level={4} style={{ margin: 0 }}>
           Users List
         </Title>
 
@@ -227,29 +252,24 @@ const Users: React.FC = () => {
         </Select>
       </div>
 
-      {/* Table */}
-      <div
-        style={{
-          overflowX: "auto",
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          pageSize: 10,
         }}
-      >
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-          }}
-          onRow={(record) => ({
-            onClick: () => navigate(`/edit-user/${record.id}`),
-            style: { cursor: "pointer" },
-          })}
-          scroll={{ x: 700 }}
-        />
-      </div>
+        onRow={(record) => ({
+          onClick: () => navigate(`/auditor-edit-user/${record.id}`),
+          style: {
+            cursor: "pointer",
+          },
+        })}
+        scroll={{ x: 700 }}
+      />
     </Card>
   );
 };
 
-export default Users;
+export default AuditorUsers;

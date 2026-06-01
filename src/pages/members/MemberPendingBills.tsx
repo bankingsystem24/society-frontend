@@ -55,18 +55,30 @@ const MemberPendingBills: React.FC = () => {
       const res = await axios.get(`${BASE_URL}/members/flats`, {
         params: { societyId, memberId },
       });
-      setFlats(res.data || []);
+
+      const flatsData = res.data || [];
+
+      setFlats(flatsData);
+
+      // ✅ Auto select first flat
+      if (flatsData.length > 0) {
+        const firstFlatId = flatsData[0].id;
+
+        setSelectedFlat(firstFlatId);
+
+        fetchBills(firstFlatId);
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const fetchBills = async (flatId?: number | null) => {
-
+  const fetchBills = async (flatId: number | null) => {
     if (!flatId) {
-      setBills([]); // ✅ empty by default
+      setBills([]);
       return;
     }
+
     try {
       setLoading(true);
 
@@ -76,11 +88,6 @@ const MemberPendingBills: React.FC = () => {
 
       const flatIds = flatsRes.data.map((f: any) => Number(f.id));
 
-      if (flatIds.length === 0) {
-        setBills([]);
-        return;
-      }
-
       const billsRes = await axios.post(`${BASE_URL}/members/bills`, {
         flatIds,
       });
@@ -89,10 +96,7 @@ const MemberPendingBills: React.FC = () => {
         (b: Billing) => b.status !== "PAID",
       );
 
-      // filter by flat
-      if (flatId) {
-        pending = pending.filter((b: Billing) => b.flat?.id === flatId);
-      }
+      pending = pending.filter((b: Billing) => b.flat?.id === flatId);
 
       setBills(pending);
     } catch (err) {
@@ -146,7 +150,7 @@ const MemberPendingBills: React.FC = () => {
               billIds: selectedRowKeys,
               memberId,
               amount: totalAmount,
-              paymentMode : response.method || "ONLINE",
+              paymentMode: response.method || "ONLINE",
             });
 
             message.success("Payment successful");
@@ -173,8 +177,8 @@ const MemberPendingBills: React.FC = () => {
 
         message.error(
           response?.error?.description ||
-          response?.error?.reason ||
-          "Payment failed"
+            response?.error?.reason ||
+            "Payment failed",
         );
       });
 

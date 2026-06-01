@@ -31,6 +31,12 @@ import SuperAdminLayout from "./components/layout/SuperAdminLayout";
 import CreateSociety from "./pages/society/CreateSociety";
 import Societies from "./pages/society/Societies";
 import EditSociety from "./pages/society/EditSociety";
+import SuperAdminUsers from "./pages/superadmin/users/SuperAdminUsers";
+import SuperAdminCreateUser from "./pages/superadmin/users/SuperAdminCreateUser";
+import SuperAdminEditUser from "./pages/superadmin/users/SuperAdminEditUser";
+import AuditorLayout from "./components/layout/AuditorLayout";
+import AuditorDashboard from "./pages/dashboard/AuditorDashboard";
+import AuditorUsers from "./pages/auditor/users/AuditorUsers";
 
 export default function App() {
   return (
@@ -45,11 +51,16 @@ export default function App() {
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
-        <Route path="/superadminusers" element={<Users />} />
-        <Route path="/superadmin-create-user" element={<CreateUser />} />
+        <Route path="/superadminusers" element={<SuperAdminUsers />} />
+        <Route path="/superadmin-create-user" element={<SuperAdminCreateUser />} />
+        <Route path="/superadmin-edit-user/:id" element={<SuperAdminEditUser />} />
         <Route path="/superadmin-create-society" element={<CreateSociety />} />
         <Route path="/superadmin-view-societies" element={<Societies />} />
         <Route path="/superadmin-edit-society/:id" element={<EditSociety />} />
+      </Route>``
+      <Route element={<AuditorLayout />}>
+        <Route path="/auditordashboard" element={<AuditorDashboard />} />
+        <Route path="/auditorusers" element={<AuditorUsers />} />
 
       </Route>
 
