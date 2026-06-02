@@ -69,7 +69,7 @@ const SuperAdminCreateUser: React.FC = () => {
         mobile: values.mobile,
         role: values.role,
         active: true,
-
+        name:values.name,
         society: values.societyId
           ? {
               id: values.societyId,
@@ -116,6 +116,20 @@ const SuperAdminCreateUser: React.FC = () => {
                 {
                   required: true,
                   message: "Please enter username",
+                },
+              ]}
+            >
+              <Input onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter name",
                 },
               ]}
             >
@@ -194,7 +208,7 @@ const SuperAdminCreateUser: React.FC = () => {
               name="societyId"
               rules={[
                 {
-                  required: true,
+                  required: false,
                   message: "Please select society",
                 },
               ]}
@@ -251,6 +265,9 @@ const SuperAdminCreateUser: React.FC = () => {
 
         <Button type="primary" htmlType="submit">
           Save User
+        </Button>
+        <Button type="default" onClick={() => navigate("/superadminusers")} style={{ marginLeft: 8 }}>
+          Cancel
         </Button>
       </Form>
     </Card>

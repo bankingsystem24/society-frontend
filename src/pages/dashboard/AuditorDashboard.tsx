@@ -26,7 +26,6 @@ const AuditorDashboard: React.FC = () => {
       `/accounting-year/${societyId}/active`
     );
 
-    console.log("response",res.data);
     setFinancialYear(res.fyCode || "-");
   } catch (error) {
     console.error("Error loading financial year", error);
@@ -37,11 +36,6 @@ const AuditorDashboard: React.FC = () => {
   const loadStats = async () => {
     try {
         const res = await apiGet("/users");
-      
-
-
-
-
     } catch (error) {
       console.error("Error loading dashboard stats", error);
     }
@@ -59,66 +53,8 @@ const AuditorDashboard: React.FC = () => {
         level={2}
         style={{ color: "#1677ff", marginBottom: 24 }}
       >
-        Society Dashboard
+        Auditor Dashboard
       </Title>
-
-      {/* <Row gutter={16}>
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Wings</span>}
-              value={stats.wings}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Flats</span>}
-              value={stats.flats}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Members</span>}
-              value={stats.members}
-              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Users</span>}
-              value={stats.users}
-              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={16} style={{ marginTop: 20 }}>
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Financial Year</span>}
-              value={financialYear}
-              prefix={<CalendarOutlined  style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-    </Row> */}
 
     </div>
   );

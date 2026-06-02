@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Table, Card, Typography, Select, Switch, message, Button, Popconfirm, Space } from "antd";
+import {
+  Table,
+  Card,
+  Typography,
+  Select,
+  Switch,
+  message,
+  Button,
+  Popconfirm,
+  Space,
+} from "antd";
 import { apiDelete, apiGet, apiPut } from "../../api/axios";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const Members: React.FC = () => {
-
   const navigate = useNavigate();
 
   const [data, setData] = useState<any[]>([]);
@@ -51,10 +60,7 @@ const Members: React.FC = () => {
 
   const updateStatus = async (id: number, checked: boolean) => {
     try {
-    await apiPut(
-      `/members/update-status?id=${id}&active=${checked}`,
-      {}
-    );
+      await apiPut(`/members/update-status?id=${id}&active=${checked}`, {});
 
       message.success(checked ? "Member Activated" : "Member Deactivated");
 
@@ -73,31 +79,25 @@ const Members: React.FC = () => {
 
   const deleteMember = async (id: number) => {
     try {
-
       await apiDelete(`/members/${id}`);
 
       message.success("Member deleted successfully");
 
       // remove deleted row instantly
-      setData((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
-
+      setData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-
       console.error(error);
 
       message.error("Failed to delete member");
     }
   };
 
-
   const columns = [
     {
       title: "Member Name",
       dataIndex: "name",
       key: "name",
-      width: 180,
+      width: 150,
     },
     {
       title: "Mobile",
@@ -106,22 +106,22 @@ const Members: React.FC = () => {
       width: 140,
     },
     {
+      title: "Address",
+      dataIndex: "address",
+      key: "address",
+      width: 150,
+    },
+    {
       title: "Email",
       dataIndex: "email",
       key: "email",
       width: 250,
     },
     {
-      title: "Flat",
-      dataIndex: "flatNo",
-      key: "flatNo",
-      width: 100,
-    },
-    {
       title: "Status",
       dataIndex: "active",
       key: "active",
-      width: 180,
+      width: 110,
       render: (_: any, record: any) => (
         <Switch
           checked={record.active}
@@ -132,32 +132,37 @@ const Members: React.FC = () => {
       ),
     },
     {
-  title: "Action",
-  key: "action",
-  width: 140,
-  render: (_: any, record: any) => (
-    <Space>
-      <Popconfirm
-        title="Delete Member"
-        description="Are you sure to delete this member?"
-        okText="Yes"
-        cancelText="No"
-        onConfirm={() => deleteMember(record.id)}
-      >
-        <Button
-          danger
-          icon={<DeleteOutlined />}
-        >
-          Delete
-        </Button>
-      </Popconfirm>
-    </Space>
-  ),
-},
+      title: "Action",
+      key: "action",
+      width: 220,
+      render: (_: any, record: any) => (
+        <Space>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/edit-member/${record.id}`)}
+          >
+            Edit
+          </Button>
+
+          <Popconfirm
+            title="Delete Member"
+            description="Are you sure to delete this member?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => deleteMember(record.id)}
+          >
+            <Button danger icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   return (
-    <Card style={{ width: "100%", padding:16 }} >
+    <Card style={{ width: "100%", padding: 16 }}>
       {/* Header */}
       <div
         style={{
@@ -165,56 +170,67 @@ const Members: React.FC = () => {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 16,
+          gap: 16,
+          marginBottom: 20,
         }}
       >
-        <Title
-          level={4}
+        <div>
+          <Title level={4} style={{ margin: 0 }}>
+            Members Management
+          </Title>
+
+          <Typography.Text type="secondary">
+            Manage society members and ownership details
+          </Typography.Text>
+        </div>
+
+        <div
           style={{
-            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
           }}
         >
-          Members List
-        </Title>
+          <Select
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value)}
+            style={{ width: 160 }}
+            size="medium"
+          >
+            <Option value="active">Active Members</Option>
+            <Option value="inactive">Inactive Members</Option>
+            <Option value="all">All Members</Option>
+          </Select>
 
-        <Select
-          value={statusFilter}
-          onChange={(value) => setStatusFilter(value)}
+          <Button
+            type="primary"
+            size="medium"
+            icon={<PlusOutlined />}
+            onClick={() => navigate("/create-member")}
+          >
+            Create Member
+          </Button>
+        </div>
+        <div
           style={{
-            minWidth: 140,
             width: "100%",
-            maxWidth: 180,
+            overflowX: "auto",
           }}
         >
-          <Option value="active">Active</Option>
-          <Option value="inactive">Inactive</Option>
-          <Option value="all">All</Option>
-        </Select>
-      </div>
-
-      {/* Responsive Table */}
-      <div
-        style={{
-          overflowX: "auto",
-        }}
-      >
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            responsive: true,
-          }}
-          onRow={(record) => ({
-          onClick: () =>
-            navigate(`/edit-member/${record.id}`),
-          style: { cursor: "pointer" },
-        })}
-          scroll={{ x: 850 }}
-        />
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            rowKey="id"
+            loading={loading}
+            size="small"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              responsive: true,
+            }}
+            scroll={{ x: "max-content" }}
+          />
+        </div>
       </div>
     </Card>
   );

@@ -26,7 +26,6 @@ const SuperAdminDashboard: React.FC = () => {
       `/accounting-year/${societyId}/active`
     );
 
-    console.log("response",res.data);
     setFinancialYear(res.fyCode || "-");
   } catch (error) {
     console.error("Error loading financial year", error);
@@ -37,12 +36,7 @@ const SuperAdminDashboard: React.FC = () => {
   const loadStats = async () => {
     try {
         const res = await apiGet("/users");
-      
-
-
-
-
-    } catch (error) {
+          } catch (error) {
       console.error("Error loading dashboard stats", error);
     }
   };
@@ -59,7 +53,7 @@ const SuperAdminDashboard: React.FC = () => {
         level={2}
         style={{ color: "#1677ff", marginBottom: 24 }}
       >
-        Society Dashboard
+        Super Admin Dashboard
       </Title>
 
       {/* <Row gutter={16}>

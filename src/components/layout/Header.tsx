@@ -9,7 +9,8 @@ const { Text } = Typography;
 const HeaderBar: React.FC = () => {
   const navigate = useNavigate();
 
-  const username = sessionStorage.getItem("username");
+  const userName = sessionStorage.getItem("userName");
+  const role = sessionStorage.getItem("role");
   const societyName = sessionStorage.getItem("societyName");
   const [financialYear, setFinancialYear] = useState(
     sessionStorage.getItem("financialYear") || "",
@@ -94,10 +95,10 @@ const HeaderBar: React.FC = () => {
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Text style={{ color: "#fff", fontWeight: 500 }}>
-              {username || "Admin"}
+              {userName} ({role})
             </Text>
             <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>
-              Online
+              Online 
             </Text>
           </div>
         </Space>

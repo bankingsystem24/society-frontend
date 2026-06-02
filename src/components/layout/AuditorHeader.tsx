@@ -9,8 +9,9 @@ const { Text } = Typography;
 const AuditorHeaderBar: React.FC = () => {
   const navigate = useNavigate();
 
-  const username = sessionStorage.getItem("username");
+  const userName = sessionStorage.getItem("userName");
   const societyName = sessionStorage.getItem("societyName");
+  const role = sessionStorage.getItem("role");
   const [financialYear, setFinancialYear] = useState(
     sessionStorage.getItem("financialYear") || "",
   );
@@ -60,7 +61,7 @@ const AuditorHeaderBar: React.FC = () => {
             lineHeight: 1.2,
           }}
         >
-          All Societies
+          No.of Societies
         </Text>
 
         <Text
@@ -94,7 +95,7 @@ const AuditorHeaderBar: React.FC = () => {
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Text style={{ color: "#fff", fontWeight: 500 }}>
-              {username || "Auditor"}
+              {userName} ({role})
             </Text>
             <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>
               Online

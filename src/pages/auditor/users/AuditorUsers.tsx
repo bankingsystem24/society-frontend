@@ -43,15 +43,10 @@ const AuditorUsers: React.FC = () => {
       // Get all societies
       const societies = await apiGet("/societies");
 
-      console.log("All Societies:", societies);
-      console.log("Auditor ID:", auditorId);
-
       // Get society IDs assigned to this auditor
       const auditorSocietyIds = (societies || [])
         .filter((s: any) => Number(s.auditor?.id) === Number(auditorId))
         .map((s: any) => Number(s.id));
-
-      console.log("Auditor Society IDs:", auditorSocietyIds);
 
       // Get users
       let users = [];
@@ -86,7 +81,6 @@ const AuditorUsers: React.FC = () => {
           return (a.username || "").localeCompare(b.username || "");
         });
 
-      console.log("Filtered Users:", filtered);
 
       setData(filtered);
     } catch (error) {
@@ -153,11 +147,15 @@ const AuditorUsers: React.FC = () => {
       key: "username",
     },
     {
-      title: "Name",
+      title: "MemberName",
       dataIndex: "memberName",
       key: "memberName",
     },
-
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
     {
       title: "Email",
       dataIndex: "email",

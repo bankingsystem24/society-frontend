@@ -208,7 +208,7 @@ const EditMember: React.FC = () => {
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={12}>
+            {/* <Col xs={24} md={12}>
               <Form.Item
                 label="Flat"
                 name="flatId"
@@ -228,7 +228,7 @@ const EditMember: React.FC = () => {
                   ))}
                 </Select>
               </Form.Item>
-            </Col>
+            </Col> */}
           </Row>
 
           <Row gutter={16}>

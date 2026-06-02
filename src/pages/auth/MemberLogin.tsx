@@ -38,8 +38,6 @@ const MemberLogin: React.FC = () => {
       sessionStorage.setItem("financialYear", fyRes.data.fyCode);
 
       // ================= SESSION =================
-      console.log("res", res.data);
-
       sessionStorage.setItem("memberToken", res.data.token);
       sessionStorage.setItem("memberId", String(res.data.memberId));
       sessionStorage.setItem("memberName", res.data.memberName);

@@ -61,6 +61,7 @@ const SuperAdminEditUser: React.FC = () => {
 
       form.setFieldsValue({
         username: res.username,
+        name: res.name,
         email: res.email,
         mobile: res.mobile,
         role: res.role,
@@ -109,6 +110,7 @@ const SuperAdminEditUser: React.FC = () => {
         mobile: values.mobile,
         role: values.role,
         active: values.active,
+        name: values.name,
 
         society: values.societyId
           ? {
@@ -165,7 +167,20 @@ const SuperAdminEditUser: React.FC = () => {
                 <Input onPressEnter={focusNext} />
               </Form.Item>
             </Col>
-
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Name"
+                name="name"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter name",
+                  },
+                ]}
+              >
+                <Input onPressEnter={focusNext} />
+              </Form.Item>
+            </Col>
             <Col xs={24} md={12}>
               <Form.Item
                 label="Email"
@@ -258,7 +273,7 @@ const SuperAdminEditUser: React.FC = () => {
                 name="societyId"
                 rules={[
                   {
-                    required: true,
+                    required: false,
                     message: "Please select society",
                   },
                 ]}

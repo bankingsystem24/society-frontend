@@ -30,19 +30,12 @@ const AuditorSidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key: "users",
-            icon: <UserOutlined />,
+            key: "/auditorusers",
             label: "Users",
-            children: [
-              {
-                key: "/auditorusers",
-                label: "User List",
-              },
-              {
-                key: "/auditor-view-societies",
-                label: "Society List",
-              },
-            ],
+          },
+          {
+            key: "/auditorsocieties",
+            label: "Society List",
           },
         ]}
       />

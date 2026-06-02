@@ -7,11 +7,10 @@ import {
   Popconfirm,
   Space,
   message,
-  
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { apiDelete, apiGet } from "../../api/axios";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
 const { Title } = Typography;
@@ -32,9 +31,7 @@ const Flats: React.FC = () => {
 
       const societyId = sessionStorage.getItem("societyId");
 
-      const res = await apiGet(
-        `/flats?societyId=${societyId}`
-      );
+      const res = await apiGet(`/flats?societyId=${societyId}`);
 
       setData(res || []);
     } catch (error) {
@@ -51,24 +48,14 @@ const Flats: React.FC = () => {
 
       message.success("Flat deleted successfully");
 
-      setData((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
+      setData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error(error);
       message.error("Failed to delete flat");
     }
   };
 
-const columns: ColumnsType<any> = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 80,
-      responsive: ["md"],
-      hidden : true
-    },
+  const columns: ColumnsType<any> = [
     {
       title: "Flat Number",
       dataIndex: "flatNo",
@@ -80,35 +67,30 @@ const columns: ColumnsType<any> = [
       dataIndex: "wingName",
       key: "wingName",
       width: 120,
-      responsive: ["sm"],
     },
     {
       title: "Owner",
       dataIndex: "ownerName",
       key: "ownerName",
       width: 180,
-      responsive: ["lg"],
     },
     {
-      title: "Area",
+      title: "Area (Sq Ft)",
       dataIndex: "areaSqFt",
       key: "areaSqFt",
       width: 120,
-      responsive: ["md"],
     },
     {
       title: "Floor",
       dataIndex: "floorNo",
       key: "floorNo",
       width: 100,
-      responsive: ["sm"],
     },
     {
       title: "Maintenance",
       dataIndex: "maintenanceAmount",
       key: "maintenanceAmount",
       width: 150,
-      responsive: ["lg"],
       render: (value: any) => `₹ ${value}`,
     },
     {
@@ -120,23 +102,27 @@ const columns: ColumnsType<any> = [
     {
       title: "Action",
       key: "action",
-      width: 140,
+      width: 220,
       fixed: "right",
 
       render: (_: any, record: any) => (
         <Space>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/edit-flat/${record.id}`)}
+          >
+            Edit
+          </Button>
+
           <Popconfirm
             title="Delete Flat"
-            description="Are you sure to delete this flat?"
+            description="Are you sure you want to delete this flat?"
             okText="Yes"
             cancelText="No"
             onConfirm={() => deleteFlat(record.id)}
           >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Button danger icon={<DeleteOutlined />}>
               Delete
             </Button>
           </Popconfirm>
@@ -147,29 +133,53 @@ const columns: ColumnsType<any> = [
 
   return (
     <Card
-      styles={{
-        body: {
-          padding: 12,
-        },
+      bordered={false}
+      style={{
+        borderRadius: 12,
       }}
     >
-      <Title level={3}>Flat List</Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div>
+          <Title level={4} style={{ margin: 0 }}>
+            Flats Management
+          </Title>
+
+          <Typography.Text type="secondary">
+            Manage society flats and owner details
+          </Typography.Text>
+        </div>
+
+        <Button
+          type="primary"
+          size="medium"
+          icon={<PlusOutlined />}
+          onClick={() => navigate("/create-flat")}
+        >
+          Create Flat
+        </Button>
+      </div>
 
       <Table
         columns={columns}
         dataSource={data}
         rowKey="id"
         loading={loading}
-        scroll={{ x: 1000 }}
+        scroll={{ x: 1200 }}
+        bordered
+        size="small"
         pagination={{
           pageSize: 10,
-          showSizeChanger: false,
+          showSizeChanger: true,
         }}
-        onRow={(record) => ({
-          onClick: () =>
-            navigate(`/edit-flat/${record.id}`),
-          style: { cursor: "pointer" },
-        })}
       />
     </Card>
   );

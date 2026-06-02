@@ -11,7 +11,7 @@ import {
   Space,
 } from "antd";
 import { apiDelete, apiGet, apiPut } from "../../api/axios";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 
@@ -40,7 +40,6 @@ const Users: React.FC = () => {
 
       const societyId = sessionStorage.getItem("societyId");
 
-      console.log("Loading users for societyId:", societyId);
       if (!societyId) {
         const res = await apiGet("/users");
         const filtered = (res || [])
@@ -58,10 +57,12 @@ const Users: React.FC = () => {
           });
 
         setData(filtered || []);
+
         return;
       } else {
         const res = await apiGet(`/users?societyId=${societyId}`);
         setData(res || []);
+
       }
     } catch (error) {
       console.error("Error loading users", error);
@@ -140,9 +141,14 @@ const Users: React.FC = () => {
       key: "username",
     },
     {
-      title: "Name",
+      title: "Member Name",
       dataIndex: "memberName",
       key: "memberName",
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
     },
     {
       title: "Email",
@@ -153,7 +159,7 @@ const Users: React.FC = () => {
       title: "Status",
       dataIndex: "active",
       key: "active",
-      width: 180,
+      width: 80,
       render: (_: any, record: any) => (
         <Switch
           checked={record.active}
@@ -166,9 +172,20 @@ const Users: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      width: 120,
+      width: 150,
       render: (_: any, record: any) => (
         <Space>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/edit-user/${record.id}`);
+            }}
+          >
+            Edit
+          </Button>
+
           <Popconfirm
             title="Delete User"
             description="Are you sure to delete this user?"
@@ -176,7 +193,11 @@ const Users: React.FC = () => {
             cancelText="No"
             onConfirm={() => deleteUser(record.id)}
           >
-            <Button danger icon={<DeleteOutlined />}>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={(e) => e.stopPropagation()}
+            >
               Delete
             </Button>
           </Popconfirm>
@@ -187,9 +208,10 @@ const Users: React.FC = () => {
 
   return (
     <Card
+      bordered={false}
       style={{
         width: "100%",
-        padding: 16,
+        borderRadius: 12,
       }}
     >
       {/* Header */}
@@ -199,34 +221,49 @@ const Users: React.FC = () => {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 16,
+          gap: 16,
+          marginBottom: 20,
+          marginTop: -10,
         }}
       >
-        <Title
-          level={4}
-          style={{
-            margin: 0,
-          }}
-        >
-          Users List
-        </Title>
+        <div>
+          <Title level={4} style={{ margin: 0 }}>
+            Users Management
+          </Title>
 
-        <Select
-          value={statusFilter}
-          onChange={(value) => setStatusFilter(value)}
+          <Typography.Text type="secondary">
+            Manage users, roles and access permissions
+          </Typography.Text>
+        </div>
+
+        <div
           style={{
-            minWidth: 140,
-            width: "100%",
-            maxWidth: 180,
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
           }}
         >
-          <Option value="active">Active</Option>
-          <Option value="inactive">Inactive</Option>
-          <Option value="all">All</Option>
-        </Select>
+          <Select
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value)}
+            style={{ width: 160 }}
+            size="small"
+          >
+            <Option value="active">Active Users</Option>
+            <Option value="inactive">Inactive Users</Option>
+            <Option value="all">All Users</Option>
+          </Select>
+
+          <Button
+            type="primary"
+            size="small"
+            icon={<PlusOutlined />}
+            onClick={() => navigate("/create-user")}
+          >
+            Create User
+          </Button>
+        </div>
       </div>
-
       {/* Table */}
       <div
         style={{
@@ -238,14 +275,12 @@ const Users: React.FC = () => {
           dataSource={filteredData}
           rowKey="id"
           loading={loading}
+          size="small"
           pagination={{
             pageSize: 10,
+            showSizeChanger: true,
           }}
-          onRow={(record) => ({
-            onClick: () => navigate(`/edit-user/${record.id}`),
-            style: { cursor: "pointer" },
-          })}
-          scroll={{ x: 700 }}
+          scroll={{ x: "max-content" }}
         />
       </div>
     </Card>

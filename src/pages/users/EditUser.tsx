@@ -54,6 +54,7 @@ const EditUser: React.FC = () => {
       const res = await apiGet(`/users/${id}`);
 
       form.setFieldsValue({
+        name:res.name,
         username: res.username,
         email: res.email,
         mobile: res.mobile,
@@ -95,6 +96,7 @@ const EditUser: React.FC = () => {
       const societyId = sessionStorage.getItem("societyId");
 
       const payload = {
+        name:values.name,
         username: values.username,
         password: values.password,
         email: values.email,
@@ -137,19 +139,25 @@ const EditUser: React.FC = () => {
         <Form
           layout="vertical"
           form={form}
-          onFinish={onFinish}
-        >
+          onFinish={onFinish}>
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item
                 label="Username"
                 name="username"
+                rules={[{ required: true }]}>
+                <Input onPressEnter={focusNext} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Name"
+                name="name"
                 rules={[{ required: true }]}
               >
                 <Input onPressEnter={focusNext} />
               </Form.Item>
             </Col>
-
             <Col xs={24} md={12}>
               <Form.Item
                 label="Email"

@@ -11,11 +11,11 @@ import {
   Space,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { apiGet, apiPut } from "../../api/axios";
+import { apiGet, apiPut } from "../../../api/axios";
 
 const { Option } = Select;
 
-const EditSociety: React.FC = () => {
+const SuperAdminEditSociety: React.FC = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -204,4 +204,4 @@ const EditSociety: React.FC = () => {
   );
 };
 
-export default EditSociety;
+export default SuperAdminEditSociety;

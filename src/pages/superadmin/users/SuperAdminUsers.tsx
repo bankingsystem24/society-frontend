@@ -10,7 +10,7 @@ import {
   Popconfirm,
 } from "antd";
 import { apiDelete, apiGet, apiPut } from "../../../api/axios";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 
@@ -39,31 +39,25 @@ const SuperAdminUsers: React.FC = () => {
       const societyId = sessionStorage.getItem("societyId");
       if (!societyId) {
         const res = await apiGet("/users");
-      const filtered = (res || [])
-        .filter((user: any) => user.role !== "SUPER_ADMIN")
-        .sort((a: any, b: any) => {
-          const societyCompare = (a.societyName || "").localeCompare(
-            b.societyName || ""
-          );
-          if (societyCompare !== 0) {
-            return societyCompare;
-          }
-          const roleCompare = (a.role || "").localeCompare(
-            b.role || ""
-          );
-          if (roleCompare !== 0) {
-            return roleCompare;
-          }
-          return (a.username || "").localeCompare(
-            b.username || ""
-          );
-        });
-        setData(filtered);
 
+        const filtered = (res || [])
+          // .filter((user: any) => user.role == "SUPER_ADMIN")
+          .sort((a: any, b: any) => {
+            const societyCompare = (a.societyName || "").localeCompare(
+              b.societyName || "",
+            );
+            if (societyCompare !== 0) {
+              return societyCompare;
+            }
+            const roleCompare = (a.role || "").localeCompare(b.role || "");
+            if (roleCompare !== 0) {
+              return roleCompare;
+            }
+            return (a.username || "").localeCompare(b.username || "");
+          });
+        setData(filtered);
       } else {
-        const res = await apiGet(
-          `/users?societyId=${societyId}`
-        );
+        const res = await apiGet(`/users?societyId=${societyId}`);
 
         setData(res || []);
       }
@@ -84,26 +78,16 @@ const SuperAdminUsers: React.FC = () => {
     }
   };
 
-  const updateStatus = async (
-    id: number,
-    checked: boolean
-  ) => {
+  const updateStatus = async (id: number, checked: boolean) => {
     try {
-      await apiPut(
-        `/users/update-status?id=${id}&active=${checked}`,
-        {}
-      );
+      await apiPut(`/users/update-status?id=${id}&active=${checked}`, {});
 
-      message.success(
-        checked ? "User Activated" : "User Deactivated"
-      );
+      message.success(checked ? "User Activated" : "User Deactivated");
 
       setData((prev) =>
         prev.map((item) =>
-          item.id === id
-            ? { ...item, active: checked }
-            : item
-        )
+          item.id === id ? { ...item, active: checked } : item,
+        ),
       );
     } catch (error) {
       console.error(error);
@@ -117,9 +101,7 @@ const SuperAdminUsers: React.FC = () => {
 
       message.success("User deleted successfully");
 
-      setData((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
+      setData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error(error);
       message.error("Failed to delete user");
@@ -143,11 +125,15 @@ const SuperAdminUsers: React.FC = () => {
       key: "username",
     },
     {
-      title: "Name",
+      title: "Member Name",
       dataIndex: "memberName",
       key: "memberName",
     },
-
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
     {
       title: "Email",
       dataIndex: "email",
@@ -169,9 +155,7 @@ const SuperAdminUsers: React.FC = () => {
             checked={record.active}
             checkedChildren="Active"
             unCheckedChildren="Inactive"
-            onChange={(checked) =>
-              updateStatus(record.id, checked)
-            }
+            onChange={(checked) => updateStatus(record.id, checked)}
           />
         </div>
       ),
@@ -179,13 +163,23 @@ const SuperAdminUsers: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      width: 140,
+      width: 220,
       render: (_: any, record: any) => (
         <div
-          onClick={(e) => {
-            e.stopPropagation();
+          style={{
+            display: "flex",
+            gap: 8,
           }}
+          onClick={(e) => e.stopPropagation()}
         >
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/superadmin-edit-user/${record.id}`)}
+          >
+            Edit
+          </Button>
+
           <Popconfirm
             title="Delete User"
             description="Are you sure to delete this user?"
@@ -193,13 +187,7 @@ const SuperAdminUsers: React.FC = () => {
             cancelText="No"
             onConfirm={() => deleteUser(record.id)}
           >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
+            <Button danger icon={<DeleteOutlined />}>
               Delete
             </Button>
           </Popconfirm>
@@ -220,47 +208,58 @@ const SuperAdminUsers: React.FC = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: 20,
           flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 16,
+          gap: 16,
         }}
       >
-        <Title level={4} style={{ margin: 0 }}>
-          Users List
-        </Title>
+        <div>
+          <Title level={4} style={{ margin: 0 }}>
+            Users Management
+          </Title>
 
-        <Select
-          value={statusFilter}
-          onChange={(value) => setStatusFilter(value)}
+          <Typography.Text type="secondary">
+            Manage system users, roles and access permissions
+          </Typography.Text>
+        </div>
+
+        <div
           style={{
-            minWidth: 140,
-            width: "100%",
-            maxWidth: 180,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
           }}
         >
-          <Option value="active">Active</Option>
-          <Option value="inactive">Inactive</Option>
-          <Option value="all">All</Option>
-        </Select>
-      </div>
+          <Select
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value)}
+            style={{ width: 160 }}
+            size="medium"
+          >
+            <Option value="active">Active Users</Option>
+            <Option value="inactive">Inactive Users</Option>
+            <Option value="all">All Users</Option>
+          </Select>
 
+          <Button
+            type="primary"
+            size="medium"
+            icon={<PlusOutlined />}
+            onClick={() => navigate("/superadmin-create-user")}
+          >
+            Create User
+          </Button>
+        </div>
+      </div>
       <Table
         columns={columns}
         dataSource={filteredData}
         rowKey="id"
         loading={loading}
+        size="small"
         pagination={{
           pageSize: 10,
         }}
-        onRow={(record) => ({
-          onClick: () =>
-            navigate(
-              `/superadmin-edit-user/${record.id}`
-            ),
-          style: {
-            cursor: "pointer",
-          },
-        })}
         scroll={{ x: 700 }}
       />
     </Card>

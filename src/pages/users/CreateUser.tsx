@@ -12,10 +12,12 @@ import {
 
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
+import { useNavigate } from "react-router-dom";
 
 const CreateUser: React.FC = () => {
   const [form] = Form.useForm();
   const [members, setMembers] = useState<any[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadMembers();
@@ -55,20 +57,16 @@ const CreateUser: React.FC = () => {
       const societyId = sessionStorage.getItem("societyId");
 
       const payload = {
+        name:values.name,
         username: values.username,
         password: values.password,
         email: values.email,
         mobile: values.mobile,
-
-        // ✅ FIXED ROLE (matches backend enum)
         role: values.role,
-
         active: true,
-
         society: {
           id: Number(societyId),
         },
-
         member: {
           id: values.memberId,
         },
@@ -78,6 +76,7 @@ const CreateUser: React.FC = () => {
 
       message.success("User created successfully");
       form.resetFields();
+      navigate("/users");
 
     } catch (error: any) {
       message.error(
@@ -100,6 +99,15 @@ const CreateUser: React.FC = () => {
             <Form.Item
               label="Username"
               name="username"
+              rules={[{ required: true }]}
+            >
+              <Input onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="Name"
+              name="name"
               rules={[{ required: true }]}
             >
               <Input onPressEnter={focusNext} />
@@ -186,7 +194,9 @@ const CreateUser: React.FC = () => {
         <Button type="primary" htmlType="submit">
           Save User
         </Button>
-
+        <Button type="default" style={{ marginLeft: 8 }} onClick={() => navigate("/users")}>
+          Cancel
+        </Button>
       </Form>
     </Card>
   );

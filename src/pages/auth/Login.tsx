@@ -20,7 +20,8 @@ const Login: React.FC = () => {
       );
 
       message.success("Login successful");
-      console.log("Response:",res);
+      sessionStorage.setItem("userName", res.data.name);
+      sessionStorage.setItem("role", res.data.role);
 
       if (res.data.societyId !== null){
         const fyRes = await axios.get(
@@ -32,8 +33,6 @@ const Login: React.FC = () => {
           },
         );
         sessionStorage.setItem("financialYear", fyRes.data.fyCode);
-              console.log("fyRes", fyRes);
-
         }
 
       sessionStorage.setItem("token", res.data.token);
@@ -44,17 +43,22 @@ const Login: React.FC = () => {
       }
       sessionStorage.setItem("societyName", res.data.societyName);
 
-      console.log("User Role:", res.data.role);
-
       if(res.data.role === "SUPER_ADMIN"){
           navigate("/superadmindashboard");
 
       } else if(res.data.role === "ADMIN"){
           navigate("/clientdashboard");
 
+      } else if(res.data.role === "MEMBER"){
+          sessionStorage.setItem("memberToken", res.data.token);
+          sessionStorage.setItem("memberId", String(res.data.memberId));
+          sessionStorage.setItem("memberName", res.data.memberName);
+          sessionStorage.setItem("societyId", String(res.data.societyId));
+          sessionStorage.setItem("societyName", res.data.societyName);
+          sessionStorage.setItem("role", res.data.role);
+          navigate("/member-dashboard");
       } else if(res.data.role === "AUDITOR"){
           sessionStorage.setItem("username", "Auditor");
-          console.log("Response",res);
           sessionStorage.setItem("auditorId", res.data.auditorId);
           navigate("/auditordashboard");
       }

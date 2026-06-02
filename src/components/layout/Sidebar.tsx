@@ -52,64 +52,25 @@ const Sidebar: React.FC = () => {
             label:"Set Financial Year"
           },
           {
-            key: "wings",
+            key: "/wings",
             icon: <ApartmentOutlined />,
             label: "Wings",
-            children: [
-              {
-                key: "/wings",
-                label: "Wing List",
-              },
-              {
-                key: "/create-wing",
-                label: "Create Wing",
-              },
-            ],
+
           },
           {
-            key: "flats",
+            key: "/flats",
             icon: <HomeOutlined />,
             label: "Flats",
-            children: [
-              {
-                key: "/flats",
-                label: "Flat List",
-              },
-              {
-                key: "/create-flat",
-                label: "Create Flat",
-              },
-            ],
           },
           {
-            key: "members",
+            key: "/members",
             icon: <TeamOutlined />,
             label: "Members",
-            children: [
-              {
-                key: "/members",
-                label: "Member List",
-              },
-              {
-                key: "/create-member",
-                label: "Create Member",
-              },
-            ],
           },
           {
-            key: "users",
+            key: "/users",
             icon: <UserOutlined />,
             label: "Users",
-            children: [
-              {
-                key: "/users",
-                label: "User List",
-              },
-              {
-                key: "/create-user",
-                label: "Create User",
-              },
-            ],
           },
           {
             key: "Bills",

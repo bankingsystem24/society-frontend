@@ -52,11 +52,6 @@ const MemberDashboard: React.FC = () => {
         }
       );
 
-      console.log(
-        "Member Dashboard",
-        res.data
-      );
-
       setStats({
         pendingAmount:
           res.data.pendingAmount || 0,

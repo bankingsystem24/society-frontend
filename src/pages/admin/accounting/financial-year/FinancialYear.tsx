@@ -62,7 +62,6 @@ const FinancialYear: React.FC = () => {
     const fyCode = values.fyCode;
     const username = "Admin";
 
-    console.log("username",username);
     try {
       await axios.post(
         `http://localhost:7777/api/accounting-year/create`,

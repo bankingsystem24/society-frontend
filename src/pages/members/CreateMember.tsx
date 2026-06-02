@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Row, Col, message, Select, Card } from "antd";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
+import { useNavigate } from "react-router-dom";
 
 interface MemberFormValues {
   name: string;
@@ -20,7 +21,7 @@ const CreateMember: React.FC = () => {
   const [flats, setFlats] = useState<any[]>([]);
 
   const societyId = sessionStorage.getItem("societyId");
-
+  const navigate = useNavigate();
   useEffect(() => {
     loadFlats();
   }, []);
@@ -73,6 +74,7 @@ const CreateMember: React.FC = () => {
       await apiPost("/members", payload);
       message.success("Member created successfully");
       form.resetFields();
+      navigate("/members");
     } catch (error) {
       console.error(error);
       message.error("Failed to create member");
@@ -115,7 +117,7 @@ const CreateMember: React.FC = () => {
             </Form.Item>
           </Col>
 
-          <Col span={12}>
+          {/* <Col span={12}>
             <Form.Item label="Flat" name="flatId">
               <Select placeholder="Select flat" onKeyDown={handleSelectEnter}>
                 {flats.map((f) => (
@@ -125,7 +127,7 @@ const CreateMember: React.FC = () => {
                 ))}
               </Select>
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
 
         <Row gutter={16}>
@@ -171,6 +173,9 @@ const CreateMember: React.FC = () => {
 
         <Button type="primary" htmlType="submit">
           Save Member
+        </Button>
+        <Button type="default" style={{ marginLeft: 8 }} onClick={() => navigate("/members")}>
+          Cancel
         </Button>
       </Form>
     </Card>

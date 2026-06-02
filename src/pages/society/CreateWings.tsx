@@ -2,6 +2,7 @@ import { Button, Card, Col,  Form, Input, message, Row, Select } from "antd";
 import React, { useEffect } from "react";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
+import { useNavigate } from "react-router-dom";
 
 interface WingFormValues {
   description: string;
@@ -18,6 +19,7 @@ const CreateWings: React.FC = () => {
 
   const societyId = sessionStorage.getItem("societyId");
 
+  const navigate = useNavigate();
   useEffect(() => {
     loadWings();
   }, []);
@@ -64,6 +66,7 @@ const CreateWings: React.FC = () => {
       message.success("Wing created successfully");
       form.resetFields();
       loadWings();
+      navigate("/wings");
     } catch (err) {
       message.error("Failed to create wing");
     }
@@ -158,6 +161,14 @@ return (
       <Button type="primary" htmlType="submit">
         Save Wing
       </Button>
+      <Button
+          type="default"
+          size="medium"
+          style={{ marginLeft: 8 }}
+          onClick={() => navigate("/wings")}
+        >
+          Cancel
+        </Button>
     </Form>
   </Card>
 );

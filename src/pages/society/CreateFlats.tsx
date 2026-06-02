@@ -2,6 +2,7 @@ import { Button, Card, Col, Form, Input, message, Row, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
+import { useNavigate } from "react-router-dom";
 
 interface FlatFormValues {
   flatNo: string;
@@ -22,6 +23,7 @@ const CreateFlat: React.FC = () => {
   const [members, setMembers] = useState<any[]>([]);
 
   const societyId = sessionStorage.getItem("societyId");
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDropdowns();
@@ -63,6 +65,7 @@ const CreateFlat: React.FC = () => {
       await apiPost("/flats", payload);
       message.success("Flat created successfully");
       form.resetFields();
+      navigate("/flats");
     } catch (err) {
       message.error("Failed to create flat");
     }
@@ -164,7 +167,7 @@ const CreateFlat: React.FC = () => {
             <Form.Item
               label="Owner"
               name="ownerId"
-              rules={[{ required: true }]}
+              rules={[{ required: false }]}
             >
               <Select placeholder="Select owner">
                 {members.map((m) => (
@@ -179,6 +182,9 @@ const CreateFlat: React.FC = () => {
 
         <Button type="primary" htmlType="submit">
           Save Flat
+        </Button>
+        <Button type="default" style={{ marginLeft: 8 }} onClick={() => navigate("/flats")}>
+          Cancel
         </Button>
       </Form>
     </Card>

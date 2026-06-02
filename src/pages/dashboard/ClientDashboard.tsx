@@ -22,12 +22,12 @@ const ClientDashboard: React.FC = () => {
   const loadFinancialYear = async () => {
   try {
     const societyId = sessionStorage.getItem("societyId");
+    const userName = sessionStorage.getItem("UserName");
 
     const res = await apiGet(
       `/accounting-year/${societyId}/active`
     );
 
-    console.log("response",res.data);
     setFinancialYear(res.fyCode || "-");
   } catch (error) {
     console.error("Error loading financial year", error);
@@ -69,7 +69,7 @@ const ClientDashboard: React.FC = () => {
         level={2}
         style={{ color: "#1677ff", marginBottom: 24 }}
       >
-        Society Dashboard
+        Admin Dashboard
       </Title>
 
       <Row gutter={16}>
