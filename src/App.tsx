@@ -28,9 +28,6 @@ import TrialBalance from "./pages/accounting/TrialBalance";
 import FinancialYear from "./pages/admin/accounting/financial-year/FinancialYear";
 import SuperAdminDashboard from "./pages/dashboard/SuperAdminDashboard";
 import SuperAdminLayout from "./components/layout/SuperAdminLayout";
-import CreateSociety from "./pages/society/CreateSociety";
-import Societies from "./pages/society/Societies";
-import EditSociety from "./pages/society/EditSociety";
 import SuperAdminUsers from "./pages/superadmin/users/SuperAdminUsers";
 import SuperAdminCreateUser from "./pages/superadmin/users/SuperAdminCreateUser";
 import SuperAdminEditUser from "./pages/superadmin/users/SuperAdminEditUser";
@@ -41,6 +38,7 @@ import SuperAdminCreateSociety from "./pages/superadmin/societies/SuperAdminCrea
 import SuperAdminSocieties from "./pages/superadmin/societies/SuperAdminSocieties";
 import SuperAdminEditSociety from "./pages/superadmin/societies/SuperAdminEditSociety";
 import AuditorSocieties from "./pages/auditor/societies/AuditorSocieties";
+import Expenses from "./pages/expenses/Expenses";
 
 export default function App() {
   return (
@@ -99,6 +97,7 @@ export default function App() {
         <Route path="/view-ledger" element={<LedgerView />} />
         <Route path="/trial-balance" element={<TrialBalance />} />
 
+        <Route path="/add-expenses" element={<Expenses />} />
 
 
       </Route>

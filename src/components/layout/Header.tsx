@@ -9,7 +9,7 @@ const { Text } = Typography;
 const HeaderBar: React.FC = () => {
   const navigate = useNavigate();
 
-  const userName = sessionStorage.getItem("userName");
+  const userName = sessionStorage.getItem("memberName");
   const role = sessionStorage.getItem("role");
   const societyName = sessionStorage.getItem("societyName");
   const [financialYear, setFinancialYear] = useState(

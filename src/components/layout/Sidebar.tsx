@@ -90,15 +90,27 @@ const Sidebar: React.FC = () => {
             ],
           },
           {
+            key: "Expenses",
+            icon: <UserOutlined />,
+            label: "Expenses",
+            children: [
+              {
+                key: "/add-expenses",
+                label: "Add Expense",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-expenses",
+                label: "View Expenses",
+                icon: <HomeOutlined />,
+              },
+            ],
+          },
+          {
             key: "Receipts",
             icon: <UserOutlined />,
             label: "Receipts",
             children: [
-              // {
-              //   key: "/generate-receipt",
-              //   label: "Generate Receipt",
-              //   icon: <HomeOutlined />,
-              // },
               {
                 key: "/view-receipts",
                 label: "View Receipts",
