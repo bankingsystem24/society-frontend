@@ -24,6 +24,7 @@ interface Bill {
   year: number;
   maintenanceAmount: number;
   penaltyAmount: number;
+  interestAmount: number;
   totalAmount: number;
   status: string;
   dueDate: string;
@@ -76,6 +77,8 @@ export default function ViewBills() {
         societyId: Number(societyId),
       });
       setBills(res.data);
+      console.log("Bills loaded:", res.data);
+
     } catch {
       message.error("Failed to load bills");
     } finally {
@@ -140,6 +143,7 @@ export default function ViewBills() {
     { title: "Month", dataIndex: "month" },
     { title: "Year", dataIndex: "year" },
     { title: "Maintenance", dataIndex: "maintenanceAmount" },
+    { title: "Interest", dataIndex: "interestAmount" },
     { title: "Penalty", dataIndex: "penaltyAmount" },
     { title: "Total", dataIndex: "totalAmount" },
     {
@@ -160,7 +164,13 @@ export default function ViewBills() {
         </span>
       ),
     },
-    { title: "Due Date", dataIndex: "dueDate" },
+    { 
+      title: "Due Date", 
+      dataIndex: "dueDate",
+      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
+     },
+    {
+    },
   ];
 
   const totalMaintenance = bills.reduce(
@@ -169,6 +179,10 @@ export default function ViewBills() {
   );
   const totalPenalty = bills.reduce(
     (s, b) => s + (b.penaltyAmount || 0),
+    0
+  );
+  const totalInterest = bills.reduce(
+    (s, b) => s + (b.interestAmount || 0),
     0
   );
   const grandTotal = bills.reduce(

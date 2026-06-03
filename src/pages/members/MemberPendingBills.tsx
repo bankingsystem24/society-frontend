@@ -22,6 +22,9 @@ type Billing = {
   month: string;
   year: number;
   totalAmount: number;
+  interestAmount?: number;
+  maintenanceAmount?: number;
+  discountAmount?: number;
   status: string;
   paidDate?: string;
   paymentMode?: string;
@@ -99,6 +102,7 @@ const MemberPendingBills: React.FC = () => {
       pending = pending.filter((b: Billing) => b.flat?.id === flatId);
 
       setBills(pending);
+      console.log("Fetched bills:", pending);
     } catch (err) {
       console.error(err);
     } finally {
@@ -107,6 +111,21 @@ const MemberPendingBills: React.FC = () => {
   };
 
   const selectedBills = bills.filter((b) => selectedRowKeys.includes(b.id));
+
+  const totalMaintenance = selectedBills.reduce(
+    (sum, b) => sum + (b.maintenanceAmount || 0),
+    0,
+  );
+
+  const totalInterest = selectedBills.reduce(
+    (sum, b) => sum + (b.interestAmount || 0),
+    0,
+  );
+
+  const totalDiscount = selectedBills.reduce(
+    (sum, b) => sum + (b.discountAmount || 0),
+    0,
+  );
 
   const totalAmount = selectedBills.reduce(
     (sum, b) => sum + (b.totalAmount || 0),
@@ -205,6 +224,21 @@ const MemberPendingBills: React.FC = () => {
       dataIndex: "year",
     },
     {
+      title: "Maintenance",
+      dataIndex: "maintenanceAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
+      title: "Interest",
+      dataIndex: "interestAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
+      title: "Discount",
+      dataIndex: "discountAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
       title: "Amount",
       dataIndex: "totalAmount",
       render: (v: number) => `₹ ${v}`,
@@ -256,8 +290,11 @@ const MemberPendingBills: React.FC = () => {
             }}
           >
             <div>
-              Selected: <b>{selectedBills.length}</b> | Total:{" "}
-              <b>₹ {totalAmount}</b>
+              Selected: <b>{selectedBills.length}</b>
+              {" | "}Maintenance: <b>₹ {totalMaintenance}</b>
+              {" | "}Interest: <b>₹ {totalInterest}</b>
+              {" | "}Discount: <b>₹ {totalDiscount}</b>
+              {" | "}Total: <b>₹ {totalAmount}</b>
             </div>
 
             <Button

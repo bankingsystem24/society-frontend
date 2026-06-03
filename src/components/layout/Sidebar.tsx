@@ -52,6 +52,10 @@ const Sidebar: React.FC = () => {
             label:"Set Financial Year"
           },
           {
+            key:"/billing-policy",
+            label:"Billing Policy"
+          },          
+          {
             key: "/wings",
             icon: <ApartmentOutlined />,
             label: "Wings",

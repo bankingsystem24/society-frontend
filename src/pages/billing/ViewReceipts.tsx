@@ -16,6 +16,10 @@ interface Receipt {
   createdAt?: string;
   flatNo: string;
   memberName: string;
+  interestAmount?: number;
+  maintenanceAmount?: number;
+  penaltyAmount?: number;
+  discountAmount?: number;
   totalAmount: number;
   paymentMode?: string;
 }
@@ -24,9 +28,11 @@ interface ReceiptBill {
   id: number;
   month: string;
   year: number;
-  totalAmount: number;
   maintenanceAmount: number;
   penaltyAmount: number;
+  interestAmount?: number;
+  discountAmount?: number;
+  totalAmount: number;
   status: string;
 }
 
@@ -98,6 +104,8 @@ const loadReceipts = async (flatId?: number) => {
     });
 
     setReceipts(filtered);
+    console.log("Receipts:", filtered);
+    
 
   } catch (error) {
     console.error(error);

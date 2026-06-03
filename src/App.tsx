@@ -39,6 +39,7 @@ import SuperAdminSocieties from "./pages/superadmin/societies/SuperAdminSocietie
 import SuperAdminEditSociety from "./pages/superadmin/societies/SuperAdminEditSociety";
 import AuditorSocieties from "./pages/auditor/societies/AuditorSocieties";
 import Expenses from "./pages/expenses/Expenses";
+import BillingPolicy from "./pages/billing/BillingPolicy";
 
 export default function App() {
   return (
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="/clientdashboard" element={<ClientDashboard />} />
 
         <Route path="/financial-year" element={<FinancialYear/>} />
+        <Route path="/billing-policy" element={<BillingPolicy />} />
         
         <Route path="/wings" element={<Wings />} />
         <Route path="/create-wing" element={<CreateWings />} />
