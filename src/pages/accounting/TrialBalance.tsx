@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Card, Typography, Spin, message, Row, Col, Tag } from "antd";
 import axios from "axios";
+import type { ColumnsType } from "antd/es/table";
 
 const { Title } = Typography;
 
@@ -17,7 +18,12 @@ const TrialBalance: React.FC = () => {
   const [data, setData] = useState<TrialBalanceRow[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const societyId = sessionStorage.getItem("societyId");
+  const societyId = Number(sessionStorage.getItem("societyId"));
+
+if (!societyId) {
+  message.error("Society ID missing. Please login again.");
+  return;
+}
 
   const fetchData = async () => {
     try {
@@ -37,7 +43,7 @@ const TrialBalance: React.FC = () => {
     fetchData();
   }, []);
 
-  const columns = [
+  const columns: ColumnsType<TrialBalanceRow> = [
     {
       title: "GL Code",
       dataIndex: "glCode",
@@ -115,12 +121,6 @@ const TrialBalance: React.FC = () => {
 
           {/* SUMMARY */}
           <Row gutter={[16, 16]} style={{ marginTop: 20 }} justify="end">
-            <Col xs={24} sm={12} md={6}>
-              <Card size="small">
-                <b>Total Debit</b>
-                <div>{totalDebit.toFixed(2)}</div>
-              </Card>
-            </Col>
 
             <Col xs={24} sm={12} md={6}>
               <Card size="small">
@@ -128,6 +128,15 @@ const TrialBalance: React.FC = () => {
                 <div>{totalCredit.toFixed(2)}</div>
               </Card>
             </Col>
+
+            <Col xs={24} sm={12} md={6}>
+              <Card size="small">
+                <b>Total Debit</b>
+                <div>{totalDebit.toFixed(2)}</div>
+              </Card>
+            </Col>
+
+
 
             <Col xs={24} sm={12} md={6}>
               <Card

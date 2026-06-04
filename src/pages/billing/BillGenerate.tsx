@@ -86,6 +86,7 @@ const BillGenerate: React.FC = () => {
         month: selectedMonth,
         year: selectedYear,
         societyId: Number(societyId),
+        createdBy: sessionStorage.getItem("userId"),
       };
 
       await apiPost("/billing/generate", payload);

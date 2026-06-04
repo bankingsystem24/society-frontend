@@ -33,6 +33,7 @@ const Login: React.FC = () => {
           },
         );
         sessionStorage.setItem("financialYear", fyRes.data.fyCode);
+        sessionStorage.setItem("financialYearId",fyRes.data.id);
         }
 
       sessionStorage.setItem("token", res.data.token);
@@ -41,24 +42,24 @@ const Login: React.FC = () => {
       } else {
         sessionStorage.removeItem("societyId");
       }
-      sessionStorage.setItem("societyName", res.data.societyName);
+      console.log(res.data);
 
+      sessionStorage.setItem("societyName", res.data.societyName);
+      sessionStorage.setItem("memberToken", res.data.token);
+      sessionStorage.setItem("memberId", String(res.data.memberId));
+      sessionStorage.setItem("memberName", res.data.memberName);
+      sessionStorage.setItem("societyId", String(res.data.societyId));
+      sessionStorage.setItem("societyName", res.data.societyName);
+      sessionStorage.setItem("role", res.data.role);
+      sessionStorage.setItem("userName", res.data.name);
+      sessionStorage.setItem("userId", String(res.data.auditorId));
       if(res.data.role === "SUPER_ADMIN"){
           navigate("/superadmindashboard");
-
       } else if(res.data.role === "ADMIN"){
           navigate("/clientdashboard");
-
       } else if(res.data.role === "MEMBER"){
-          sessionStorage.setItem("memberToken", res.data.token);
-          sessionStorage.setItem("memberId", String(res.data.memberId));
-          sessionStorage.setItem("memberName", res.data.memberName);
-          sessionStorage.setItem("societyId", String(res.data.societyId));
-          sessionStorage.setItem("societyName", res.data.societyName);
-          sessionStorage.setItem("role", res.data.role);
           navigate("/member-dashboard");
       } else if(res.data.role === "AUDITOR"){
-          sessionStorage.setItem("username", "Auditor");
           sessionStorage.setItem("auditorId", res.data.auditorId);
           navigate("/auditordashboard");
       }

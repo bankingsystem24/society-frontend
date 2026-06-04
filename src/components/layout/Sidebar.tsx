@@ -77,6 +77,11 @@ const Sidebar: React.FC = () => {
             label: "Users",
           },
           {
+            key: "/gl-balances",
+            icon: <UserOutlined />,
+            label: "GL Balances",
+          },
+          {
             key: "Bills",
             icon: <UserOutlined />,
             label: "Bills",

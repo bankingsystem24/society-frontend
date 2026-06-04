@@ -40,6 +40,7 @@ import SuperAdminEditSociety from "./pages/superadmin/societies/SuperAdminEditSo
 import AuditorSocieties from "./pages/auditor/societies/AuditorSocieties";
 import Expenses from "./pages/expenses/Expenses";
 import BillingPolicy from "./pages/billing/BillingPolicy";
+import GlOpeningBalance from "./pages/accounting/GlOpeningBalance";
 
 export default function App() {
   return (
@@ -90,6 +91,8 @@ export default function App() {
         <Route path="/users" element={<Users />} />
         <Route path="/create-user" element={<CreateUser />} />
         <Route path="/edit-user/:id" element={<EditUser />} />
+
+        <Route path="/gl-balances" element={<GlOpeningBalance />} />
 
         <Route path="/bill-generate" element={<BillGenerate />}/>
         <Route path="/view-bills" element={<ViewBills />} />
