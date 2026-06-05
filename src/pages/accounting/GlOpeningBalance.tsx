@@ -10,8 +10,14 @@ import {
   Popconfirm,
   Space,
   Select,
+  Row,
+  Col,
+  Grid,
 } from "antd";
+
 import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface GlOpeningBalance {
   id?: number;
@@ -29,16 +35,23 @@ const GlOpeningBalance: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<GlOpeningBalance | null>(null);
   const [glList, setGlList] = useState<any[]>([]);
+
   const [form] = Form.useForm();
+
+  const debit = Form.useWatch("openingDebit", form);
+  const credit = Form.useWatch("openingCredit", form);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const financialYear = sessionStorage.getItem("financialYear");
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
+  // ================= FETCH GL MASTER =================
   const fetchGlMaster = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:7777/api/gl/master?societyId=${societyId}`,
+        `${BASE_URL}/gl/master?societyId=${societyId}`,
       );
       setGlList(res.data || []);
     } catch {
@@ -46,13 +59,15 @@ const GlOpeningBalance: React.FC = () => {
     }
   };
 
-  // ================= FETCH =================
+  // ================= FETCH DATA =================
   const fetchData = async () => {
     try {
       setLoading(true);
+
       const res = await axios.get(
-        `http://localhost:7777/api/gl/opening-balance?societyId=${societyId}`,
+        `${BASE_URL}/gl/opening-balance?societyId=${societyId}`,
       );
+
       setData(res.data || []);
     } catch {
       message.error("Failed to load opening balances");
@@ -61,61 +76,86 @@ const GlOpeningBalance: React.FC = () => {
     }
   };
 
+  // ================= INITIAL LOAD =================
   useEffect(() => {
     fetchData();
     fetchGlMaster();
   }, []);
 
+  // ================= AUTO CALCULATE BALANCE =================
+  useEffect(() => {
+    form.setFieldValue(
+      "openingBalance",
+      Number(debit || 0) - Number(credit || 0),
+    );
+  }, [debit, credit, form]);
+
+  // ================= FORM INIT WHEN MODAL OPENS =================
+  useEffect(() => {
+    if (!open) return;
+
+    if (editing) {
+      form.setFieldsValue({
+        financialYearId: editing.financialYearId,
+        glCode: editing.glCode,
+        openingDebit: editing.openingDebit,
+        openingCredit: editing.openingCredit,
+        openingBalance: editing.openingBalance,
+      });
+    } else {
+      form.resetFields();
+
+      form.setFieldsValue({
+        financialYearId,
+        openingDebit: 0,
+        openingCredit: 0,
+        openingBalance: 0,
+      });
+    }
+  }, [open, editing, financialYearId, form]);
+
   // ================= OPEN MODAL =================
   const openModal = (record?: GlOpeningBalance) => {
     setEditing(record || null);
     setOpen(true);
-
-    if (record) {
-      form.setFieldsValue(record);
-    } else {
-      form.resetFields();
-
-      // 👇 auto set financial year here
-      form.setFieldsValue({
-        financialYearId: financialYearId,
-      });
-    }
   };
 
   // ================= SAVE =================
   const handleSave = async (values: GlOpeningBalance) => {
     try {
-        const payload = {
+      const payload = {
         societyId,
         financialYearId: values.financialYearId,
         glCode: values.glCode,
         openingDebit: Number(values.openingDebit || 0),
         openingCredit: Number(values.openingCredit || 0),
         openingBalance:
-            Number(values.openingDebit || 0) - Number(values.openingCredit || 0),
-        };
+          Number(values.openingDebit || 0) - Number(values.openingCredit || 0),
+      };
 
       if (editing?.id) {
         await axios.put(
-          `http://localhost:7777/api/gl/opening-balance/${editing.id}`,
+          `${BASE_URL}/gl/opening-balance/${editing.id}`,
           payload,
         );
+
         message.success("Updated successfully");
       } else {
-
-        console.log("Payload",payload);
-
         await axios.post(
-          "http://localhost:7777/api/gl/opening-balance",
+          `${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,
           payload,
         );
+
         message.success("Created successfully");
       }
 
+      form.resetFields();
+      setEditing(null);
       setOpen(false);
+
       fetchData();
-    } catch {
+    } catch (error) {
+      console.error(error);
       message.error("Save failed");
     }
   };
@@ -123,20 +163,26 @@ const GlOpeningBalance: React.FC = () => {
   // ================= DELETE =================
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:7777/api/gl/opening-balance/${id}`);
+      await axios.delete(`${BASE_URL}/gl/opening-balance/${id}`);
+
       message.success("Deleted successfully");
       fetchData();
-    } catch {
+    } catch (error) {
+      console.error(error);
       message.error("Delete failed");
     }
   };
 
-  // ================= TABLE =================
+  // ================= TABLE COLUMNS =================
   const columns = [
     {
-      title: "GL Code",
-      dataIndex: "glCode",
-      key: "glCode",
+      title: "GL Account",
+      key: "glAccount",
+      render: (_: any, record: GlOpeningBalance) => {
+        const gl = glList.find((g) => g.glCode === record.glCode);
+
+        return `${record.glCode} - ${gl?.accountName || ""}`;
+      },
     },
     {
       title: "Opening Debit",
@@ -157,7 +203,7 @@ const GlOpeningBalance: React.FC = () => {
       title: "Action",
       key: "action",
       render: (_: any, record: GlOpeningBalance) => (
-        <Space>
+        <Space wrap>
           <Button type="link" onClick={() => openModal(record)}>
             Edit
           </Button>
@@ -176,10 +222,17 @@ const GlOpeningBalance: React.FC = () => {
   ];
 
   return (
-    <div>
+    <div
+      style={{
+        padding: 16,
+        maxWidth: 1200,
+        margin: "0 auto",
+      }}
+    >
       <Button
         type="primary"
         onClick={() => openModal()}
+        block={screens.xs}
         style={{ marginBottom: 16 }}
       >
         Add Opening Balance
@@ -190,24 +243,25 @@ const GlOpeningBalance: React.FC = () => {
         columns={columns}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 800 }}
       />
 
-      {/* ================= MODAL ================= */}
       <Modal
         title={editing ? "Edit Opening Balance" : "Add Opening Balance"}
         open={open}
-        onCancel={() => setOpen(false)}
+        width={screens.xs ? "95%" : 700}
+        style={{ top: 20 }}
+        onCancel={() => {
+          form.resetFields();
+          setEditing(null);
+          setOpen(false);
+        }}
         onOk={() => form.submit()}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
-          <Form.Item
-            name="financialYearId"
-            label="Financial Year ID"
-            rules={[{ required: true }]}
-            hidden
-          >
-            <InputNumber style={{ width: "100%" }} />
+          <Form.Item name="financialYearId" hidden rules={[{ required: true }]}>
+            <InputNumber />
           </Form.Item>
 
           <Form.Item label="Financial Year">
@@ -217,7 +271,12 @@ const GlOpeningBalance: React.FC = () => {
           <Form.Item
             name="glCode"
             label="GL Account"
-            rules={[{ required: true, message: "Select GL Account" }]}
+            rules={[
+              {
+                required: true,
+                message: "Please select GL Account",
+              },
+            ]}
           >
             <Select
               showSearch
@@ -232,16 +291,30 @@ const GlOpeningBalance: React.FC = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item name="openingDebit" label="Opening Debit">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item name="openingDebit" label="Opening Debit">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  controls={false}
+                  min={0}
+                />
+              </Form.Item>
+            </Col>
 
-          <Form.Item name="openingCredit" label="Opening Credit">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
+            <Col xs={24} md={12}>
+              <Form.Item name="openingCredit" label="Opening Credit">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  controls={false}
+                  min={0}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item name="openingBalance" label="Opening Balance">
-            <InputNumber style={{ width: "100%" }} />
+            <InputNumber style={{ width: "100%" }} controls={false} disabled />
           </Form.Item>
         </Form>
       </Modal>

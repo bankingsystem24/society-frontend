@@ -12,6 +12,9 @@ import {
   Row,
   Col,
 } from "antd";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -40,7 +43,7 @@ const Expenses: React.FC = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:7777/api/expenses/${societyId}`
+        `${BASE_URL}/expenses/${societyId}`
       );
       setData(res.data);
     } catch (err) {
@@ -62,7 +65,7 @@ const Expenses: React.FC = () => {
         narration: values.narration,
       };
 
-      await axios.post("http://localhost:7777/api/expenses", payload);
+      await axios.post("${BASE_URL}/expenses", payload);
 
       message.success("Expense added successfully");
       form.resetFields();

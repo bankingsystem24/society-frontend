@@ -11,6 +11,8 @@ import {
 } from "antd";
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -43,7 +45,7 @@ const LedgerView: React.FC = () => {
       setLoading(true);
 
       const response = await axios.get(
-        `http://localhost:7777/api/ledger/${societyId}/${glCode}`
+        `${BASE_URL}/ledger/${societyId}/${glCode}`
       );
 
       setData(response.data);

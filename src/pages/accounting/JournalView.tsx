@@ -12,6 +12,8 @@ import {
 import axios from "axios";
 import dayjs from "dayjs";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const { Title } = Typography;
 const { Panel } = Collapse;
 
@@ -42,7 +44,7 @@ const JournalView: React.FC = () => {
       setLoading(true);
 
       const response = await axios.get(
-        `http://localhost:7777/api/journal/${societyId}`,
+        `${BASE_URL}/journal/${societyId}`,
 
       );
 

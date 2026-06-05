@@ -5,6 +5,8 @@ import type { ColumnsType } from "antd/es/table";
 
 const { Title } = Typography;
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 interface TrialBalanceRow {
   glCode: number;
   accountName: string;
@@ -29,7 +31,7 @@ if (!societyId) {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:7777/api/gl/reports/trial-balance?societyId=${societyId}`
+        `${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`
       );
       setData(res.data || []);
     } catch (err) {

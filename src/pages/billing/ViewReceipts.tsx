@@ -82,6 +82,7 @@ const loadReceipts = async (flatId?: number) => {
     const financialYear =
       sessionStorage.getItem("financialYear");
 
+      console.log("Response",res.data);
     if (!financialYear) {
       setReceipts(res.data);
       return;
@@ -122,6 +123,8 @@ const loadReceipts = async (flatId?: number) => {
 
       setReceiptBills(res.data);
 
+      console.log("Receipt Bills",res.data);
+
       const selected = receipts.find((r) => r.id === receiptId) || null;
 
       setSelectedReceipt(selected);
@@ -145,6 +148,8 @@ const loadReceipts = async (flatId?: number) => {
           <td>${b.year}</td>
           <td>${b.maintenanceAmount}</td>
           <td>${b.penaltyAmount}</td>
+          <td>${b.interestAmount}</td>
+          <td>${b.discountAmount}</td>
           <td>${b.totalAmount}</td>
           <td>${b.status}</td>
         </tr>
@@ -265,7 +270,9 @@ const loadReceipts = async (flatId?: number) => {
                 <th>Year</th>
                 <th>Maintenance</th>
                 <th>Penalty</th>
-                <th>Total</th>
+                <th>Interest</th>
+                <th>Discount</th>
+                <th>Net Paid</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -308,7 +315,22 @@ const loadReceipts = async (flatId?: number) => {
       dataIndex: "memberName",
     },
     {
-      title: "Amount",
+      title: "Maintenance",
+      dataIndex: "maintenanceAmount",
+      render: (value) => `₹ ${value}`,
+    },
+    {
+      title: "Interest",
+      dataIndex: "interestAmount",
+      render: (value) => `₹ ${value}`,
+    },
+        {
+      title: "Discount",
+      dataIndex: "discountAmount",
+      render: (value) => `₹ ${value}`,
+    },
+        {
+      title: "Net Paid",
       dataIndex: "totalAmount",
       render: (value) => `₹ ${value}`,
     },
@@ -452,6 +474,15 @@ const loadReceipts = async (flatId?: number) => {
               title: "Penalty",
               dataIndex: "penaltyAmount",
             },
+            {
+              title: "Interest",
+              dataIndex: "interestAmount",
+            },
+            {
+              title: "Discount",
+              dataIndex: "discountAmount",
+            },
+
             {
               title: "Total",
               dataIndex: "totalAmount",

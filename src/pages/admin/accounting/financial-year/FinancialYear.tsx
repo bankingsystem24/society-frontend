@@ -16,6 +16,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 
 const { Title } = Typography;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface FinancialYear {
   id: number;
@@ -44,7 +45,7 @@ const FinancialYear: React.FC = () => {
       setLoading(true);
 
       const res = await axios.get(
-        `http://localhost:7777/api/accounting-year/${societyId}`
+        `${BASE_URL}/accounting-year/${societyId}`
       );
 
       setData(res.data);
@@ -64,7 +65,7 @@ const FinancialYear: React.FC = () => {
 
     try {
       await axios.post(
-        `http://localhost:7777/api/accounting-year/create`,
+        `${BASE_URL}/accounting-year/create`,
         {
             societyId: Number(societyId),
             fyCode,
@@ -87,7 +88,7 @@ const FinancialYear: React.FC = () => {
   const handleActivate = async (yearId: number) => {
     try {
       await axios.put(
-        `http://localhost:7777/api/accounting-year/activate`,
+        `${BASE_URL}/accounting-year/activate`,
         {
           societyId,
           yearId,
