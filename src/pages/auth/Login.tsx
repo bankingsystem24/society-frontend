@@ -22,6 +22,8 @@ const Login: React.FC = () => {
       message.success("Login successful");
       sessionStorage.setItem("userName", res.data.name);
       sessionStorage.setItem("role", res.data.role);
+      sessionStorage.setItem("memberId", String(res.data.memberId));
+
 
       if (res.data.societyId !== null){
         const fyRes = await axios.get(
@@ -42,11 +44,9 @@ const Login: React.FC = () => {
       } else {
         sessionStorage.removeItem("societyId");
       }
-      console.log(res.data);
 
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("memberToken", res.data.token);
-      sessionStorage.setItem("memberId", String(res.data.memberId));
       sessionStorage.setItem("memberName", res.data.memberName);
       sessionStorage.setItem("societyId", String(res.data.societyId));
       sessionStorage.setItem("societyName", res.data.societyName);

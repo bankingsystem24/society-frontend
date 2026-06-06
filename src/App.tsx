@@ -41,6 +41,8 @@ import AuditorSocieties from "./pages/auditor/societies/AuditorSocieties";
 import Expenses from "./pages/expenses/Expenses";
 import BillingPolicy from "./pages/billing/BillingPolicy";
 import GlOpeningBalance from "./pages/accounting/GlOpeningBalance";
+import Vendors from "./pages/vendors/Vendors";
+import PendingBills from "./pages/billing/PendingBills";
 
 export default function App() {
   return (
@@ -97,12 +99,15 @@ export default function App() {
         <Route path="/bill-generate" element={<BillGenerate />}/>
         <Route path="/view-bills" element={<ViewBills />} />
         <Route path="/view-receipts" element={<ViewReceipts />} />
+        <Route path="/pending-bills" element={<PendingBills />} />
+
 
         <Route path="/view-journal" element={<JournalView />} />
         <Route path="/view-ledger" element={<LedgerView />} />
         <Route path="/trial-balance" element={<TrialBalance />} />
 
         <Route path="/add-expenses" element={<Expenses />} />
+        <Route path="/vendors" element={<Vendors />} />
 
 
       </Route>

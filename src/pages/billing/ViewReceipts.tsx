@@ -81,8 +81,6 @@ const loadReceipts = async (flatId?: number) => {
 
     const financialYear =
       sessionStorage.getItem("financialYear");
-
-      console.log("Response",res.data);
     if (!financialYear) {
       setReceipts(res.data);
       return;
@@ -105,7 +103,6 @@ const loadReceipts = async (flatId?: number) => {
     });
 
     setReceipts(filtered);
-    console.log("Receipts:", filtered);
     
 
   } catch (error) {
@@ -118,17 +115,10 @@ const loadReceipts = async (flatId?: number) => {
   const loadReceiptDetails = async (receiptId: number) => {
     try {
       setLoading(true);
-
       const res = await axios.get(`${BASE_URL}/receipts/details/${receiptId}`);
-
       setReceiptBills(res.data);
-
-      console.log("Receipt Bills",res.data);
-
       const selected = receipts.find((r) => r.id === receiptId) || null;
-
       setSelectedReceipt(selected);
-
       setDetailsOpen(true);
     } catch (error) {
       console.error(error);

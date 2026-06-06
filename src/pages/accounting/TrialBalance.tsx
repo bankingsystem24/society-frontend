@@ -118,6 +118,7 @@ if (!societyId) {
               pagination={false}
               scroll={{ x: 800 }}
               bordered
+              size="small"
             />
           </div>
 

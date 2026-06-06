@@ -1,12 +1,4 @@
-import {
-  Button,
-  Card,
-  Form,
-  Modal,
-  Select,
-  Table,
-  message,
-} from "antd";
+import { Button, Card, Form, Modal, Select, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
@@ -25,6 +17,7 @@ interface Bill {
   maintenanceAmount: number;
   penaltyAmount: number;
   interestAmount: number;
+  discountAmount:number;
   totalAmount: number;
   status: string;
   dueDate: string;
@@ -39,8 +32,18 @@ interface Members {
 }
 
 const months = [
-  "APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER",
-  "OCTOBER","NOVEMBER","DECEMBER","JANUARY","FEBRUARY","MARCH",
+  "APRIL",
+  "MAY",
+  "JUNE",
+  "JULY",
+  "AUGUST",
+  "SEPTEMBER",
+  "OCTOBER",
+  "NOVEMBER",
+  "DECEMBER",
+  "JANUARY",
+  "FEBRUARY",
+  "MARCH",
 ];
 
 export default function ViewBills() {
@@ -77,14 +80,17 @@ export default function ViewBills() {
         societyId: Number(societyId),
       });
       setBills(res.data);
-      console.log("Bills loaded:", res.data);
-
     } catch {
       message.error("Failed to load bills");
     } finally {
       setLoading(false);
     }
   };
+
+  const selectedBills = bills.filter((b) => selectedRowKeys.includes(b.id));
+
+  const selectedFlatNo =
+    selectedBills.length > 0 ? selectedBills[0].flatNo : null;
 
   const loadMembers = async () => {
     try {
@@ -145,6 +151,8 @@ export default function ViewBills() {
     { title: "Maintenance", dataIndex: "maintenanceAmount" },
     { title: "Interest", dataIndex: "interestAmount" },
     { title: "Penalty", dataIndex: "penaltyAmount" },
+    { title: "Discount", dataIndex: "discountAmount" },
+
     { title: "Total", dataIndex: "totalAmount" },
     {
       title: "Status",
@@ -153,46 +161,33 @@ export default function ViewBills() {
         <span
           style={{
             color:
-              text === "PAID"
-                ? "green"
-                : text === "PENDING"
-                ? "orange"
-                : "red",
+              text === "PAID" ? "green" : text === "PENDING" ? "orange" : "red",
           }}
         >
           {text}
         </span>
       ),
     },
-    { 
-      title: "Due Date", 
+    {
+      title: "Due Date",
       dataIndex: "dueDate",
       render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
-     },
-    {
     },
+    {},
   ];
 
   const totalMaintenance = bills.reduce(
     (s, b) => s + (b.maintenanceAmount || 0),
-    0
+    0,
   );
-  const totalPenalty = bills.reduce(
-    (s, b) => s + (b.penaltyAmount || 0),
-    0
-  );
-  const totalInterest = bills.reduce(
-    (s, b) => s + (b.interestAmount || 0),
-    0
-  );
-  const grandTotal = bills.reduce(
-    (s, b) => s + (b.totalAmount || 0),
-    0
-  );
+  const totalPenalty = bills.reduce((s, b) => s + (b.penaltyAmount || 0), 0);
+  const totalInterest = bills.reduce((s, b) => s + (b.interestAmount || 0), 0);
+  const totalDiscount = bills.reduce((s, b) => s + (b.discountAmount || 0), 0);
+
+  const grandTotal = bills.reduce((s, b) => s + (b.totalAmount || 0), 0);
 
   return (
     <Card title="View Bills">
-
       {/* ================= FILTER SECTION ================= */}
       <Form form={form} layout="vertical">
         <div
@@ -203,7 +198,6 @@ export default function ViewBills() {
             marginBottom: 16,
           }}
         >
-
           {/* Flat */}
           <div style={{ flex: "1 1 220px", minWidth: 220 }}>
             <Form.Item label="Flat" name="flatId">
@@ -211,7 +205,7 @@ export default function ViewBills() {
                 allowClear
                 placeholder="Select Flat"
                 onChange={filterBills}
-                options={flats.map(f => ({
+                options={flats.map((f) => ({
                   label: f.flatNo,
                   value: f.id,
                 }))}
@@ -240,7 +234,7 @@ export default function ViewBills() {
               <Select
                 allowClear
                 onChange={filterBills}
-                options={months.map(m => ({ label: m, value: m }))}
+                options={months.map((m) => ({ label: m, value: m }))}
               />
             </Form.Item>
           </div>
@@ -266,14 +260,13 @@ export default function ViewBills() {
               <Select
                 allowClear
                 onChange={filterBills}
-                options={members.map(m => ({
+                options={members.map((m) => ({
                   label: m.name,
                   value: m.id,
                 }))}
               />
             </Form.Item>
           </div>
-
         </div>
       </Form>
 
@@ -306,6 +299,24 @@ export default function ViewBills() {
 
         <div style={{ flex: "1 1 220px", minWidth: 220 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
+            <div style={{ fontSize: 13 }}>Total Interest</div>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
+              ₹ {totalInterest.toFixed(2)}
+            </div>
+          </Card>
+        </div>
+
+        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <Card styles={{ body: { padding: "6px 10px" } }}>
+            <div style={{ fontSize: 13 }}>Total Discount</div>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>
+              ₹ {totalDiscount.toFixed(2)}
+            </div>
+          </Card>
+        </div>
+
+        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Grand Total</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>
               ₹ {grandTotal.toFixed(2)}
@@ -321,7 +332,7 @@ export default function ViewBills() {
           disabled={selectedRowKeys.length === 0}
           onClick={() => setPaymentModalOpen(true)}
         >
-          Pay Selected Bills ({selectedRowKeys.length})
+          Payment Received by Admin ({selectedRowKeys.length})
         </Button>
       </div>
 
@@ -333,11 +344,17 @@ export default function ViewBills() {
         loading={loading}
         size="small"
         scroll={{ x: 800 }}
+        
         rowSelection={{
           selectedRowKeys,
+          hideSelectAll: true,
           onChange: setSelectedRowKeys,
-          getCheckboxProps: record => ({
-            disabled: record.status !== "PENDING",
+          getCheckboxProps: (record) => ({
+            disabled:
+              record.status !== "PENDING" ||
+              (selectedFlatNo !== null &&
+                record.flatNo !== selectedFlatNo &&
+                !selectedRowKeys.includes(record.id)),
           }),
         }}
       />
@@ -365,7 +382,6 @@ export default function ViewBills() {
           </Form.Item>
         </Form>
       </Modal>
-
     </Card>
   );
 }

@@ -9,8 +9,6 @@ import {
   message,
   Select,
 } from "antd";
-import MemberSidebar from "../../components/layout/MemberSidebar";
-import MemberHeader from "../../components/layout/MemberHeader";
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -37,7 +35,7 @@ type Flat = {
   flatNo: string;
 };
 
-const MemberPendingBills: React.FC = () => {
+const PendingBills: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [bills, setBills] = useState<Billing[]>([]);
   const [flats, setFlats] = useState<Flat[]>([]);
@@ -250,14 +248,6 @@ const MemberPendingBills: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Layout.Sider breakpoint="lg" collapsedWidth="0">
-        <MemberSidebar />
-      </Layout.Sider>
-
-      <Layout>
-        <MemberHeader />
-
         <Content style={{ padding: 24, background: "#f0f5ff" }}>
           <Title level={3}>Pending Bills</Title>
 
@@ -323,9 +313,7 @@ const MemberPendingBills: React.FC = () => {
             />
           )}
         </Content>
-      </Layout>
-    </Layout>
   );
 };
 
-export default MemberPendingBills;
+export default PendingBills;

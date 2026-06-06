@@ -6,6 +6,7 @@ import {
   HomeOutlined,
   TeamOutlined,
   UserOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -81,6 +82,17 @@ const Sidebar: React.FC = () => {
             icon: <UserOutlined />,
             label: "GL Balances",
           },
+
+          {
+            key: "/add-expenses",
+            icon: <UserOutlined />,
+            label: "Expenses",
+          },
+          {
+            key: "/vendors",
+            icon: <UserOutlined />,
+            label: "Vendors",
+          },          
           {
             key: "Bills",
             icon: <UserOutlined />,
@@ -96,22 +108,10 @@ const Sidebar: React.FC = () => {
                 label: "View Bills",
                 icon: <HomeOutlined />,
               },
-            ],
-          },
-          {
-            key: "Expenses",
-            icon: <UserOutlined />,
-            label: "Expenses",
-            children: [
               {
-                key: "/add-expenses",
-                label: "Add Expense",
+              key: "/pending-bills",
                 icon: <HomeOutlined />,
-              },
-              {
-                key: "/view-expenses",
-                label: "View Expenses",
-                icon: <HomeOutlined />,
+              label: "Pay Online",
               },
             ],
           },

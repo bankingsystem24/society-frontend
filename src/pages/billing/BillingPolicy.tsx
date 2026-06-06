@@ -58,8 +58,7 @@ const BillingPolicy: React.FC = () => {
         });
       }
     } catch (error) {
-      console.log("No billing policy found");
-
+      console.error("No billing policy found");
       setPolicyId(null);
     }
   };
