@@ -29,15 +29,48 @@ interface LedgerData {
   accountHead: string;
 }
 
+interface GLItem {
+  glCode: number;
+  accountName?: string;
+  groupName?: string;
+}
+
 const LedgerView: React.FC = () => {
   const [data, setData] = useState<LedgerData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [glCode, setGlCode] = useState<number>(1101);
+
+  const [glList, setGlList] = useState<GLItem[]>([]);
+  const [glCode, setGlCode] = useState<number | null>(null);
 
   const societyId = sessionStorage.getItem("societyId");
 
+  // ---------------- FETCH GL LIST ----------------
   useEffect(() => {
-    fetchLedger();
+    fetchGlCodes();
+  }, []);
+
+  const fetchGlCodes = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/gl/master?societyId=${societyId}`);
+
+      const list = res.data || [];
+      setGlList(list);
+
+      // set default GL dynamically
+      if (list.length > 0) {
+        setGlCode(list[0].glCode);
+      }
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to load GL codes");
+    }
+  };
+
+  // ---------------- FETCH LEDGER ----------------
+  useEffect(() => {
+    if (glCode) {
+      fetchLedger();
+    }
   }, [glCode]);
 
   const fetchLedger = async () => {
@@ -49,9 +82,8 @@ const LedgerView: React.FC = () => {
       );
 
       setData(response.data || []);
+      console.log("Ledter Data",response.data);
 
-      console.log("Ledger",response.data);
-      
     } catch (error) {
       console.error(error);
       message.error("Failed to load ledger");
@@ -60,6 +92,7 @@ const LedgerView: React.FC = () => {
     }
   };
 
+  // ---------------- CALCULATIONS ----------------
   const totalDebit = data.reduce(
     (sum, item) => sum + (item.debitAmount || 0),
     0
@@ -78,6 +111,7 @@ const LedgerView: React.FC = () => {
       ? `${data[0].glCode} - ${data[0].accountHead}`
       : "";
 
+  // ---------------- TABLE COLUMNS ----------------
   const columns = [
     {
       title: "Date",
@@ -158,11 +192,12 @@ const LedgerView: React.FC = () => {
     },
   ];
 
+  // ---------------- UI ----------------
   return (
     <Card variant="outlined">
       <Row justify="space-between" align="middle">
         <Col>
-          <Space orientation="vertical" size={0}>
+          <Space direction="vertical" size={0}>
             <Title level={3} style={{ margin: 0 }}>
               Ledger Report
             </Title>
@@ -173,25 +208,18 @@ const LedgerView: React.FC = () => {
 
         <Col>
           <Select
-            value={glCode}
-            style={{ width: 280 }}
+            value={glCode ?? undefined}
+            style={{ width: 320 }}
             onChange={(value) => setGlCode(value)}
+            loading={glList.length === 0}
+            placeholder="Select Account"
           >
-            <Option value={1101}>
-              1101 - Member Receivable
-            </Option>
-
-            <Option value={4001}>
-              4001 - Maintenance Income
-            </Option>
-
-            <Option value={1001}>
-              1001 - Cash In Hand
-            </Option>
-
-            <Option value={1010}>
-              1010 - Bank Savings Account
-            </Option>
+            {glList.map((gl) => (
+              <Option key={gl.glCode} value={gl.glCode}>
+                {gl.glCode} -{" "}
+                {gl.accountName || gl.groupName || "Account"}
+              </Option>
+            ))}
           </Select>
         </Col>
       </Row>
@@ -202,10 +230,10 @@ const LedgerView: React.FC = () => {
         loading={loading}
         columns={columns}
         dataSource={data}
-        rowKey={(record) => `${record.voucherNo}-${record.glCode}-${record.entryDate}`}
-        pagination={{
-          pageSize: 20,
-        }}
+        rowKey={(record) =>
+          `${record.voucherNo}-${record.glCode}-${record.entryDate}`
+        }
+        pagination={{ pageSize: 20 }}
         style={{ marginTop: 20 }}
         summary={() => (
           <Table.Summary.Row>
@@ -233,9 +261,7 @@ const LedgerView: React.FC = () => {
               <b>
                 {Math.abs(closingBalance).toLocaleString(
                   "en-IN",
-                  {
-                    minimumFractionDigits: 2,
-                  }
+                  { minimumFractionDigits: 2 }
                 )}{" "}
                 {closingBalance >= 0 ? "DR" : "CR"}
               </b>
@@ -276,9 +302,7 @@ const LedgerView: React.FC = () => {
               ₹{" "}
               {Math.abs(closingBalance).toLocaleString(
                 "en-IN",
-                {
-                  minimumFractionDigits: 2,
-                }
+                { minimumFractionDigits: 2 }
               )}{" "}
               {closingBalance >= 0 ? "DR" : "CR"}
             </div>
