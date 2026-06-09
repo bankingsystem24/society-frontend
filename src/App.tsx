@@ -43,6 +43,7 @@ import BillingPolicy from "./pages/billing/BillingPolicy";
 import GlOpeningBalance from "./pages/accounting/GlOpeningBalance";
 import Vendors from "./pages/vendors/Vendors";
 import PendingBills from "./pages/billing/PendingBills";
+import ProfitAndLoss from "./pages/accounting/ProfitAndLoss";
 
 export default function App() {
   return (
@@ -105,6 +106,8 @@ export default function App() {
         <Route path="/view-journal" element={<JournalView />} />
         <Route path="/view-ledger" element={<LedgerView />} />
         <Route path="/trial-balance" element={<TrialBalance />} />
+        <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
+        
 
         <Route path="/add-expenses" element={<Expenses />} />
         <Route path="/vendors" element={<Vendors />} />

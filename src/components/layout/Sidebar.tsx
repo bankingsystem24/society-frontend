@@ -147,6 +147,11 @@ const Sidebar: React.FC = () => {
                 label: "Trial Balance",
                 icon: <HomeOutlined />,
               },
+              {
+                key: "/profit-and-loss",
+                label: "Profit & Loss",
+                icon: <HomeOutlined />,
+              },
             ],
           },
 
