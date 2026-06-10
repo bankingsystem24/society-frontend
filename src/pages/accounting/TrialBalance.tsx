@@ -55,9 +55,16 @@ const TrialBalance: React.FC = () => {
         `${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`
       );
 
-      setData(res.data || []);
+const filteredData = (res.data || []).filter(item =>
+    (item.openingBalance ?? 0) !== 0 ||
+    (item.closingBalance ?? 0) !== 0 ||
+    (item.credit ?? 0) !== 0 ||
+    (item.debit ?? 0) !== 0
+);
 
-      console.log("Trial Balance Response:",res.data);
+setData(filteredData);
+
+console.log("Filtered Trial Balance Response:", filteredData);
 
     } catch (error) {
       message.error("Failed to load Trial Balance");

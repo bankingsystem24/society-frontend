@@ -44,6 +44,8 @@ import GlOpeningBalance from "./pages/accounting/GlOpeningBalance";
 import Vendors from "./pages/vendors/Vendors";
 import PendingBills from "./pages/billing/PendingBills";
 import ProfitAndLoss from "./pages/accounting/ProfitAndLoss";
+import GenerateSinkingFund from "./pages/billing/GenerateSinkingFund";
+import ViewSinkingFund from "./pages/billing/ViewSinkingFund";
 
 export default function App() {
   return (
@@ -101,6 +103,8 @@ export default function App() {
         <Route path="/view-bills" element={<ViewBills />} />
         <Route path="/view-receipts" element={<ViewReceipts />} />
         <Route path="/pending-bills" element={<PendingBills />} />
+        <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
+        <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
 
 
         <Route path="/view-journal" element={<JournalView />} />

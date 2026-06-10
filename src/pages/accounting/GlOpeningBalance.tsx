@@ -24,6 +24,7 @@ interface GlOpeningBalance {
   societyId: number;
   financialYearId: number;
   glCode: number;
+  // contraGlCode: number;
   openingDebit: number;
   openingCredit: number;
   openingBalance: number;
@@ -98,6 +99,7 @@ const GlOpeningBalance: React.FC = () => {
       form.setFieldsValue({
         financialYearId: editing.financialYearId,
         glCode: editing.glCode,
+        // contraGlCode: editing.contraGlCode,
         openingDebit: editing.openingDebit,
         openingCredit: editing.openingCredit,
         openingBalance: editing.openingBalance,
@@ -109,7 +111,7 @@ const GlOpeningBalance: React.FC = () => {
         financialYearId,
         openingDebit: 0,
         openingCredit: 0,
-        openingBalance: 0,
+        openingBalance: null,
       });
     }
   }, [open, editing, financialYearId, form]);
@@ -129,9 +131,10 @@ const GlOpeningBalance: React.FC = () => {
         glCode: values.glCode,
         openingDebit: Number(values.openingDebit || 0),
         openingCredit: Number(values.openingCredit || 0),
-        openingBalance:
-          Number(values.openingDebit || 0) - Number(values.openingCredit || 0),
+        // contraGlCode: values.contraGlCode,
+        openingBalance:null
       };
+      console.log("Payload", payload);
 
       if (editing?.id) {
         await axios.put(
@@ -195,19 +198,16 @@ const GlOpeningBalance: React.FC = () => {
       key: "openingCredit",
     },
     {
-      title: "Opening Balance",
-      dataIndex: "openingBalance",
-      key: "openingBalance",
-    },
-    {
       title: "Action",
       key: "action",
       render: (_: any, record: GlOpeningBalance) => (
         <Space wrap>
-          <Button type="primary" onClick={() => openModal(record)}>
-            Edit
-          </Button>
-
+      <Button
+        type="primary"
+        onClick={() => openModal(record)}
+      >
+        Edit
+      </Button>
           <Popconfirm
             title="Delete this record?"
             onConfirm={() => handleDelete(record.id!)}
@@ -244,6 +244,7 @@ const GlOpeningBalance: React.FC = () => {
         rowKey="id"
         loading={loading}
         scroll={{ x: 800 }}
+        size="small"
       />
 
       <Modal
@@ -291,6 +292,7 @@ const GlOpeningBalance: React.FC = () => {
             </Select>
           </Form.Item>
 
+
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item name="openingDebit" label="Opening Debit">
@@ -312,10 +314,30 @@ const GlOpeningBalance: React.FC = () => {
               </Form.Item>
             </Col>
           </Row>
+          {/* <Form.Item
+            name="contraGlCode"
+            label="Contra GL Account"
+            rules={[
+              {
+                required: true,
+                message: "Please select Contra GL",
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Select Contra GL"
+              optionFilterProp="children"
+            >
+              {glList.map((gl) => (
+                <Select.Option key={gl.glCode} value={gl.glCode}>
+                  {gl.glCode} - {gl.accountName}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item> */}
 
-          <Form.Item name="openingBalance" label="Opening Balance">
-            <InputNumber style={{ width: "100%" }} controls={false} disabled />
-          </Form.Item>
+
         </Form>
       </Modal>
     </div>

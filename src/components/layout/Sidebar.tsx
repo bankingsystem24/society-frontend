@@ -9,6 +9,7 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
+import "../../App.css";
 
 const { Sider } = Layout;
 
@@ -49,18 +50,17 @@ const Sidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key:"/financial-year",
-            label:"Set Financial Year"
+            key: "/financial-year",
+            label: "Set Financial Year",
           },
           {
-            key:"/billing-policy",
-            label:"Billing Policy"
-          },          
+            key: "/billing-policy",
+            label: "Billing Policy",
+          },
           {
             key: "/wings",
             icon: <ApartmentOutlined />,
             label: "Wings",
-
           },
           {
             key: "/flats",
@@ -92,7 +92,7 @@ const Sidebar: React.FC = () => {
             key: "/vendors",
             icon: <UserOutlined />,
             label: "Vendors",
-          },          
+          },
           {
             key: "Bills",
             icon: <UserOutlined />,
@@ -100,21 +100,44 @@ const Sidebar: React.FC = () => {
             children: [
               {
                 key: "/bill-generate",
-                label: "Generate Bill",
+                label: "Generate",
                 icon: <HomeOutlined />,
               },
               {
                 key: "/view-bills",
-                label: "View Bills",
+                label: "View",
                 icon: <HomeOutlined />,
               },
               {
-              key: "/pending-bills",
+                key: "/pending-bills",
+                label: "Pay Online",
                 icon: <HomeOutlined />,
-              label: "Pay Online",
               },
             ],
           },
+          {
+            key: "Sinking Fund",
+            icon: <UserOutlined />,
+            label: "Sinking Fund",
+            children: [
+              {
+                key: "/generate-sinking-fund",
+                label: "Generate",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-sinking-fund",
+                label: "View",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/pay-sinking-fund",
+                label: "Pay Online",
+                icon: <HomeOutlined />,
+              },
+            ],
+          },
+
           {
             key: "Receipts",
             icon: <UserOutlined />,
@@ -128,9 +151,9 @@ const Sidebar: React.FC = () => {
             ],
           },
           {
-            key: "Reports 1",
+            key: "Reports",
             icon: <UserOutlined />,
-            label: "Reports 1",
+            label: "Reports",
             children: [
               {
                 key: "/view-journal",
@@ -154,7 +177,6 @@ const Sidebar: React.FC = () => {
               },
             ],
           },
-
         ]}
       />
     </Sider>

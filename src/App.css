@@ -182,3 +182,10 @@
     border-right-color: var(--border);
   }
 }
+
+.ant-menu-item,
+.ant-menu-submenu-title {
+  font-size: 12px !important;
+    height: 32px !important;
+  line-height: 32px !important;
+}
