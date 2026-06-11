@@ -207,6 +207,7 @@ const PendingBills: React.FC = () => {
       setPayLoading(false);
     }
   };
+  
   const columns = [
     {
       title: "Flat No",

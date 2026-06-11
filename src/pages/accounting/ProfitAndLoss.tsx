@@ -38,7 +38,6 @@ const ProfitAndLoss: React.FC = () => {
       const res = await apiGet(`/reports/profit-loss?societyId=${societyId}`);
 
       setData(res);
-      console.log("Response", res);
     } catch (error) {
       console.error(error);
       message.error("Failed to load Profit & Loss Report");

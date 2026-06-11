@@ -134,7 +134,6 @@ const GlOpeningBalance: React.FC = () => {
         // contraGlCode: values.contraGlCode,
         openingBalance:null
       };
-      console.log("Payload", payload);
 
       if (editing?.id) {
         await axios.put(

@@ -71,8 +71,6 @@ const GenerateSinkingFund: React.FC = () => {
         createdBy: Number(sessionStorage.getItem("userId")),
       };
 
-      console.log("Palyload",payload);
-
       await apiPost("/sinking-fund/generate", payload);
 
       message.success("Sinking Fund generated successfully");

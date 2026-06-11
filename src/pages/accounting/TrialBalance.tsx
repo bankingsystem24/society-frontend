@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Card,
-  Typography,
-  Spin,
-  message,
-  Row,
-  Col,
-  Tag,
-} from "antd";
+import { Table, Card, Typography, Spin, message, Row, Col, Tag } from "antd";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
 
@@ -52,19 +43,18 @@ const TrialBalance: React.FC = () => {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`
+        `${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`,
       );
 
-const filteredData = (res.data || []).filter(item =>
-    (item.openingBalance ?? 0) !== 0 ||
-    (item.closingBalance ?? 0) !== 0 ||
-    (item.credit ?? 0) !== 0 ||
-    (item.debit ?? 0) !== 0
-);
+      const filteredData = (res.data || []).filter(
+        (item:any) =>
+          (item.openingBalance ?? 0) !== 0 ||
+          (item.closingBalance ?? 0) !== 0 ||
+          (item.credit ?? 0) !== 0 ||
+          (item.debit ?? 0) !== 0,
+      );
 
-setData(filteredData);
-
-console.log("Filtered Trial Balance Response:", filteredData);
+      setData(filteredData);
 
     } catch (error) {
       message.error("Failed to load Trial Balance");
@@ -156,15 +146,9 @@ console.log("Filtered Trial Balance Response:", filteredData);
     },
   ];
 
-  const totalDebit = data.reduce(
-    (sum, row) => sum + (row.debit || 0),
-    0
-  );
+  const totalDebit = data.reduce((sum, row) => sum + (row.debit || 0), 0);
 
-  const totalCredit = data.reduce(
-    (sum, row) => sum + (row.credit || 0),
-    0
-  );
+  const totalCredit = data.reduce((sum, row) => sum + (row.credit || 0), 0);
 
   const difference = totalDebit - totalCredit;
 
@@ -226,9 +210,7 @@ console.log("Filtered Trial Balance Response:", filteredData);
               <Card
                 size="small"
                 style={{
-                  border: isBalanced
-                    ? "1px solid green"
-                    : "1px solid red",
+                  border: isBalanced ? "1px solid green" : "1px solid red",
                 }}
               >
                 <b>Difference</b>

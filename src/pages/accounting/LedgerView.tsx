@@ -82,7 +82,6 @@ const LedgerView: React.FC = () => {
       );
 
       setData(response.data || []);
-      console.log("Ledter Data",response.data);
 
     } catch (error) {
       console.error(error);
