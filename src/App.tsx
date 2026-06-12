@@ -49,6 +49,7 @@ import ViewSinkingFund from "./pages/billing/ViewSinkingFund";
 import PendingSinkingFunds from "./pages/billing/PendingSinkingFunds";
 import MemberSinkingFunds from "./pages/members/MemberSinkingFunds";
 import GlMaster from "./pages/accounting/GlMaster";
+import DiscountPolicy from "./pages/billing/DiscountPolicy";
 
 export default function App() {
   return (
@@ -84,7 +85,8 @@ export default function App() {
 
         <Route path="/financial-year" element={<FinancialYear/>} />
         <Route path="/billing-policy" element={<BillingPolicy />} />
-        
+        <Route path="/discount-policy" element={<DiscountPolicy />} />
+
         <Route path="/wings" element={<Wings />} />
         <Route path="/create-wing" element={<CreateWings />} />
         <Route path="/edit-wing/:id" element={<EditWing />} />
