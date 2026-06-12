@@ -23,6 +23,7 @@ interface SinkingFund {
   amount: number;
   createdBy: number;
   status: string;
+  memberName: string;
 }
 
 interface Bill {
@@ -46,6 +47,9 @@ const ViewSinkingFund: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredData, setFilteredData] = useState<SinkingFund[]>([]);
+  const [flatNo, setFlatNo] = useState<string | undefined>();
+  const [memberName, setMemberName] = useState<string | undefined>();
+  const [status, setStatus] = useState<string | undefined>();
 
   const [month, setMonth] = useState<string | undefined>();
   const [year, setYear] = useState<number | undefined>();
@@ -55,7 +59,6 @@ const ViewSinkingFund: React.FC = () => {
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
 
   const societyId = Number(sessionStorage.getItem("societyId"));
-
 
   const selectedFunds = filteredData.filter((f) =>
     selectedRowKeys.includes(f.id),
@@ -84,17 +87,11 @@ const ViewSinkingFund: React.FC = () => {
 
   useEffect(() => {
     applyFilter();
-  }, [month, year]);
+  }, [month, year, flatNo, memberName, status, data]);
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (!month && !year) {
-      setFilteredData(data);
-    }
-  }, [month, year, data]);
 
   const applyFilter = () => {
     let filtered = [...data];
@@ -105,6 +102,18 @@ const ViewSinkingFund: React.FC = () => {
 
     if (year) {
       filtered = filtered.filter((item) => item.year === year);
+    }
+
+    if (flatNo) {
+      filtered = filtered.filter((item) => item.flatNo === flatNo);
+    }
+
+    if (memberName) {
+      filtered = filtered.filter((item) => item.memberName === memberName);
+    }
+
+    if (status) {
+      filtered = filtered.filter((item) => item.status === status);
     }
 
     setFilteredData(filtered);
@@ -181,6 +190,11 @@ const ViewSinkingFund: React.FC = () => {
       ),
     },
   ];
+  const flatOptions = [...new Set(data.map((item) => item.flatNo))];
+
+  const memberOptions = [...new Set(data.map((item) => item.memberName))];
+
+  const statusOptions = [...new Set(data.map((item) => item.status))];
 
   return (
     <div style={{ padding: 16 }}>
@@ -222,7 +236,47 @@ const ViewSinkingFund: React.FC = () => {
               setYear(typeof value === "number" ? value : undefined);
             }}
           />
-        </Space>
+
+          <Select
+            placeholder="Flat"
+            style={{ width: 140 }}
+            allowClear
+            onChange={(value) => setFlatNo(value || undefined)}
+          >
+            {flatOptions.map((flat) => (
+              <Select.Option key={flat} value={flat}>
+                {flat}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            placeholder="Member"
+            style={{ width: 220 }}
+            allowClear
+            showSearch
+            optionFilterProp="children"
+            onChange={(value) => setMemberName(value || undefined)}
+          >
+            {memberOptions.map((member) => (
+              <Select.Option key={member} value={member}>
+                {member}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            placeholder="Status"
+            style={{ width: 140 }}
+            allowClear
+            onChange={(value) => setStatus(value || undefined)}
+          >
+            {statusOptions.map((sts) => (
+              <Select.Option key={sts} value={sts}>
+                {sts}
+              </Select.Option>
+            ))}
+          </Select>
+                  </Space>
+
         {/* ================= BUTTON ================= */}
         <div style={{ marginBottom: 12 }}>
           <Button
@@ -240,7 +294,7 @@ const ViewSinkingFund: React.FC = () => {
           columns={columns}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 8 }}
           size="small"
           rowSelection={{
             selectedRowKeys,

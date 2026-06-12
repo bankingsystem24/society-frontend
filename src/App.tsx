@@ -46,6 +46,9 @@ import PendingBills from "./pages/billing/PendingBills";
 import ProfitAndLoss from "./pages/accounting/ProfitAndLoss";
 import GenerateSinkingFund from "./pages/billing/GenerateSinkingFund";
 import ViewSinkingFund from "./pages/billing/ViewSinkingFund";
+import PendingSinkingFunds from "./pages/billing/PendingSinkingFunds";
+import MemberSinkingFunds from "./pages/members/MemberSinkingFunds";
+import GlMaster from "./pages/accounting/GlMaster";
 
 export default function App() {
   return (
@@ -57,6 +60,7 @@ export default function App() {
       <Route path="/member-dashboard" element={<MemberDashboard />} />
       <Route path="/member-bills" element={<MemberBills />} />
       <Route path="/member-pending-bills" element={<MemberPendingBills />} />
+      <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} />
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
@@ -98,6 +102,7 @@ export default function App() {
         <Route path="/edit-user/:id" element={<EditUser />} />
 
         <Route path="/gl-balances" element={<GlOpeningBalance />} />
+        <Route path="/gl-master" element={<GlMaster />} />
 
         <Route path="/bill-generate" element={<BillGenerate />}/>
         <Route path="/view-bills" element={<ViewBills />} />
@@ -105,6 +110,7 @@ export default function App() {
         <Route path="/pending-bills" element={<PendingBills />} />
         <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
         <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
+        <Route path="/pending-sinking-funds" element={<PendingSinkingFunds />} />
 
 
         <Route path="/view-journal" element={<JournalView />} />

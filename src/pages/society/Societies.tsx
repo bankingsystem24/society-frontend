@@ -135,7 +135,7 @@ const Societies: React.FC = () => {
         columns={columns}
         rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 8 }}
         locale={{ emptyText: "No societies found" }}
       />
     </Card>

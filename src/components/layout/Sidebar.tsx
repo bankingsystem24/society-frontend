@@ -20,10 +20,15 @@ const Sidebar: React.FC = () => {
 
   return (
     <Sider
-      breakpoint="lg"
-      collapsedWidth="0"
+      width={250}
+      breakpoint="md"
+      collapsedWidth={0}
       collapsible
-      onCollapse={(collapsed) => setCollapsed(collapsed)}
+      collapsed={collapsed}
+      onCollapse={(value) => setCollapsed(value)}
+      style={{
+        height: "100vh",
+      }}
     >
       <div
         style={{
@@ -78,9 +83,21 @@ const Sidebar: React.FC = () => {
             label: "Users",
           },
           {
-            key: "/gl-balances",
-            icon: <UserOutlined />,
-            label: "GL Balances",
+            key: "general-ledger",
+            icon: <DollarOutlined />,
+            label: "General Ledger",
+            children: [
+              {
+                key: "/gl-master",
+                label: "Master",
+                icon: <UserOutlined />,
+              },
+              {
+                key: "/gl-balances",
+                label: "Balances",
+                icon: <UserOutlined />,
+              },
+            ],
           },
 
           {
@@ -131,7 +148,7 @@ const Sidebar: React.FC = () => {
                 icon: <HomeOutlined />,
               },
               {
-                key: "/pay-sinking-fund",
+                key: "/pending-sinking-funds",
                 label: "Pay Online",
                 icon: <HomeOutlined />,
               },

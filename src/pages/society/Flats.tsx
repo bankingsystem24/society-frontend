@@ -67,6 +67,7 @@ const Flats: React.FC = () => {
       dataIndex: "wingName",
       key: "wingName",
       width: 120,
+      responsive: ["sm"],
     },
     {
       title: "Owner",
@@ -79,52 +80,52 @@ const Flats: React.FC = () => {
       dataIndex: "areaSqFt",
       key: "areaSqFt",
       width: 120,
+      responsive: ["md"],
     },
     {
       title: "Floor",
       dataIndex: "floorNo",
       key: "floorNo",
       width: 100,
+      responsive: ["md"],
     },
     {
       title: "Maintenance",
       dataIndex: "maintenanceAmount",
       key: "maintenanceAmount",
       width: 150,
-      render: (value: any) => `₹ ${value}`,
+      responsive: ["lg"],
+      render: (value) => `₹ ${value}`,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       width: 120,
+      responsive: ["sm"],
     },
     {
       title: "Action",
       key: "action",
-      width: 220,
+      width: 150,
       fixed: "right",
-
       render: (_: any, record: any) => (
-        <Space>
+        <Space size="small" wrap>
           <Button
             type="primary"
             icon={<EditOutlined />}
+            size="small"
             onClick={() => navigate(`/edit-flat/${record.id}`)}
-          >
-            Edit
-          </Button>
+          />
 
           <Popconfirm
             title="Delete Flat"
-            description="Are you sure you want to delete this flat?"
+            description="Are you sure?"
             okText="Yes"
             cancelText="No"
             onConfirm={() => deleteFlat(record.id)}
           >
-            <Button danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
+            <Button danger icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
         </Space>
       ),
@@ -149,7 +150,12 @@ const Flats: React.FC = () => {
         }}
       >
         <div>
-          <Title level={4} style={{ margin: 0 }}>
+          <Title
+            level={4}
+            style={{
+              margin: 0,
+            }}
+          >
             Flats Management
           </Title>
 
@@ -160,7 +166,6 @@ const Flats: React.FC = () => {
 
         <Button
           type="primary"
-          size="medium"
           icon={<PlusOutlined />}
           onClick={() => navigate("/create-flat")}
         >
@@ -173,12 +178,13 @@ const Flats: React.FC = () => {
         dataSource={data}
         rowKey="id"
         loading={loading}
-        scroll={{ x: 1200 }}
         bordered
         size="small"
+        scroll={{ x: "max-content" }}
         pagination={{
-          pageSize: 10,
+          pageSize: 8,
           showSizeChanger: true,
+          responsive: true,
         }}
       />
     </Card>

@@ -157,52 +157,73 @@ const FinancialYear: React.FC = () => {
   ];
 
   // ================= UI =================
-  return (
-    <Card style={{ margin: 10 }}>
-      <Title level={3}>Financial Year Management</Title>
+return (
+  <Card
+    style={{
+      margin: 10,
+      width: "100%",
+    }}
+    bodyStyle={{
+      padding: window.innerWidth < 768 ? 12 : 24,
+    }}
+  >
+    <Title level={3}>Financial Year Management</Title>
 
-      <Button type="primary" onClick={() => setOpen(true)}>
-        + Create Financial Year
-      </Button>
+    <Button
+      type="primary"
+      onClick={() => setOpen(true)}
+      style={{ marginBottom: 16 }}
+    >
+      + Create Financial Year
+    </Button>
 
-      <br />
-      <br />
+    <Table
+      rowKey="id"
+      loading={loading}
+      columns={columns}
+      dataSource={data}
+      pagination={{
+        pageSize: 8,
+        showSizeChanger: false,
+      }}
+      scroll={{ x: 800 }}
+    />
 
-      <Table
-        rowKey="id"
-        loading={loading}
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-      />
-
-      {/* CREATE MODAL */}
-      <Modal
-        title="Create Financial Year"
-        open={open}
-        onCancel={() => setOpen(false)}
-        onOk={() => form.submit()}
+    <Modal
+      title="Create Financial Year"
+      open={open}
+      onCancel={() => setOpen(false)}
+      onOk={() => form.submit()}
+      width={window.innerWidth < 768 ? "95%" : 600}
+      centered
+      destroyOnHidden
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleCreate}
       >
-        <Form form={form} layout="vertical" onFinish={handleCreate}>
-          <Form.Item
-            label="FY Code (e.g. 2025-26)"
-            name="fyCode"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
+        <Form.Item
+          label="FY Code (e.g. 2025-26)"
+          name="fyCode"
+          rules={[{ required: true }]}
+        >
+          <Input />
+        </Form.Item>
 
-          <Form.Item
-            label="Date Range"
-            name="dates"
-            rules={[{ required: true }]}
-          >
-            <DatePicker.RangePicker style={{ width: "100%" }} />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </Card>
-  );
+        <Form.Item
+          label="Date Range"
+          name="dates"
+          rules={[{ required: true }]}
+        >
+          <DatePicker.RangePicker
+            style={{ width: "100%" }}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
+  </Card>
+);
 };
 
 export default FinancialYear;

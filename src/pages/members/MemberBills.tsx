@@ -304,13 +304,13 @@ const MemberBills: React.FC = () => {
               columns={columns}
               rowKey="receiptNo"
               bordered
-              pagination={{ pageSize: 10 }}
+              pagination={{ pageSize: 8 }}
               expandable={{
                 expandedRowRender: (record: any) => (
                   <Table
                     dataSource={record.items}
                     columns={innerColumns}
-                    pagination={false}
+                    pagination={{pageSize: 8,}}
                     rowKey="id"
                     size="small"
                   />

@@ -166,7 +166,7 @@ const TrialBalance: React.FC = () => {
             dataSource={data}
             columns={columns}
             rowKey="glCode"
-            pagination={false}
+            pagination={{pageSize: 8,}}
             bordered
             size="small"
             scroll={{ x: 1200 }}

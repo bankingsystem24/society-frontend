@@ -318,7 +318,7 @@ const MemberPendingBills: React.FC = () => {
                 selectedRowKeys,
                 onChange: setSelectedRowKeys,
               }}
-              pagination={{ pageSize: 10 }}
+              pagination={{ pageSize: 8 }}
               bordered
             />
           )}

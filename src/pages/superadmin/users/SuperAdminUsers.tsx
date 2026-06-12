@@ -258,7 +258,7 @@ const SuperAdminUsers: React.FC = () => {
         loading={loading}
         size="small"
         pagination={{
-          pageSize: 10,
+          pageSize: 8,
         }}
         scroll={{ x: 700 }}
       />

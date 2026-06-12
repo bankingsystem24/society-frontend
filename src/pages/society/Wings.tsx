@@ -83,93 +83,99 @@ const Wings: React.FC = () => {
       key: "total_flats",
       align: "center" as const,
     },
-    {
-      title: "Action",
-      key: "action",
-      width: 220,
+{
+  title: "Action",
+  key: "action",
+  width: 180,
 
-      render: (_: any, record: any) => (
-        <Space>
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() =>
-              navigate(`/edit-wing/${record.id}`)
-            }
-          >
-            Edit
-          </Button>
+  render: (_: any, record: any) => (
+    <Space wrap>
+      <Button
+        type="primary"
+        size="small"
+        icon={<EditOutlined />}
+        onClick={() => navigate(`/edit-wing/${record.id}`)}
+      >
+        Edit
+      </Button>
 
-          <Popconfirm
-            title="Delete Wing"
-            description="Are you sure you want to delete this wing?"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => deleteWing(record.id)}
-          >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-            >
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
+      <Popconfirm
+        title="Delete Wing"
+        description="Are you sure you want to delete this wing?"
+        okText="Yes"
+        cancelText="No"
+        onConfirm={() => deleteWing(record.id)}
+      >
+        <Button
+          danger
+          size="small"
+          icon={<DeleteOutlined />}
+        >
+          Delete
+        </Button>
+      </Popconfirm>
+    </Space>
+  ),
+},
   ];
 
-  return (
-    <Card
-      bordered={false}
+return (
+  <Card
+    bordered={false}
+    style={{
+      borderRadius: 12,
+      width: "100%",
+      minHeight: "calc(100vh - 140px)",
+    }}
+    bodyStyle={{
+      padding: window.innerWidth < 768 ? 12 : 24,
+    }}
+  >
+    <div
       style={{
-        borderRadius: 12,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+        flexWrap: "wrap",
+        gap: 12,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <Title level={4} style={{ margin: 0 }}>
-            Wings Management
-          </Title>
+      <div>
+        <Title level={4} style={{ margin: 0 }}>
+          Wings Management
+        </Title>
 
-          <Text type="secondary">
-            Manage society wings, floors and flats
-          </Text>
-        </div>
-
-        <Button
-          type="primary"
-          size="medium"
-          icon={<PlusOutlined />}
-          onClick={() => navigate("/create-wing")}
-        >
-          Create Wing
-        </Button>
+        <Text type="secondary">
+          Manage society wings, floors and flats
+        </Text>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        bordered
-        size="small"
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-        }}
-      />
-    </Card>
-  );
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => navigate("/create-wing")}
+      >
+        Create Wing
+      </Button>
+    </div>
+
+    <Table
+      columns={columns}
+      dataSource={data}
+      rowKey="id"
+      loading={loading}
+      bordered
+      size="small"
+      scroll={{ x: 900 }}
+      pagination={{
+        pageSize: 8,
+        showSizeChanger: true,
+        responsive: true,
+      }}
+    />
+  </Card>
+);
 };
 
 export default Wings;

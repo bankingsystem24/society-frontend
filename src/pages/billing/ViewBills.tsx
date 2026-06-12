@@ -344,7 +344,7 @@ export default function ViewBills() {
         loading={loading}
         size="small"
         scroll={{ x: 800 }}
-        
+        pagination={{pageSize: 8,}}
         rowSelection={{
           selectedRowKeys,
           hideSelectAll: true,

@@ -204,6 +204,7 @@ const Vendors: React.FC = () => {
           rowKey="id"
           loading={loading}
           scroll={{ x: 1000 }}
+          pagination={{pageSize: 8,}}
         />
       </Card>
 

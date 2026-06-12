@@ -232,7 +232,7 @@ const LedgerView: React.FC = () => {
         rowKey={(record) =>
           `${record.voucherNo}-${record.glCode}-${record.entryDate}`
         }
-        pagination={{ pageSize: 20 }}
+        pagination={{ pageSize: 8 }}
         style={{ marginTop: 20 }}
         summary={() => (
           <Table.Summary.Row>

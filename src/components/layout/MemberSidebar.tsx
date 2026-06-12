@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Menu } from "antd";
 import {
   DashboardOutlined,
@@ -7,11 +7,24 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import Sider from "antd/es/layout/Sider";
 
 const MemberSidebar: React.FC = () => {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
+    <Sider
+      breakpoint="lg"
+      collapsedWidth="0"
+      collapsible
+      onCollapse={(collapsed) => setCollapsed(collapsed)}
+     
+      style={{
+        overflow: "auto",
+        height: "100vh",
+      }}
+    >
     <div style={{ height: "100vh" }}>
       <div style={{ color: "white", padding: 16, fontWeight: "bold" }}>
         Member Panel
@@ -29,15 +42,25 @@ const MemberSidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key: "/member-bills",
-            icon: <DollarOutlined />,
-            label: "Paid Bills",
-          },
-          {
             key: "/member-pending-bills",
             icon: <DollarOutlined />,
             label: "Pending Bills",
           },
+          {
+            key: "/member-bills",
+            icon: <DollarOutlined />,
+            label: "Paid Bills",
+          },
+
+
+
+          {
+            key: "/member-sinking-funds",
+            icon: <DollarOutlined />,
+            label: "Pending Funds",
+          },
+
+
           {
             key: "/member-login",
             icon: <LogoutOutlined />,
@@ -46,6 +69,7 @@ const MemberSidebar: React.FC = () => {
         ]}
       />
     </div>
+    </Sider>
   );
 };
 

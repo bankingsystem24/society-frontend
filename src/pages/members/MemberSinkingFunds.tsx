@@ -10,24 +10,24 @@ import {
   Select,
 } from "antd";
 import axios from "axios";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
+
 const { Content } = Layout;
 const { Title } = Typography;
 
-type Billing = {
+type SinkingFund = {
   id: number;
   month: string;
   year: number;
-  totalAmount: number;
-  interestAmount?: number;
-  maintenanceAmount?: number;
-  discountAmount?: number;
+  amount: number;
   status: string;
-  paidDate?: string;
-  paymentMode?: string;
-  receiptNo?: string;
-  flat?: { id?: number; flatNo?: string };
+  flat?: {
+    id?: number;
+    flatNo?: string;
+  };
 };
 
 type Flat = {
@@ -35,9 +35,9 @@ type Flat = {
   flatNo: string;
 };
 
-const PendingBills: React.FC = () => {
+const MemberSinkingFunds: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [bills, setBills] = useState<Billing[]>([]);
+  const [sinkingFunds, setSinkingFunds] = useState<SinkingFund[]>([]);
   const [flats, setFlats] = useState<Flat[]>([]);
   const [selectedFlat, setSelectedFlat] = useState<number | null>(null);
 
@@ -55,29 +55,32 @@ const PendingBills: React.FC = () => {
   const loadFlats = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/members/flats`, {
-        params: { societyId, memberId },
+        params: {
+          societyId,
+          memberId,
+        },
       });
 
       const flatsData = res.data || [];
 
       setFlats(flatsData);
 
-      // ✅ Auto select first flat
       if (flatsData.length > 0) {
         const firstFlatId = flatsData[0].id;
 
         setSelectedFlat(firstFlatId);
 
-        fetchBills(firstFlatId);
+        fetchSinkingFunds(firstFlatId);
       }
     } catch (err) {
       console.error(err);
+      message.error("Failed to load flats");
     }
   };
 
-  const fetchBills = async (flatId: number | null) => {
+  const fetchSinkingFunds = async (flatId: number | null) => {
     if (!flatId) {
-      setBills([]);
+      setSinkingFunds([]);
       return;
     }
 
@@ -85,73 +88,72 @@ const PendingBills: React.FC = () => {
       setLoading(true);
 
       const flatsRes = await axios.get(`${BASE_URL}/members/flats`, {
-        params: { societyId, memberId },
+        params: {
+          societyId,
+          memberId,
+        },
       });
 
       const flatIds = flatsRes.data.map((f: any) => Number(f.id));
 
-      const billsRes = await axios.post(`${BASE_URL}/members/bills`, {
+      const res = await axios.post(`${BASE_URL}/members/sinking-funds`, {
         flatIds,
       });
 
-      let pending = (billsRes.data || []).filter(
-        (b: Billing) => b.status !== "PAID",
+      let pendingFunds = (res.data || []).filter(
+        (fund: SinkingFund) => fund.status !== "PAID",
       );
 
-      pending = pending.filter((b: Billing) => b.flat?.id === flatId);
+      pendingFunds = pendingFunds.filter(
+        (fund: SinkingFund) => fund.flat?.id === flatId,
+      );
 
-      setBills(pending);
+      setSinkingFunds(pendingFunds);
     } catch (err) {
       console.error(err);
+      message.error("Failed to load sinking funds");
     } finally {
       setLoading(false);
     }
   };
 
-  const selectedBills = bills.filter((b) => selectedRowKeys.includes(b.id));
-
-  const totalMaintenance = selectedBills.reduce(
-    (sum, b) => sum + (b.maintenanceAmount || 0),
-    0,
+  const selectedFunds = sinkingFunds.filter((fund) =>
+    selectedRowKeys.includes(fund.id),
   );
 
-  const totalInterest = selectedBills.reduce(
-    (sum, b) => sum + (b.interestAmount || 0),
-    0,
-  );
-
-  const totalDiscount = selectedBills.reduce(
-    (sum, b) => sum + (b.discountAmount || 0),
-    0,
-  );
-
-  const totalAmount = selectedBills.reduce(
-    (sum, b) => sum + (b.totalAmount || 0),
+  const totalAmount = selectedFunds.reduce(
+    (sum, fund) => sum + (fund.amount || 0),
     0,
   );
 
   const handlePay = async () => {
     if (selectedRowKeys.length === 0) {
-      message.warning("Select bills first");
+      message.warning("Select sinking fund records first");
       return;
     }
 
     try {
       setPayLoading(true);
-      const orderRes = await axios.post(`${BASE_URL}/billing/create-order`, {
-        billIds: [...selectedRowKeys],
-        memberId,
-        amount: totalAmount,
-      });
+
+      const orderRes = await axios.post(
+        `${BASE_URL}/sinking-fund/create-order`,
+        {
+          sinkingFundIds: [...selectedRowKeys],
+          memberId,
+          amount: totalAmount,
+        },
+      );
 
       const order = orderRes.data;
+
       const options = {
         key: order.key,
         amount: order.amount,
         currency: "INR",
         name: "Society Management",
-        description: "Maintenance Bill Payment",
+        description: "Sinking Fund Payment",
         order_id: order.razorpayOrderId,
+
         modal: {
           ondismiss: function () {
             message.warning("Payment cancelled");
@@ -160,11 +162,11 @@ const PendingBills: React.FC = () => {
 
         handler: async function (response: any) {
           try {
-            await axios.post(`${BASE_URL}/billing/verify-payment`, {
+            await axios.post(`${BASE_URL}/sinking-fund/verify-payment`, {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
-              billIds: selectedRowKeys,
+              sinkingFundIds: selectedRowKeys,
               memberId,
               userId,
               amount: totalAmount,
@@ -172,13 +174,16 @@ const PendingBills: React.FC = () => {
             });
 
             message.success("Payment successful");
+
             setSelectedRowKeys([]);
-            fetchBills(selectedFlat);
+
+            fetchSinkingFunds(selectedFlat);
           } catch (err) {
             console.error(err);
             message.error("Payment verification failed");
           }
         },
+
         prefill: {
           name: sessionStorage.getItem("memberName") || "Member",
           email: sessionStorage.getItem("email") || "",
@@ -189,7 +194,9 @@ const PendingBills: React.FC = () => {
           color: "#1677ff",
         },
       };
+
       const rzp = new (window as any).Razorpay(options);
+
       rzp.on("payment.failed", function (response: any) {
         console.error(response);
 
@@ -203,13 +210,12 @@ const PendingBills: React.FC = () => {
       rzp.open();
     } catch (err) {
       console.error(err);
-
       message.error("Payment initiation failed");
     } finally {
       setPayLoading(false);
     }
   };
-  
+
   const columns = [
     {
       title: "Flat No",
@@ -224,69 +230,60 @@ const PendingBills: React.FC = () => {
       dataIndex: "year",
     },
     {
-      title: "Maintenance",
-      dataIndex: "maintenanceAmount",
-      render: (v: number) => `₹ ${v}`,
-    },
-    {
-      title: "Interest",
-      dataIndex: "interestAmount",
-      render: (v: number) => `₹ ${v}`,
-    },
-    {
-      title: "Discount",
-      dataIndex: "discountAmount",
-      render: (v: number) => `₹ ${v}`,
-    },
-    {
       title: "Amount",
-      dataIndex: "totalAmount",
-      render: (v: number) => `₹ ${v}`,
+      dataIndex: "amount",
+      render: (value: number) => `₹ ${value}`,
     },
     {
       title: "Status",
       dataIndex: "status",
-      render: (s: string) => <Tag color="orange">{s}</Tag>,
+      render: (status: string) => <Tag color="orange">{status}</Tag>,
     },
   ];
 
   return (
-        <Content style={{ padding: 24, background: "#f0f5ff" }}>
-          <Title level={3}>Pending Bills</Title>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider breakpoint="lg" collapsedWidth="0">
+        <MemberSidebar />
+      </Layout.Sider>
 
-          {/* ================= FLAT FILTER ================= */}
+      <Layout>
+        <MemberHeader />
+        <Content style={{ padding: 24, background: "#f0f5ff" }}>
+          <Title level={3}>Pending Sinking Funds</Title>
+
+          {/* Flat Filter */}
           <div style={{ marginBottom: 12 }}>
             <Select
               placeholder="Select Flat"
               style={{ width: 220 }}
               allowClear
-              options={flats.map((f) => ({
-                label: f.flatNo,
-                value: f.id,
+              options={flats.map((flat) => ({
+                label: flat.flatNo,
+                value: flat.id,
               }))}
               value={selectedFlat || undefined}
-              onChange={(val) => {
-                setSelectedFlat(val || null);
-                fetchBills(val || null);
+              onChange={(value) => {
+                setSelectedFlat(value || null);
+                fetchSinkingFunds(value || null);
                 setSelectedRowKeys([]);
               }}
             />
           </div>
 
-          {/* ================= SUMMARY BAR ================= */}
+          {/* Summary */}
           <div
             style={{
               marginBottom: 12,
               display: "flex",
               justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <div>
-              Selected: <b>{selectedBills.length}</b>
-              {" | "}Maintenance: <b>₹ {totalMaintenance}</b>
-              {" | "}Interest: <b>₹ {totalInterest}</b>
-              {" | "}Discount: <b>₹ {totalDiscount}</b>
-              {" | "}Total: <b>₹ {totalAmount}</b>
+              Selected: <b>{selectedFunds.length}</b>
+              {" | "}
+              Total Amount: <b>₹ {totalAmount}</b>
             </div>
 
             <Button
@@ -295,18 +292,19 @@ const PendingBills: React.FC = () => {
               disabled={selectedRowKeys.length === 0 || payLoading}
               onClick={handlePay}
             >
-              Pay Bill (Online)
+              Pay Sinking Fund (Online)
             </Button>
           </div>
 
-          {/* ================= TABLE ================= */}
+          {/* Table */}
           {loading ? (
             <Spin size="large" />
           ) : (
             <Table
               rowKey="id"
-              dataSource={bills}
+              dataSource={sinkingFunds}
               columns={columns}
+              size="small"
               rowSelection={{
                 selectedRowKeys,
                 onChange: setSelectedRowKeys,
@@ -316,7 +314,9 @@ const PendingBills: React.FC = () => {
             />
           )}
         </Content>
+      </Layout>
+    </Layout>
   );
 };
 
-export default PendingBills;
+export default MemberSinkingFunds;

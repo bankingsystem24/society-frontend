@@ -245,7 +245,9 @@ const JournalView: React.FC = () => {
                         columns={columns}
                         dataSource={rows}
                         rowKey={(r: JournalData) => r.journalId}
-                        pagination={false}
+                        pagination={{
+                          pageSize: 8,
+                        }}
                       />
                     </Panel>
                   );

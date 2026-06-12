@@ -29,13 +29,39 @@ interface Expense {
   narration: string;
 }
 
+interface VendorOption {
+  label: string;
+  value: number;
+}
+
 const Expenses: React.FC = () => {
+    const societyId = Number(sessionStorage.getItem("societyId"));
+
   const [form] = Form.useForm();
   const [data, setData] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const societyId = sessionStorage.getItem("societyId");
+const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/vendors/${societyId}`);
+
+      setVendors(
+        res.data.map((v: any) => ({
+          label: v.vendorName,
+          value: v.id,
+        }))
+      );
+
+    } catch (err) {
+      console.error("Failed to load vendors", err);
+    }
+  };
 
   const fetchGlMaster = async () => {
     try {
@@ -107,10 +133,13 @@ const Expenses: React.FC = () => {
         return gl?.accountName || "-";
       },
     },
-    {
-      title: "Vendor",
-      dataIndex: "vendor",
-    },
+{
+  title: "Vendor",
+  render: (_: any, record: any) => {
+    const v = vendors.find((x: any) => x.value === record.vendorId);
+    return v?.label || "-";
+  },
+},
     {
       title: "Amount",
       dataIndex: "amount",
@@ -128,110 +157,104 @@ const Expenses: React.FC = () => {
     },
   ];
 
-return (
-  <div style={{ padding: 16 }}>
-    {/* ENTRY FORM */}
-    <Card title="Add Expense" style={{ marginBottom: 16 }}>
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Row gutter={16} style={{ marginTop:-10}} >
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="expenseDate"
-              label="Date"
-              rules={[{ required: true }]}
-            >
-              <DatePicker style={{ width: "100%" }} />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="expenseGlCode"
-              label="Expense Account"
-              rules={[{ required: true }]}
-            >
-              <Select
-                showSearch
-                placeholder="Select Expense Account"
-                optionFilterProp="label"
+  return (
+    <div style={{ padding: 16 }}>
+      {/* ENTRY FORM */}
+      <Card title="Add Expenses" style={{ marginBottom: 16 }}>
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <Row gutter={16} style={{ marginTop: -10 }}>
+            <Col xs={24} md={8}>
+              <Form.Item
+                name="expenseDate"
+                label="Date"
+                rules={[{ required: true }]}
               >
-                {glList.map((gl) => (
-                  <Select.Option
-                    key={gl.glCode}
-                    value={gl.glCode}
-                    label={`${gl.glCode} - ${gl.accountName}`}
-                  >
-                    {gl.glCode} - {gl.accountName}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
+                <DatePicker style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
 
-          <Col xs={24} md={8}>
-            <Form.Item name="vendor" label="Vendor">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
+            <Col xs={24} md={8}>
+              <Form.Item
+                name="expenseGlCode"
+                label="Expense Account"
+                rules={[{ required: true }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Select Expense Account"
+                  optionFilterProp="label"
+                >
+                  {glList.map((gl) => (
+                    <Select.Option
+                      key={gl.glCode}
+                      value={gl.glCode}
+                      label={`${gl.glCode} - ${gl.accountName}`}
+                    >
+                      {gl.glCode} - {gl.accountName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
 
-        <Row gutter={16} style={{ marginTop:-10}}>
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="amount"
-              label="Amount"
-              rules={[{ required: true }]}
-            >
-              <InputNumber
-                style={{ width: "100%" }}
-                controls={false}
-              />
-            </Form.Item>
-          </Col>
+            <Col xs={24} md={8}>
+              <Form.Item name="vendorId" label="Vendor">
+                <Select
+                  options={vendors}
+                  placeholder="Select Vendor"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="paymentMode"
-              label="Payment Mode"
-            >
-              <Select>
-                <Select.Option value="CASH">Cash</Select.Option>
-                <Select.Option value="BANK">Bank</Select.Option>
-                <Select.Option value="UPI">UPI</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
+          <Row gutter={16} style={{ marginTop: -10 }}>
+            <Col xs={24} md={8}>
+              <Form.Item
+                name="amount"
+                label="Amount"
+                rules={[{ required: true }]}
+              >
+                <InputNumber style={{ width: "100%" }} controls={false} />
+              </Form.Item>
+            </Col>
 
-          <Col xs={24} md={8}>
-            <Form.Item
-              name="narration"
-              label="Narration"
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
+            <Col xs={24} md={8}>
+              <Form.Item name="paymentMode" label="Payment Mode">
+                <Select>
+                  <Select.Option value="CASH">Cash</Select.Option>
+                  <Select.Option value="BANK">Bank</Select.Option>
+                  <Select.Option value="UPI">UPI</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
 
-        <Button type="primary" htmlType="submit">
-          Save Expense
-        </Button>
-      </Form>
-    </Card>
+            <Col xs={24} md={8}>
+              <Form.Item name="narration" label="Narration">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
 
-    {/* EXPENSE LIST */}
-    <Card title="Expense List">
-      <Table
-        dataSource={data}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        scroll={{ x: 1000 }}
-        size="small"
-      />
-    </Card>
-  </div>
-);
+          <Button type="primary" htmlType="submit">
+            Save Expense
+          </Button>
+        </Form>
+      </Card>
 
+      {/* EXPENSE LIST */}
+      <Card title="Expense List">
+        <Table
+          dataSource={data}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          scroll={{ x: 1000 }}
+          size="small"
+          pagination={{pageSize: 8,}}
+        />
+      </Card>
+    </div>
+  );
 };
 
 export default Expenses;

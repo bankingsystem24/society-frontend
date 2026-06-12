@@ -256,7 +256,7 @@ const AuditorUsers: React.FC = () => {
         rowKey="id"
         loading={loading}
         pagination={{
-          pageSize: 10,
+          pageSize: 8,
         }}
         onRow={(record) => ({
           onClick: () => navigate(`/auditor-edit-user/${record.id}`),

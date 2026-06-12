@@ -63,75 +63,87 @@ const ClientDashboard: React.FC = () => {
     border: "1px solid #d6e4ff",
   };
 
-  return (
-    <div style={{ padding: 24, background: "#f0f5ff", minHeight: "100vh" }}>
-      <Title
-        level={2}
-        style={{ color: "#1677ff", marginBottom: 24 }}
-      >
-        Admin Dashboard
-      </Title>
+return (
+  <div
+    style={{
+      padding: 16,
+      background: "#f0f5ff",
+      minHeight: "100%",
+    }}
+  >
+    <Title
+      level={2}
+      style={{
+        color: "#1677ff",
+        marginBottom: 24,
+      }}
+    >
+      Admin Dashboard
+    </Title>
 
-      <Row gutter={16}>
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Wings</span>}
-              value={stats.wings}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
+    <Row gutter={[16, 16]}>
+      <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+        <Card style={cardStyle}>
+          <Statistic
+            title={<span style={{ color: "#1677ff" }}>Wings</span>}
+            value={stats.wings}
+            prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+            valueStyle={{ color: "#1677ff" }}
+          />
+        </Card>
+      </Col>
 
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Flats</span>}
-              value={stats.flats}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
+      <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+        <Card style={cardStyle}>
+          <Statistic
+            title={<span style={{ color: "#1677ff" }}>Flats</span>}
+            value={stats.flats}
+            prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+            valueStyle={{ color: "#1677ff" }}
+          />
+        </Card>
+      </Col>
 
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Members</span>}
-              value={stats.members}
-              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
+      <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+        <Card style={cardStyle}>
+          <Statistic
+            title={<span style={{ color: "#1677ff" }}>Members</span>}
+            value={stats.members}
+            prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
+            valueStyle={{ color: "#1677ff" }}
+          />
+        </Card>
+      </Col>
 
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Users</span>}
-              value={stats.users}
-              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row gutter={16} style={{ marginTop: 20 }}>
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Financial Year</span>}
-              value={financialYear}
-              prefix={<CalendarOutlined  style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
+      <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+        <Card style={cardStyle}>
+          <Statistic
+            title={<span style={{ color: "#1677ff" }}>Users</span>}
+            value={stats.users}
+            prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
+            valueStyle={{ color: "#1677ff" }}
+          />
+        </Card>
+      </Col>
     </Row>
 
-    </div>
-  );
+    <Row gutter={[16, 16]} style={{ marginTop: 20 }}>
+      <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+        <Card style={cardStyle}>
+          <Statistic
+            title={<span style={{ color: "#1677ff" }}>Financial Year</span>}
+            value={financialYear}
+            prefix={<CalendarOutlined style={{ color: "#1677ff" }} />}
+            valueStyle={{
+              color: "#1677ff",
+              fontSize: 20,
+            }}
+          />
+        </Card>
+      </Col>
+    </Row>
+  </div>
+);
 };
 
 export default ClientDashboard;

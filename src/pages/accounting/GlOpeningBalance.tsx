@@ -244,6 +244,9 @@ const GlOpeningBalance: React.FC = () => {
         loading={loading}
         scroll={{ x: 800 }}
         size="small"
+        pagination={{
+          pageSize: 8,
+        }}
       />
 
       <Modal

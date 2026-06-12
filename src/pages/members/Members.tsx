@@ -224,7 +224,7 @@ const Members: React.FC = () => {
             loading={loading}
             size="small"
             pagination={{
-              pageSize: 10,
+              pageSize: 8,
               showSizeChanger: true,
               responsive: true,
             }}

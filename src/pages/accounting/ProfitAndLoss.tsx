@@ -129,7 +129,9 @@ const ProfitAndLoss: React.FC = () => {
               rowKey="glCode"
               dataSource={data?.income || []}
               columns={columns}
-              pagination={false}
+              pagination={{
+                pageSize: 8,
+              }}
               size="small"
               summary={() => (
                 <Table.Summary.Row>
@@ -158,7 +160,7 @@ const ProfitAndLoss: React.FC = () => {
                 rowKey="glCode"
                 dataSource={data?.expense}
                 columns={columns}
-                pagination={false}
+                pagination={{pageSize: 8,}}
                 summary={() => (
                   <Table.Summary.Row>
                     <Table.Summary.Cell index={0} />
