@@ -165,7 +165,18 @@ const Sidebar: React.FC = () => {
               },
             ],
           },
-
+          {
+            key: "Contributions",
+            icon: <UserOutlined />,
+            label: "Contributions",
+            children: [
+              {
+                key: "/generate-contribution",
+                label: "Contributions",
+                icon: <HomeOutlined />,
+              },
+            ],
+          },
           {
             key: "Receipts",
             icon: <UserOutlined />,

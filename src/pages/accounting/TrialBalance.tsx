@@ -68,20 +68,18 @@ const TrialBalance: React.FC = () => {
       title: "GL Code",
       dataIndex: "glCode",
       key: "glCode",
-      width: 100,
-      fixed: "left",
+      width: 60,
     },
     {
       title: "Account Name",
       dataIndex: "accountName",
       key: "accountName",
-      width: 250,
-      fixed: "left",
+      width: 150,
     },
     {
       title: "Opening",
       key: "opening",
-      width: 140,
+      width: 80,
       align: "right",
       render: (_, record) =>
         `${(record.openingBalance || 0).toFixed(2)} ${
@@ -92,7 +90,7 @@ const TrialBalance: React.FC = () => {
       title: "Debit",
       dataIndex: "debit",
       key: "debit",
-      width: 140,
+      width: 80,
       align: "right",
       render: (value: number) => (value || 0).toFixed(2),
     },
@@ -100,14 +98,14 @@ const TrialBalance: React.FC = () => {
       title: "Credit",
       dataIndex: "credit",
       key: "credit",
-      width: 140,
+      width: 80,
       align: "right",
       render: (value: number) => (value || 0).toFixed(2),
     },
     {
       title: "Closing",
       key: "closing",
-      width: 140,
+      width: 80,
       align: "right",
       render: (_, record) =>
         `${(record.closingBalance || 0).toFixed(2)} ${
@@ -118,7 +116,7 @@ const TrialBalance: React.FC = () => {
       title: "A/c Type",
       dataIndex: "groupName",
       key: "accountType",
-      width: 140,
+      width: 80,
       align: "center",
       render: (value: string) => {
         let color = "default";
@@ -169,7 +167,7 @@ const TrialBalance: React.FC = () => {
             pagination={{pageSize: 8,}}
             bordered
             size="small"
-            scroll={{ x: 1200 }}
+            scroll={{ x: 800 }}
             summary={() => (
               <Table.Summary fixed>
                 <Table.Summary.Row>
