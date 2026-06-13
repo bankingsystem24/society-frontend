@@ -54,10 +54,11 @@ const ContributionPage: React.FC = () => {
   const [rate, setRate] = useState<number>(0);
   const [description, setDescription] = useState("");
   const [minAmount, setMinAmount] = useState<number>(0);
-  const societyId = Number(sessionStorage.getItem("societyId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(false);
+  const societyId = Number(sessionStorage.getItem("societyId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     if (type === "COMPULSORY") {
@@ -65,6 +66,16 @@ const ContributionPage: React.FC = () => {
     }
   }, [type]);
 
+const clearForm = () => {
+  setName("");
+  setDate(dayjs());
+  setDueDate(null);
+  setFlatAmount(0);
+  setRate(0);
+  setDescription("");
+  setMinAmount(0);
+  setMode("FLAT");
+};
 
 const total = useMemo(() => {
   if (!Array.isArray(contributions)) return 0;
@@ -80,12 +91,9 @@ const total = useMemo(() => {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/contribution/compulsory/${societyId}`,
+        `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,
       );
-
       setContributions(res.data);
-
-      console.log("Data:", res.data);
     } catch (err) {
       console.error("Error fetching contributions:", err);
     } finally {
@@ -106,29 +114,31 @@ const total = useMemo(() => {
       minAmount: minAmount,
       userId: userId,
     };
-
-    console.log("Payload:", payload);
-
     if (type === "COMPULSORY") {
       if (mode === "AREA") {
         const cres = await axios.post(
-          `${BASE_URL}/contribution/compulsory/${societyId}`,
+          `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,
           payload,
         );
         alert("Contribution generated successfully!");
+        fetchCompulsoryContributions();
       } else if (mode === "FLAT") {
         const cres = await axios.post(
-          `${BASE_URL}/contribution/compulsory/${societyId}`,
+          `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,
           payload,
         );
         alert("Contribution generated successfully!");
+        fetchCompulsoryContributions();
       }
     } else if (type === "VOLUNTARY") {
       const vres = await axios.post(
-        `${BASE_URL}/contribution/voluntary/${societyId}`,
+        `${BASE_URL}/contribution/voluntary/${societyId}/${financialYearId}`,
         payload,
       );
+        alert("Contribution generated successfully!");
+        fetchCompulsoryContributions();
     }
+    clearForm();
   };
 
   return (

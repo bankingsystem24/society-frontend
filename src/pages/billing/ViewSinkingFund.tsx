@@ -26,26 +26,11 @@ interface SinkingFund {
   memberName: string;
 }
 
-interface Bill {
-  id: number;
-  month: string;
-  year: number;
-  maintenanceAmount: number;
-  penaltyAmount: number;
-  interestAmount: number;
-  discountAmount: number;
-  totalAmount: number;
-  status: string;
-  dueDate: string;
-  createdDate: string;
-  flatNo: string;
-  memberName: string;
-}
 
 const ViewSinkingFund: React.FC = () => {
   const [data, setData] = useState<SinkingFund[]>([]);
   const [loading, setLoading] = useState(false);
-  const [bills, setBills] = useState<Bill[]>([]);
+  // const [bills, setBills] = useState<Bill[]>([]);
   const [filteredData, setFilteredData] = useState<SinkingFund[]>([]);
   const [flatNo, setFlatNo] = useState<string | undefined>();
   const [memberName, setMemberName] = useState<string | undefined>();
@@ -59,6 +44,7 @@ const ViewSinkingFund: React.FC = () => {
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
 
   const societyId = Number(sessionStorage.getItem("societyId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   const selectedFunds = filteredData.filter((f) =>
     selectedRowKeys.includes(f.id),
@@ -126,28 +112,14 @@ const ViewSinkingFund: React.FC = () => {
       const res = await axios.put(`${BASE_URL}/sinking-fund/pay`, {
         sinkingFundIds,
         paymentMode,
+        financialYearId,
       });
 
       message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
-      loadBills();
     } catch {
       message.error("Payment failed");
-    }
-  };
-
-  const loadBills = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
-        societyId: Number(societyId),
-      });
-      setBills(res.data);
-    } catch {
-      message.error("Failed to load bills");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -191,9 +163,7 @@ const ViewSinkingFund: React.FC = () => {
     },
   ];
   const flatOptions = [...new Set(data.map((item) => item.flatNo))];
-
   const memberOptions = [...new Set(data.map((item) => item.memberName))];
-
   const statusOptions = [...new Set(data.map((item) => item.status))];
 
   return (
@@ -275,7 +245,7 @@ const ViewSinkingFund: React.FC = () => {
               </Select.Option>
             ))}
           </Select>
-                  </Space>
+        </Space>
 
         {/* ================= BUTTON ================= */}
         <div style={{ marginBottom: 12 }}>

@@ -66,7 +66,7 @@ const GlOpeningBalance: React.FC = () => {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/gl/opening-balance?societyId=${societyId}`,
+        `${BASE_URL}/gl/opening-balance?societyId=${societyId}&financialYearId=${financialYearId}`,
       );
 
       setData(res.data || []);
@@ -131,8 +131,7 @@ const GlOpeningBalance: React.FC = () => {
         glCode: values.glCode,
         openingDebit: Number(values.openingDebit || 0),
         openingCredit: Number(values.openingCredit || 0),
-        // contraGlCode: values.contraGlCode,
-        openingBalance:null
+        openingBalance: null,
       };
 
       if (editing?.id) {
@@ -201,12 +200,9 @@ const GlOpeningBalance: React.FC = () => {
       key: "action",
       render: (_: any, record: GlOpeningBalance) => (
         <Space wrap>
-      <Button
-        type="primary"
-        onClick={() => openModal(record)}
-      >
-        Edit
-      </Button>
+          <Button type="primary" onClick={() => openModal(record)}>
+            Edit
+          </Button>
           <Popconfirm
             title="Delete this record?"
             onConfirm={() => handleDelete(record.id!)}
@@ -294,7 +290,6 @@ const GlOpeningBalance: React.FC = () => {
             </Select>
           </Form.Item>
 
-
           <Row gutter={16}>
             <Col xs={24} md={12}>
               <Form.Item name="openingDebit" label="Opening Debit">
@@ -338,8 +333,6 @@ const GlOpeningBalance: React.FC = () => {
               ))}
             </Select>
           </Form.Item> */}
-
-
         </Form>
       </Modal>
     </div>

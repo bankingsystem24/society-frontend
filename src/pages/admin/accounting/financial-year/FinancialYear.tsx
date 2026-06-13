@@ -110,6 +110,7 @@ const FinancialYear: React.FC = () => {
             );
       
       sessionStorage.setItem("financialYear", fyRes.data.fyCode);
+      sessionStorage.setItem("financialYearId",fyRes.data.id);
       window.dispatchEvent(new Event("financialYearChanged"));
 
     } catch (err) {

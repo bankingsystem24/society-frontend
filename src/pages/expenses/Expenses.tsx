@@ -36,6 +36,7 @@ interface VendorOption {
 
 const Expenses: React.FC = () => {
     const societyId = Number(sessionStorage.getItem("societyId"));
+    const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   const [form] = Form.useForm();
   const [data, setData] = useState<Expense[]>([]);
@@ -84,7 +85,7 @@ const [vendors, setVendors] = useState<VendorOption[]>([]);
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}/expenses/${societyId}`);
+      const res = await axios.get(`${BASE_URL}/expenses/${societyId}/${financialYearId}`);
       setData(res.data);
     } catch (err) {
       message.error("Failed to load expenses");
@@ -103,10 +104,9 @@ const [vendors, setVendors] = useState<VendorOption[]>([]);
         paymentMode: values.paymentMode,
         narration: values.narration,
         vendorId: values.vendorId || null,
+        financialYearId:financialYearId,
       };
-
       await axios.post(`${BASE_URL}/expenses`, payload);
-
       message.success("Expense added successfully");
       form.resetFields();
       fetchExpenses();

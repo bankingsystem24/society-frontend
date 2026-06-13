@@ -56,7 +56,8 @@ export default function ViewBills() {
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
 
   const [form] = Form.useForm();
-  const societyId = sessionStorage.getItem("societyId");
+  const societyId = Number(sessionStorage.getItem("societyId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     loadFlats();
@@ -77,7 +78,8 @@ export default function ViewBills() {
     try {
       setLoading(true);
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
-        societyId: Number(societyId),
+        societyId: societyId,
+        financialYearId:financialYearId,
       });
       setBills(res.data);
     } catch {
@@ -108,6 +110,7 @@ export default function ViewBills() {
       const res = await axios.put(`${BASE_URL}/billing/pay`, {
         billIds,
         paymentMode,
+        financialYearId,
       });
 
       message.success(res.data);
@@ -132,8 +135,8 @@ export default function ViewBills() {
         month: values.month || null,
         status: values.status || null,
         memberId: values.memberId || null,
+        financialYearId:financialYearId,
       };
-
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, payload);
       setBills(res.data);
     } catch {

@@ -57,6 +57,7 @@ const GenerateSinkingFund: React.FC = () => {
       setLoading(true);
 
       const societyId = sessionStorage.getItem("societyId");
+      const financialYearId = sessionStorage.getItem("financialYearId");
 
       if (!societyId) {
         message.error("Society not found");
@@ -69,6 +70,7 @@ const GenerateSinkingFund: React.FC = () => {
         amount:selectedAmount,
         societyId: Number(societyId),
         createdBy: Number(sessionStorage.getItem("userId")),
+        financialYearId
       };
 
       await apiPost("/sinking-fund/generate", payload);

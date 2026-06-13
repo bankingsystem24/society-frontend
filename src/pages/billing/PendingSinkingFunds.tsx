@@ -45,6 +45,7 @@ const PendingSinkingFunds: React.FC = () => {
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
   const userId = Number(sessionStorage.getItem("userId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     loadFlats();
@@ -58,16 +59,11 @@ const PendingSinkingFunds: React.FC = () => {
           memberId,
         },
       });
-
       const flatsData = res.data || [];
-
       setFlats(flatsData);
-
       if (flatsData.length > 0) {
         const firstFlatId = flatsData[0].id;
-
         setSelectedFlat(firstFlatId);
-
         fetchSinkingFunds(firstFlatId);
       }
     } catch (err) {
@@ -84,7 +80,6 @@ const PendingSinkingFunds: React.FC = () => {
 
     try {
       setLoading(true);
-
       const flatsRes = await axios.get(`${BASE_URL}/members/flats`, {
         params: {
           societyId,
@@ -93,11 +88,12 @@ const PendingSinkingFunds: React.FC = () => {
       });
 
       const flatIds = flatsRes.data.map((f: any) => Number(f.id));
-
       const res = await axios.post(
         `${BASE_URL}/members/sinking-funds`,
         {
           flatIds,
+          societyId,
+          financialYearId
         },
       );
 
@@ -108,7 +104,6 @@ const PendingSinkingFunds: React.FC = () => {
       pendingFunds = pendingFunds.filter(
         (fund: SinkingFund) => fund.flat?.id === flatId,
       );
-
       setSinkingFunds(pendingFunds);
     } catch (err) {
       console.error(err);
@@ -174,6 +169,7 @@ const PendingSinkingFunds: React.FC = () => {
                 userId,
                 amount: totalAmount,
                 paymentMode: response.method || "ONLINE",
+                financialYearId:financialYearId
               },
             );
 

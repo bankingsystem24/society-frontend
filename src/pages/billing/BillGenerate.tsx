@@ -27,6 +27,7 @@ const BillGenerate: React.FC = () => {
 
   const onFinish = async (values: BillingFormValues) => {
     const financialYear = sessionStorage.getItem("financialYear");
+    const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
     if (!financialYear) {
       message.error("Financial Year not found");
@@ -87,6 +88,7 @@ const BillGenerate: React.FC = () => {
         year: selectedYear,
         societyId: Number(societyId),
         createdBy: sessionStorage.getItem("userId"),
+        financialYearId:financialYearId
       };
 
       await apiPost("/billing/generate", payload);

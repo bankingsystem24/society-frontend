@@ -47,6 +47,7 @@ const PendingBills: React.FC = () => {
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
   const userId = Number(sessionStorage.getItem("userId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     loadFlats();
@@ -92,6 +93,7 @@ const PendingBills: React.FC = () => {
 
       const billsRes = await axios.post(`${BASE_URL}/members/bills`, {
         flatIds,
+        societyId,financialYearId
       });
 
       let pending = (billsRes.data || []).filter(
@@ -142,6 +144,7 @@ const PendingBills: React.FC = () => {
         billIds: [...selectedRowKeys],
         memberId,
         amount: totalAmount,
+        financialYearId:financialYearId
       });
 
       const order = orderRes.data;
@@ -169,6 +172,7 @@ const PendingBills: React.FC = () => {
               userId,
               amount: totalAmount,
               paymentMode: response.method || "ONLINE",
+              financialYearId:financialYearId,
             });
 
             message.success("Payment successful");
