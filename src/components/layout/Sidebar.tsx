@@ -172,7 +172,17 @@ const Sidebar: React.FC = () => {
             children: [
               {
                 key: "/generate-contribution",
-                label: "Contributions",
+                label: "Add",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-contribution",
+                label: "View",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/payonline-contribution",
+                label: "Pay Online",
                 icon: <HomeOutlined />,
               },
             ],

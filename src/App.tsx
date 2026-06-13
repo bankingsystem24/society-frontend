@@ -51,6 +51,7 @@ import MemberSinkingFunds from "./pages/members/MemberSinkingFunds";
 import GlMaster from "./pages/accounting/GlMaster";
 import DiscountPolicy from "./pages/billing/DiscountPolicy";
 import ContributionPage from "./pages/billing/ContributionPage";
+import ViewContribution from "./pages/billing/ViewContribution";
 
 export default function App() {
   return (
@@ -113,6 +114,8 @@ export default function App() {
         <Route path="/pending-bills" element={<PendingBills />} />
         <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
         <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
+        <Route path="/view-contribution" element={<ViewContribution />}/>
+
         <Route path="/pending-sinking-funds" element={<PendingSinkingFunds />} />
         <Route path="/generate-contribution" element={<ContributionPage />} />
 
