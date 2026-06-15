@@ -47,6 +47,7 @@ export default function ViewReceipts() {
 
     const [billingOpen, setBillingOpen] = useState(false);
     const [contributionOpen, setContributionOpen] = useState(false);
+    const [sinkingFundOpen, setSinkingFundOpen] = useState(false);
 
 
   const [receiptBills, setReceiptBills] = useState<ReceiptBill[]>([]);
@@ -128,7 +129,8 @@ const loadReceipts = async (flatId?: number) => {
       setReceiptBills(data);
 
       const receiptType = detailsres.data?.[0]?.receiptType;
-      
+      console.log("data",data);
+
       const selected = receipts.find((r) => r.id === receiptId) || null;
       setSelectedReceipt(selected);
 
@@ -136,7 +138,9 @@ const loadReceipts = async (flatId?: number) => {
         setBillingOpen(true);
       }else if (receiptType==="CONTRIBUTION") {
         setContributionOpen(true);
-      } 
+      } else if (receiptType==="SINKING_FUND"){
+        setSinkingFundOpen(true);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -159,7 +163,6 @@ const loadReceipts = async (flatId?: number) => {
           <td>${b.discountAmount}</td>
           <td>${b.totalAmount}</td>
           <td>${b.status}</td>
-          <td>${b.receiptType}</td>
         </tr>
       `,
       )
@@ -282,7 +285,6 @@ const loadReceipts = async (flatId?: number) => {
                 <th>Discount</th>
                 <th>Net Paid</th>
                 <th>Status</th>
-                <th>ReceiptType</th>
               </tr>
             </thead>
 
@@ -317,15 +319,9 @@ const loadReceipts = async (flatId?: number) => {
       .map(
         (b) => `
         <tr>
-          <td>${b.month}</td>
-          <td>${b.year}</td>
           <td>${b.name}</td>
-          <td>${b.penaltyAmount}</td>
-          <td>${b.interestAmount}</td>
-          <td>${b.discountAmount}</td>
           <td>${b.totalAmount}</td>
           <td>${b.status}</td>
-          <td>${b.receiptType}</td>
         </tr>
       `,
       )
@@ -365,7 +361,7 @@ const loadReceipts = async (flatId?: number) => {
         <body>
 
           <h2>${societyName}</h2>
-          <h2>Maintenance Receipt</h2>
+          <h2>Contribution Receipt</h2>
 
           <hr />
 
@@ -440,15 +436,9 @@ const loadReceipts = async (flatId?: number) => {
           <table>
             <thead>
               <tr>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Name</th>
-                <th>Penalty</th>
-                <th>Interest</th>
-                <th>Discount</th>
+                <th>Contribution for</th>
                 <th>Net Paid</th>
                 <th>Status</th>
-                <th>ReceiptType</th>
               </tr>
             </thead>
 
@@ -476,6 +466,160 @@ const loadReceipts = async (flatId?: number) => {
     }
   };
 
+
+    const handleSinkingFundPrint = (receipt: Receipt | null) => {
+    if (!receipt) return;
+
+    const rows = receiptBills
+      .map(
+        (b) => `
+        <tr>
+          <td>${b.receiptType}</td>
+          <td>${b.totalAmount}</td>
+          <td>${b.status}</td>
+        </tr>
+      `,
+      )
+      .join("");
+
+    const societyName =  sessionStorage.getItem("societyName") || "";
+
+    const content = `
+      <html>
+        <head>
+          <title>Receipt</title>
+
+          <style>
+            body {
+              font-family: Arial;
+              padding: 20px;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+
+            th, td {
+              border: 1px solid #ccc;
+              padding: 8px;
+              text-align: left;
+            }
+
+            h2 {
+              margin-bottom: 0;
+            }
+          </style>
+        </head>
+
+        <body>
+
+          <h2>${societyName}</h2>
+          <h2>Sinking Fund Receipt</h2>
+
+          <hr />
+
+        <table
+        style={{
+            width: "100%",
+            marginTop: "10px",
+            borderCollapse: "collapse",
+        }}
+        >
+        <tbody>
+            <tr>
+            <td style="padding:6px; font-weight:bold; width:180px;">
+                Receipt No
+            </td>
+            <td style="padding:6px;">
+                ${receipt.receiptNo}
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:6px; font-weight:bold;">
+                Flat
+            </td>
+            <td style="padding:6px;">
+                ${receipt.flatNo}
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:6px; font-weight:bold;">
+                Member
+            </td>
+            <td style="padding:6px;">
+                ${receipt.memberName}
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:6px; font-weight:bold;">
+                Total Amount
+            </td>
+            <td style="padding:6px;">
+                ₹ ${receipt.totalAmount}
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:6px; font-weight:bold;">
+                Payment Mode
+            </td>
+            <td style="padding:6px;">
+                ${receipt.paymentMode || "CASH"}
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:6px; font-weight:bold;">
+                Date
+            </td>
+            <td style="padding:6px;">
+                ${
+                receipt.createdAt
+                    ? new Date(receipt.createdAt).toLocaleDateString("en-GB")
+                    : "-"
+                }
+            </td>
+            </tr>
+        </tbody>
+        </table>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Contribution for</th>
+                <th>Net Paid</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+
+          <br/><br/>
+
+          <p>
+            <b>Authorized Signatory</b>
+          </p>
+
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+
+    if (printWindow) {
+      printWindow.document.write(content);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
 
 
   const columns: ColumnsType<Receipt> = [
@@ -521,10 +665,6 @@ const loadReceipts = async (flatId?: number) => {
       dataIndex: "createdAt",
       render: (value) =>
         value ? new Date(value).toLocaleDateString("en-GB") : "-",
-    },
-    {
-      title:"Payment Mode",
-      dataIndex:"paymentMode",
     },
     {
       title:"Transaction Id",
@@ -584,98 +724,6 @@ const loadReceipts = async (flatId?: number) => {
         />
       </div>
 
-      {/* <Modal
-        open={detailsOpen}
-        onCancel={() => setDetailsOpen(false)}
-        width={900}
-        title={`Receipt Details - ${selectedReceipt?.receiptNo || ""}`}
-        footer={[
-          <Button
-            key="print"
-            type="primary"
-            onClick={() => handlePrint(selectedReceipt)}
-          >
-            Print Receipt
-          </Button>,
-
-          <Button key="close" onClick={() => setDetailsOpen(false)}>
-            Close
-          </Button>,
-        ]}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 16,
-            marginBottom: 16,
-          }}
-        >
-          <div>
-            <b>Flat:</b> {selectedReceipt?.flatNo}
-          </div>
-
-          <div>
-            <b>Member:</b> {selectedReceipt?.memberName}
-          </div>
-
-          <div>
-            <b>Total:</b> ₹ {selectedReceipt?.totalAmount}
-          </div>
-
-          <div>
-            <b>Payment Mode:</b> {selectedReceipt?.paymentMode}
-          </div>
-        </div>
-
-        <Table
-          rowKey="id"
-          dataSource={receiptBills}
-          pagination={false}
-          size="small"
-          scroll={{ x: "max-content" }}
-          columns={[
-            {
-              title: "Month",
-              dataIndex: "month",
-            },
-            {
-              title: "Year",
-              dataIndex: "year",
-            },
-            {
-              title: "Maintenance",
-              dataIndex: "maintenanceAmount",
-            },
-            {
-              title: "Penalty",
-              dataIndex: "penaltyAmount",
-            },
-            {
-              title: "Interest",
-              dataIndex: "interestAmount",
-            },
-            {
-              title: "Discount",
-              dataIndex: "discountAmount",
-            },
-
-            {
-              title: "Total",
-              dataIndex: "totalAmount",
-            },
-            {
-              title: "Status",
-              dataIndex: "status",
-              render: (value) => <Tag color="green">{value}</Tag>,
-            },
-            {
-              title: "Receipt Type",
-              dataIndex: "receiptType",
-            },
-          ]}
-        />
-      </Modal> */}
 
       <Modal
         open={billingOpen}
@@ -823,7 +871,7 @@ const loadReceipts = async (flatId?: number) => {
           scroll={{ x: "max-content" }}
           columns={[
             {
-              title: "Type",
+              title: "Contribution for",
               dataIndex: "name",
             },
             {
@@ -836,8 +884,80 @@ const loadReceipts = async (flatId?: number) => {
               render: (value) => <Tag color="green">{value}</Tag>,
             },
             {
-              title: "Receipt Type",
+              title: "Paid Date",
+              dataIndex: "createdAt",
+            },
+          ]}
+        />
+      </Modal>
+
+      <Modal
+        open={sinkingFundOpen}
+        onCancel={() => setSinkingFundOpen(false)}
+        width={900}
+        title={`Receipt Details - ${selectedReceipt?.receiptNo || ""}`}
+        footer={[
+          <Button
+            key="print"
+            type="primary"
+            onClick={() => handleSinkingFundPrint(selectedReceipt)}
+          >
+            Print Receipt
+          </Button>,
+
+          <Button key="close" onClick={() => setSinkingFundOpen(false)}>
+            Close
+          </Button>,
+        ]}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 16,
+            marginBottom: 16,
+          }}
+        >
+          <div>
+            <b>Flat:</b> {selectedReceipt?.flatNo}
+          </div>
+
+          <div>
+            <b>Member:</b> {selectedReceipt?.memberName}
+          </div>
+
+          <div>
+            <b>Total:</b> ₹ {selectedReceipt?.totalAmount}
+          </div>
+
+          <div>
+            <b>Payment Mode:</b> {selectedReceipt?.paymentMode}
+          </div>
+        </div>
+
+        <Table
+          rowKey="id"
+          dataSource={receiptBills}
+          pagination={false}
+          size="small"
+          scroll={{ x: "max-content" }}
+          columns={[
+            {
+              title: "Contribution for",
               dataIndex: "receiptType",
+            },
+            {
+              title: "Total",
+              dataIndex: "totalAmount",
+            },
+            {
+              title: "Status",
+              dataIndex: "status",
+              render: (value) => <Tag color="green">{value}</Tag>,
+            },
+            {
+              title: "Paid Date",
+              dataIndex: "createdAt",
             },
           ]}
         />

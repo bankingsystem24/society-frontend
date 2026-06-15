@@ -14,6 +14,7 @@ import {
   Tag,
   Col,
   Row,
+  message,
 } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -23,12 +24,6 @@ const { Title, Text } = Typography;
 type ContributionType = "COMPULSORY" | "VOLUNTARY";
 type CompulsoryMode = "FLAT" | "AREA";
 
-type Member = {
-  id: number;
-  name: string;
-  flatNo: string;
-  areaSqft: number;
-};
 
 type Contribution = {
   id: number;
@@ -62,7 +57,7 @@ const ContributionPage: React.FC = () => {
 
   useEffect(() => {
     if (type === "COMPULSORY") {
-      fetchCompulsoryContributions();
+      fetchContributions();
     }
   }, [type]);
 
@@ -86,12 +81,12 @@ const total = useMemo(() => {
 }, [contributions]);
 
 
-  const fetchCompulsoryContributions = async () => {
+  const fetchContributions = async () => {
     try {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,
+        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
       );
       setContributions(res.data);
     } catch (err) {
@@ -121,22 +116,22 @@ const total = useMemo(() => {
           payload,
         );
         alert("Contribution generated successfully!");
-        fetchCompulsoryContributions();
+        fetchContributions();
       } else if (mode === "FLAT") {
         const cres = await axios.post(
           `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,
           payload,
         );
-        alert("Contribution generated successfully!");
-        fetchCompulsoryContributions();
+        message.success("Contribution generated successfully!");
+        fetchContributions();
       }
     } else if (type === "VOLUNTARY") {
       const vres = await axios.post(
         `${BASE_URL}/contribution/voluntary/${societyId}/${financialYearId}`,
         payload,
       );
-        alert("Contribution generated successfully!");
-        fetchCompulsoryContributions();
+        message.success("Contribution generated successfully!");
+        fetchContributions();
     }
     clearForm();
   };

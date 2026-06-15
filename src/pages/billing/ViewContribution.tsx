@@ -8,6 +8,7 @@ import {
   Space,
   Form,
   Modal,
+  InputNumber,
 } from "antd";
 import axios from "axios";
 
@@ -30,9 +31,8 @@ interface Contribution {
   status: string;
   createdBy: number;
   financialYearId: number;
-  flatNo:string;
-  };
-
+  flatNo: string;
+}
 
 const ViewContribution: React.FC = () => {
   const [data, setData] = useState<Contribution[]>([]);
@@ -46,29 +46,39 @@ const ViewContribution: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState("CASH");
+  const [voluntaryAmount, setVoluntaryAmount] = useState<number>(0);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
-  const financialYearId = Number(
-    sessionStorage.getItem("financialYearId"),
-  );
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   const selectedContributions = filteredData.filter((c) =>
     selectedRowKeys.includes(c.id),
   );
 
-const selectedFlatNo =
-  selectedContributions.length > 0
-    ? selectedContributions[0].flatNo
-    : null;
+  const selectedFlatNo =
+    selectedContributions.length > 0 ? selectedContributions[0].flatNo : null;
+
+  const selectedType =
+    selectedContributions.length > 0 ? selectedContributions[0].type : null;
+
+  const totalSelectedAmount = selectedContributions.reduce(
+    (sum, contribution) => sum + Number(contribution.amount || 0),
+    0,
+  );
+  useEffect(() => {
+    if (selectedType === "VOLUNTARY") {
+      setVoluntaryAmount(totalSelectedAmount);
+    }
+  }, [selectedType, totalSelectedAmount]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,
+        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
       );
-      console.log("Response",res.data);
+      console.log("Response", res.data);
       setData(res.data || []);
       setFilteredData(res.data || []);
     } catch {
@@ -93,16 +103,12 @@ const selectedFlatNo =
       filtered = filtered.filter((item) => item.type === type);
     }
 
-if (flatNo) {
-  filtered = filtered.filter(
-    (item) => item.flatNo === flatNo,
-  );
-}
+    if (flatNo) {
+      filtered = filtered.filter((item) => item.flatNo === flatNo);
+    }
 
     if (status) {
-      filtered = filtered.filter(
-        (item) => item.status === status,
-      );
+      filtered = filtered.filter((item) => item.status === status);
     }
 
     setFilteredData(filtered);
@@ -112,14 +118,21 @@ if (flatNo) {
     try {
       const contributionIds = selectedRowKeys.map(Number);
 
-      const res = await axios.put(
-        `${BASE_URL}/contribution/pay`,
-        {
-          contributionIds,
-          paymentMode,
-          financialYearId,
-        },
-      );
+      if (
+        selectedType === "VOLUNTARY" &&
+        voluntaryAmount < totalSelectedAmount
+      ) {
+        message.error(
+          `Voluntary Amount cannot be less than ₹${totalSelectedAmount}`,
+        );
+        return;
+      }
+
+      const res = await axios.put(`${BASE_URL}/contribution/pay`, {
+        contributionIds,
+        paymentMode,
+        financialYearId,
+      });
 
       message.success(res.data);
 
@@ -139,7 +152,7 @@ if (flatNo) {
       key: "flatNo",
     },
     {
-      title: "Member Name",
+      title: "Contribution for",
       dataIndex: "name",
       key: "name",
     },
@@ -176,11 +189,7 @@ if (flatNo) {
         <span
           style={{
             color:
-              text === "PAID"
-                ? "green"
-                : text === "PENDING"
-                ? "orange"
-                : "red",
+              text === "PAID" ? "green" : text === "PENDING" ? "orange" : "red",
           }}
         >
           {text}
@@ -189,29 +198,35 @@ if (flatNo) {
     },
   ];
 
-  const typeOptions = [...new Set(data.map((d) => d.type))];
-
-const flatOptions = [
-  ...new Set(data.map((d) => d.flatNo).filter(Boolean)),
-];
-
-  const statusOptions = [
-    ...new Set(data.map((d) => d.status)),
+  const typeOptions = [
+    ...new Set(
+      data.filter((d) => !flatNo || d.flatNo === flatNo).map((d) => d.type),
+    ),
   ];
+
+  const flatOptions = [
+    ...new Set(
+      data
+        .filter((d) => !type || d.type === type)
+        .map((d) => d.flatNo)
+        .filter(Boolean),
+    ),
+  ];
+
+  const statusOptions = [...new Set(data.map((d) => d.status))];
 
   return (
     <div style={{ padding: 16 }}>
       <Card title="View Contribution">
-
         <Space style={{ marginBottom: 16 }} wrap>
-
           <Select
             placeholder="Contribution Type"
             style={{ width: 180 }}
             allowClear
-            onChange={(value) =>
-              setType(value || undefined)
-            }
+            onChange={(value) => {
+              setType(value || undefined);
+              setFlatNo(undefined);
+            }}
           >
             {typeOptions.map((t) => (
               <Select.Option key={t} value={t}>
@@ -224,9 +239,10 @@ const flatOptions = [
             placeholder="Flat No"
             style={{ width: 150 }}
             allowClear
-            onChange={(value) =>
-              setFlatNo(value || undefined)
-            }
+            onChange={(value) => {
+              setFlatNo(value || undefined);
+              setType(undefined);
+            }}
           >
             {flatOptions.map((flat) => (
               <Select.Option key={flat} value={flat}>
@@ -239,9 +255,7 @@ const flatOptions = [
             placeholder="Status"
             style={{ width: 150 }}
             allowClear
-            onChange={(value) =>
-              setStatus(value || undefined)
-            }
+            onChange={(value) => setStatus(value || undefined)}
           >
             {statusOptions.map((s) => (
               <Select.Option key={s} value={s}>
@@ -249,7 +263,6 @@ const flatOptions = [
               </Select.Option>
             ))}
           </Select>
-
         </Space>
 
         <div style={{ marginBottom: 12 }}>
@@ -258,8 +271,7 @@ const flatOptions = [
             disabled={selectedRowKeys.length === 0}
             onClick={() => setPaymentModalOpen(true)}
           >
-            Payment Received by Admin (
-            {selectedRowKeys.length})
+            Payment Received by Admin ({selectedRowKeys.length})
           </Button>
         </div>
 
@@ -269,29 +281,32 @@ const flatOptions = [
           dataSource={filteredData}
           columns={columns}
           pagination={{ pageSize: 10 }}
+          size="small"
           rowSelection={{
             selectedRowKeys,
             hideSelectAll: true,
             onChange: setSelectedRowKeys,
-            getCheckboxProps: (record) => ({
-              disabled:
-                record.status !== "PENDING" ||
-                (selectedFlatNo !== null &&
-                  record.flatNo !==
-                    selectedFlatNo &&
-                  !selectedRowKeys.includes(
-                    record.id,
-                  )),
-            }),
+            getCheckboxProps: (record) => {
+              const sameFlat =
+                selectedFlatNo === null || record.flatNo === selectedFlatNo;
+
+              const sameType =
+                selectedType === null || record.type === selectedType;
+
+              return {
+                disabled:
+                  record.status !== "PENDING" ||
+                  ((!sameFlat || !sameType) &&
+                    !selectedRowKeys.includes(record.id)),
+              };
+            },
           }}
         />
 
         <Modal
           title="Select Payment Method"
           open={paymentModalOpen}
-          onCancel={() =>
-            setPaymentModalOpen(false)
-          }
+          onCancel={() => setPaymentModalOpen(false)}
           onOk={handlePay}
           okText="Pay Now"
         >
@@ -320,9 +335,19 @@ const flatOptions = [
                 ]}
               />
             </Form.Item>
+            {selectedContributions.some((c) => c.type === "VOLUNTARY") && (
+              <Form.Item label="Voluntary Amount" required>
+                <InputNumber
+                  style={{ width: "100%" }}
+                  min={1}
+                  value={voluntaryAmount}
+                  onChange={(value) => setVoluntaryAmount(Number(value || 0))}
+                  placeholder="Enter Amount"
+                />
+              </Form.Item>
+            )}
           </Form>
         </Modal>
-
       </Card>
     </div>
   );

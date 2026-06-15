@@ -181,7 +181,7 @@ const Sidebar: React.FC = () => {
                 icon: <HomeOutlined />,
               },
               {
-                key: "/payonline-contribution",
+                key: "/pending-contributions",
                 label: "Pay Online",
                 icon: <HomeOutlined />,
               },
