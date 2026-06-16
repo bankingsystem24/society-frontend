@@ -46,10 +46,11 @@ const ViewContribution: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState("CASH");
-  const [voluntaryAmount, setVoluntaryAmount] = useState<number>(0);
+  const [contributionAmount, setContributionAmount] = useState<number>(0);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+  const userId = Number(sessionStorage.getItem("userId"));
 
   const selectedContributions = filteredData.filter((c) =>
     selectedRowKeys.includes(c.id),
@@ -67,8 +68,11 @@ const ViewContribution: React.FC = () => {
   );
   useEffect(() => {
     if (selectedType === "VOLUNTARY") {
-      setVoluntaryAmount(totalSelectedAmount);
+      setContributionAmount(totalSelectedAmount);
+    } else{
+          setContributionAmount(totalSelectedAmount);
     }
+    
   }, [selectedType, totalSelectedAmount]);
 
   const fetchData = async () => {
@@ -120,19 +124,21 @@ const ViewContribution: React.FC = () => {
 
       if (
         selectedType === "VOLUNTARY" &&
-        voluntaryAmount < totalSelectedAmount
+        contributionAmount < totalSelectedAmount
       ) {
         message.error(
           `Voluntary Amount cannot be less than ₹${totalSelectedAmount}`,
         );
         return;
       }
-
+      console.log(contributionAmount,userId);
+      
       const res = await axios.put(`${BASE_URL}/contribution/pay`, {
         contributionIds,
         paymentMode,
         financialYearId,
-        voluntaryAmount
+        contributionAmount,
+        userId
       });
 
       message.success(res.data);
@@ -341,8 +347,8 @@ const ViewContribution: React.FC = () => {
                 <InputNumber
                   style={{ width: "100%" }}
                   min={1}
-                  value={voluntaryAmount}
-                  onChange={(value) => setVoluntaryAmount(Number(value || 0))}
+                  value={contributionAmount}
+                  onChange={(value) => setContributionAmount(Number(value || 0))}
                   placeholder="Enter Amount"
                 />
               </Form.Item>

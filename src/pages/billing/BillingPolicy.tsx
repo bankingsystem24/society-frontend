@@ -28,11 +28,8 @@ const BillingPolicy: React.FC = () => {
   useEffect(() => {
     form.setFieldsValue({
       societyId,
-      graceDays: 0,
       interestRate: 0,
       interestType: "MONTHLY",
-      penaltyType: "FIXED",
-      penaltyValue: 0,
     });
 
     loadPolicy();
@@ -49,12 +46,8 @@ const BillingPolicy: React.FC = () => {
 
         form.setFieldsValue({
           societyId: data.society?.id,
-          billingDay: data.billingDay,
-          graceDays: data.graceDays,
           interestRate: data.interestRate,
           interestType: data.interestType,
-          penaltyType: data.penaltyType,
-          penaltyValue: data.penaltyValue,
         });
       }
     } catch (error) {
@@ -70,12 +63,8 @@ const BillingPolicy: React.FC = () => {
       const payload = {
         id: policyId,
         societyId,
-        billingDay: values.billingDay,
-        graceDays: values.graceDays,
         interestRate: values.interestRate,
         interestType: values.interestType,
-        penaltyType: values.penaltyType,
-        penaltyValue: values.penaltyValue,
         financialYearId:financialYearId,
       };
 
@@ -110,11 +99,8 @@ const BillingPolicy: React.FC = () => {
 
       form.setFieldsValue({
         societyId,
-        graceDays: 0,
         interestRate: 0,
         interestType: "MONTHLY",
-        penaltyType: "FIXED",
-        penaltyValue: 0,
       });
     } catch (error) {
       console.error(error);
@@ -149,39 +135,9 @@ const BillingPolicy: React.FC = () => {
             </Form.Item>
           </Col>
 
-          <Col span={12}>
-            <Form.Item
-              label="Billing Day"
-              name="billingDay"
-              rules={[
-                {
-                  required: true,
-                  message: "Billing day is required",
-                },
-              ]}
-            >
-              <InputNumber
-                min={1}
-                max={31}
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Col>
         </Row>
 
         <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Grace Days"
-              name="graceDays"
-            >
-              <InputNumber
-                min={0}
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Col>
-
           <Col span={12}>
             <Form.Item
               label="Interest Rate (%)"
@@ -194,9 +150,6 @@ const BillingPolicy: React.FC = () => {
               />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={16}>
           <Col span={12}>
             <Form.Item
               label="Interest Type"
@@ -213,37 +166,6 @@ const BillingPolicy: React.FC = () => {
                   Annual
                 </Option>
               </Select>
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item
-              label="Penalty Type"
-              name="penaltyType"
-            >
-              <Select>
-                <Option value="FIXED">
-                  Fixed Amount
-                </Option>
-                <Option value="PERCENTAGE">
-                  Percentage
-                </Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Penalty Value"
-              name="penaltyValue"
-            >
-              <InputNumber
-                min={0}
-                step={0.01}
-                style={{ width: "100%" }}
-              />
             </Form.Item>
           </Col>
         </Row>

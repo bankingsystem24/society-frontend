@@ -10,6 +10,7 @@ import {
   Select,
   Modal,
   InputNumber,
+  Input,
 } from "antd";
 import axios from "axios";
 
@@ -50,7 +51,9 @@ const PendingContributions: React.FC = () => {
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   const [amountModalOpen, setAmountModalOpen] = useState(false);
-  const [finalAmount, setFinalAmount] = useState<number>(0);
+  const [finalAmount, setFinalAmount] = useState<number | null>(null);
+  const [minimumAmount, setMinimumAmount] = useState<number>(0);
+  const [contributionType, setContributionType] = useState<string>("");
 
   useEffect(() => {
     loadFlats();
@@ -151,15 +154,20 @@ const PendingContributions: React.FC = () => {
     const firstContribution = selectedContributions[0];
 
     if (firstContribution?.type?.toUpperCase() === "VOLUNTARY") {
+      setContributionType("VOLUNTARY");
+      setMinimumAmount(totalAmount);
       setFinalAmount(totalAmount);
       setAmountModalOpen(true);
       return;
     }
 
-    proceedPayment(totalAmount);
+    proceedPayment(totalAmount, "COMPULSORY");
   };
 
-  const proceedPayment = async (payAmount: number) => {
+  const proceedPayment = async (
+    amountToPay: number,
+    contributionType: string,
+  ) => {
     try {
       setPayLoading(true);
 
@@ -168,7 +176,7 @@ const PendingContributions: React.FC = () => {
         {
           contributionIds: [...selectedRowKeys],
           memberId,
-          amount: payAmount,
+          amount: amountToPay,
         },
       );
 
@@ -198,7 +206,8 @@ const PendingContributions: React.FC = () => {
               contributionIds: selectedRowKeys,
               memberId,
               userId,
-              amount: payAmount,
+              amount: amountToPay,
+              type: contributionType,
               paymentMode: response.method || "ONLINE",
               financialYearId,
             });
@@ -395,29 +404,42 @@ const PendingContributions: React.FC = () => {
       <Modal
         title="Enter Contribution Amount"
         open={amountModalOpen}
+        destroyOnClose
         onCancel={() => {
           setAmountModalOpen(false);
-          setFinalAmount(totalAmount);
+          setFinalAmount(null);
         }}
         onOk={() => {
-          if (finalAmount < totalAmount) {
-            message.error(`Entered amount cannot be less than ₹${totalAmount}`);
-            return; // stay in modal
+          const enteredAmount = Number(finalAmount || 0);
+
+          if (enteredAmount <= 0) {
+            message.error("Please enter amount");
+            return;
+          }
+
+          if (enteredAmount < minimumAmount) {
+            message.error(
+              `Entered amount cannot be less than ₹${minimumAmount}`,
+            );
+            return;
           }
 
           setAmountModalOpen(false);
-          proceedPayment(finalAmount);
+          proceedPayment(enteredAmount, contributionType);
         }}
       >
         <p>
-          Minimum Amount: <b>₹{totalAmount}</b>
+          Minimum Amount: <b>₹{minimumAmount}</b>
         </p>
 
         <InputNumber
           style={{ width: "100%" }}
-          min={0}
+          controls={false}
           value={finalAmount}
-          onChange={(value) => setFinalAmount(Number(value || 0))}
+          onChange={(value) => {
+            setFinalAmount(value === null ? null : Number(value));
+          }}
+          placeholder="Enter amount"
         />
       </Modal>
     </Content>
