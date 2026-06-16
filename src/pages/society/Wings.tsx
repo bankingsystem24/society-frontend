@@ -121,14 +121,14 @@ const Wings: React.FC = () => {
 
 return (
   <Card
-    bordered={false}
+    variant="borderless"
     style={{
       borderRadius: 12,
       width: "100%",
       minHeight: "calc(100vh - 140px)",
     }}
-    bodyStyle={{
-      padding: window.innerWidth < 768 ? 12 : 24,
+    styles={{ body : {
+      padding: window.innerWidth < 768 ? 12 : 24,},
     }}
   >
     <div

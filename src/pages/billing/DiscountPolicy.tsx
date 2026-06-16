@@ -202,7 +202,7 @@ const DiscountPolicy: React.FC = () => {
   return (
     <Card
       title="Discount Policy"
-      bodyStyle={{ padding: 12 }}
+      styles ={{ body : {padding: 12 },}}
     >
       {/* FORM */}
       <Form form={form} layout="vertical" onFinish={onFinish}>

@@ -15,7 +15,6 @@ import dayjs from "dayjs";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const { Title } = Typography;
-const { Panel } = Collapse;
 
 interface JournalData {
   journalId: number;
@@ -43,10 +42,7 @@ const JournalView: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        `${BASE_URL}/journal/${societyId}`,
-
-      );
+      const response = await axios.get(`${BASE_URL}/journal/${societyId}`);
 
       setData(response.data);
     } catch (error) {
@@ -145,6 +141,7 @@ const JournalView: React.FC = () => {
     );
   };
 
+
   return (
     <Card style={{ margin: 10 }}>
       {/* HEADER */}
@@ -172,91 +169,99 @@ const JournalView: React.FC = () => {
       <br />
 
       {/* GROUPED VIEW */}
-      <Collapse defaultActiveKey={Object.keys(grouped)}>
-        {Object.keys(grouped).map((type) => {
+      <Collapse
+        defaultActiveKey={Object.keys(grouped)}
+        items={Object.keys(grouped).map((type) => {
           const voucherGroup = grouped[type];
 
           const typeRows = Object.values(voucherGroup).flat() as JournalData[];
           const typeTotal = getGroupTotal(typeRows);
 
-          return (
-            <Panel
-              key={type}
-              header={
-                <Row justify="space-between">
-                  <Col>
-                    <Tag
-                      color={
-                        type === "RECEIPT"
-                          ? "green"
-                          : type === "PAYMENT"
-                            ? "red"
-                            : "orange"
-                      }
-                    >
-                      {type}
-                    </Tag>
-                  </Col>
-                  <Col>
-                    <b>
-                      Debit:{" "}
-                      {typeTotal.debit.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })}{" "}
-                      | Credit:{" "}
-                      {typeTotal.credit.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </b>
-                  </Col>
-                </Row>
-              }
-            >
-              <Collapse>
-                {Object.keys(voucherGroup).map((voucherNo) => {
+          return {
+            key: type,
+            label: (
+              <Row justify="space-between" style={{ width: "100%" }}>
+                <Col>
+                  <Tag
+                    color={
+                      type === "RECEIPT"
+                        ? "green"
+                        : type === "PAYMENT"
+                          ? "red"
+                          : "orange"
+                    }
+                  >
+                    {type}
+                  </Tag>
+                </Col>
+
+                <Col>
+                  <b>
+                    Debit:{" "}
+                    {typeTotal.debit.toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                    })}
+                    {" | "}
+                    Credit:{" "}
+                    {typeTotal.credit.toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </b>
+                </Col>
+              </Row>
+            ),
+
+            children: (
+              <Collapse
+                items={Object.keys(voucherGroup).map((voucherNo) => {
                   const rows = voucherGroup[voucherNo];
                   const totals = getGroupTotal(rows);
 
-                  return (
-                    <Panel
-                      key={voucherNo}
-                      header={
-                        <Row justify="space-between">
-                          <Col>
-                            <b>{voucherNo}</b>
-                          </Col>
-                          <Col>
-                            Debit:{" "}
-                            {totals.debit.toLocaleString("en-IN", {
-                              minimumFractionDigits: 2,
-                            })}{" "}
-                            | Credit:{" "}
-                            {totals.credit.toLocaleString("en-IN", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </Col>
-                        </Row>
-                      }
-                    >
+                  return {
+                    key: voucherNo,
+                    label: (
+                      <Row justify="space-between" style={{ width: "100%" }}>
+                        <Col>
+                          <b>{voucherNo}</b>
+                        </Col>
+
+                        <Col>
+                          Debit:{" "}
+                          {totals.debit.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                          })}
+                          {" | "}
+                          Credit:{" "}
+                          {totals.credit.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </Col>
+                      </Row>
+                    ),
+
+                    children: (
                       <Table
                         bordered
                         size="small"
                         loading={loading}
                         columns={columns}
                         dataSource={rows}
-                        rowKey={(r: JournalData) => r.journalId}
+                        rowKey={(r: JournalData) =>
+                          `${r.journalId}-${r.glCode}`
+                        }
                         pagination={{
                           pageSize: 8,
                         }}
+                        scroll={{ x: "max-content" }}
                       />
-                    </Panel>
-                  );
+                    ),
+                  };
                 })}
-              </Collapse>
-            </Panel>
-          );
+              />
+            ),
+          };
         })}
-      </Collapse>
+      />
     </Card>
   );
 };

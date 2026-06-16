@@ -134,7 +134,7 @@ const Flats: React.FC = () => {
 
   return (
     <Card
-      bordered={false}
+      variant="borderless"
       style={{
         borderRadius: 12,
       }}

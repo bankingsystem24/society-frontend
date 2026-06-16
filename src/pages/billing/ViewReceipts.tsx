@@ -86,7 +86,6 @@ const loadReceipts = async (flatId?: number) => {
         financialYearId,
       }
     );
-    console.log("Receipts Response:",res.data);
 
     if (!financialYear) {
       setReceipts(res.data);
@@ -122,14 +121,12 @@ const loadReceipts = async (flatId?: number) => {
   const loadReceiptDetails = async (receiptId: number) => {
     try {
       setLoading(true);
-      console.log("ReceiptId",receiptId);
       const detailsres = await axios.get(`${BASE_URL}/receipts/details/${receiptId}`);
       const data = detailsres.data;
 
       setReceiptBills(data);
 
       const receiptType = detailsres.data?.[0]?.receiptType;
-      console.log("data",data);
 
       const selected = receipts.find((r) => r.id === receiptId) || null;
       setSelectedReceipt(selected);

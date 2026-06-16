@@ -105,13 +105,11 @@ const PendingContributions: React.FC = () => {
         (f: any) => Number(f.id) === Number(flatId),
       );
 
-      console.log("Selected Flat:", selectedFlatObj);
 
       const res = await axios.get(
         `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
       );
 
-      console.log("Contributions:", res.data);
 
       let pendingContributions = (res.data || []).filter(
         (item: any) => item.status !== "PAID",
@@ -124,8 +122,6 @@ const PendingContributions: React.FC = () => {
             selectedFlatObj.flatNo?.replace(/\s/g, "").toUpperCase(),
         );
       }
-
-      console.log("Filtered Contributions:", pendingContributions);
 
       setContributions(pendingContributions);
     } catch (err) {
@@ -310,6 +306,7 @@ const PendingContributions: React.FC = () => {
         style={{
           marginBottom: 12,
           display: "flex",
+          flexWrap:"wrap",
           justifyContent: "space-between",
           alignItems: "center",
         }}
@@ -337,6 +334,7 @@ const PendingContributions: React.FC = () => {
           rowKey="id"
           dataSource={contributions}
           columns={columns}
+          scroll={{ x:"max-context"}}
           rowSelection={{
             selectedRowKeys,
 
@@ -404,7 +402,7 @@ const PendingContributions: React.FC = () => {
       <Modal
         title="Enter Contribution Amount"
         open={amountModalOpen}
-        destroyOnClose
+        destroyOnHidden
         onCancel={() => {
           setAmountModalOpen(false);
           setFinalAmount(null);

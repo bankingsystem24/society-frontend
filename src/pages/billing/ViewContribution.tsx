@@ -82,7 +82,6 @@ const ViewContribution: React.FC = () => {
       const res = await axios.get(
         `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
       );
-      console.log("Response", res.data);
       setData(res.data || []);
       setFilteredData(res.data || []);
     } catch {
@@ -131,7 +130,6 @@ const ViewContribution: React.FC = () => {
         );
         return;
       }
-      console.log(contributionAmount,userId);
       
       const res = await axios.put(`${BASE_URL}/contribution/pay`, {
         contributionIds,
@@ -289,6 +287,7 @@ const ViewContribution: React.FC = () => {
           columns={columns}
           pagination={{ pageSize: 10 }}
           size="small"
+          scroll={{ x:"max-content"}}
           rowSelection={{
             selectedRowKeys,
             hideSelectAll: true,

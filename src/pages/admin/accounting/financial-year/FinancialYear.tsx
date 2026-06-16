@@ -164,8 +164,8 @@ return (
       margin: 10,
       width: "100%",
     }}
-    bodyStyle={{
-      padding: window.innerWidth < 768 ? 12 : 24,
+    styles ={{ body : {
+      padding: window.innerWidth < 768 ? 12 : 24,},
     }}
   >
     <Title level={3}>Financial Year Management</Title>

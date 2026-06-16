@@ -208,7 +208,7 @@ const Users: React.FC = () => {
 
   return (
     <Card
-      bordered={false}
+      variant="borderless"
       style={{
         width: "100%",
         borderRadius: 12,

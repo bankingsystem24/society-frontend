@@ -28,6 +28,7 @@ type CompulsoryMode = "FLAT" | "AREA";
 type Contribution = {
   id: number;
   name: string;
+  type: string;
   amount: number;
   flatNo: string;
   areaSqFt: number;
@@ -59,7 +60,7 @@ const ContributionPage: React.FC = () => {
     if (type === "COMPULSORY") {
       fetchContributions();
     }
-  }, [type]);
+  }, []);
 
 const clearForm = () => {
   setName("");
@@ -71,6 +72,12 @@ const clearForm = () => {
   setMinAmount(0);
   setMode("FLAT");
 };
+
+const filteredContributions = useMemo(() => {
+  return contributions.filter(
+    (item) => item.mode && item.type === type
+  );
+}, [contributions, type]);
 
 const total = useMemo(() => {
   if (!Array.isArray(contributions)) return 0;
@@ -144,7 +151,7 @@ const total = useMemo(() => {
           {/* ROW 1 - TYPE ONLY */}
           <Row gutter={[16, 16]}>
             <Col span={24}>
-              <Card size="small" bordered>
+              <Card size="small" variant="outlined">
                 <Form.Item
                   label="Contribution Type"
                   style={{ marginBottom: 0 }}
@@ -165,7 +172,7 @@ const total = useMemo(() => {
           <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
             {/* LEFT */}
             <Col xs={24} md={8}>
-              <Card size="small" bordered>
+              <Card size="small" variant="outlined">
                 <Form.Item label="Contribution for...">
                   <Input
                     value={name}
@@ -187,7 +194,7 @@ const total = useMemo(() => {
 
             {/* MIDDLE */}
             <Col xs={24} md={8}>
-              <Card size="small" bordered>
+              <Card size="small" variant="outlined">
                 <Form.Item label="Due Date">
                   <DatePicker
                     style={{ width: "100%" }}
@@ -212,7 +219,7 @@ const total = useMemo(() => {
 
             {/* RIGHT */}
             <Col xs={24} md={8}>
-              <Card size="small" bordered>
+              <Card size="small" variant="outlined">
                 {type === "COMPULSORY" ? (
                   mode === "FLAT" ? (
                     <Form.Item label="Flat Amount">
@@ -279,7 +286,6 @@ const total = useMemo(() => {
             </>
           }
         >
-          {type === "COMPULSORY" ? (
             <>
               <Title level={5}>Member-wise Calculation</Title>
 
@@ -289,9 +295,10 @@ const total = useMemo(() => {
               <Divider />
 
               <Table
-                dataSource={contributions}
+                dataSource={filteredContributions}
                 rowKey="id"
                 size="small"
+                scroll = {{ x: "max-content" }}
                 columns={[
                   { title: "Name", dataIndex: "name" },
                   { title: "Flat No", dataIndex: "flatNo" },
@@ -302,21 +309,6 @@ const total = useMemo(() => {
                 ]}
               />
             </>
-          ) : (
-            <>
-              <Title level={5}>{name || "Voluntary Contribution"}</Title>
-
-              <p>{description || "No description added"}</p>
-
-              <Divider />
-
-              <p>
-                <b>Minimum Amount:</b> ₹{minAmount}
-              </p>
-
-              <p>Members can contribute any amount voluntarily.</p>
-            </>
-          )}
         </Card>
       </div>
     </div>
