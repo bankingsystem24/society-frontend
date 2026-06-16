@@ -132,6 +132,7 @@ const ViewContribution: React.FC = () => {
         contributionIds,
         paymentMode,
         financialYearId,
+        voluntaryAmount
       });
 
       message.success(res.data);

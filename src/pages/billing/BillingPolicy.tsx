@@ -24,7 +24,7 @@ const BillingPolicy: React.FC = () => {
 
   const societyId = Number(sessionStorage.getItem("societyId"));
   const societyName = sessionStorage.getItem("societyName");
-
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   useEffect(() => {
     form.setFieldsValue({
       societyId,
@@ -76,6 +76,7 @@ const BillingPolicy: React.FC = () => {
         interestType: values.interestType,
         penaltyType: values.penaltyType,
         penaltyValue: values.penaltyValue,
+        financialYearId:financialYearId,
       };
 
       await apiPost("/billing-policy", payload);
