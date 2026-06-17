@@ -47,6 +47,7 @@ const MemberSinkingFunds: React.FC = () => {
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
   const userId = Number(sessionStorage.getItem("userId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     loadFlats();
@@ -98,6 +99,8 @@ const MemberSinkingFunds: React.FC = () => {
 
       const res = await axios.post(`${BASE_URL}/members/sinking-funds`, {
         flatIds,
+        societyId,
+        financialYearId
       });
 
       let pendingFunds = (res.data || []).filter(
@@ -141,6 +144,7 @@ const MemberSinkingFunds: React.FC = () => {
           sinkingFundIds: [...selectedRowKeys],
           memberId,
           amount: totalAmount,
+          userId
         },
       );
 

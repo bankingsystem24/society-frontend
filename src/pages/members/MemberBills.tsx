@@ -8,6 +8,7 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
 const { Title } = Typography;
 
+/* ================= TYPES ================= */
 type Billing = {
   id: number;
   month: string;
@@ -17,15 +18,132 @@ type Billing = {
   paidDate?: string;
   paymentMode?: string;
   receiptNo?: string;
+  transactionId: string;
   flat?: { flatNo?: string };
+  flatNo?: string;
 };
 
+/* ================= PRINT FUNCTION ================= */
+const printReceipt = (receipt: any, type: string) => {
+  if (!receipt) return;
+
+  const rows = (receipt.items || [])
+    .map(
+      (b: any) => `
+      <tr>
+        <td>${b.month || "-"}</td>
+        <td>${b.year || "-"}</td>
+        <td>₹ ${b.totalAmount ?? b.amount ?? 0}</td>
+        <td>${b.status || "-"}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const societyName = sessionStorage.getItem("societyName") || "";
+
+  const flatNo =
+    receipt.flatNo ||
+    receipt.items?.[0]?.flat?.flatNo ||
+    receipt.items?.[0]?.flatNo ||
+    "-";
+
+  const content = `
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+          th, td { border: 1px solid #ccc; padding: 8px; }
+          h2 { text-align: center; }
+        </style>
+      </head>
+      <body>
+
+        <h2>${societyName}</h2>
+        <h2>${type} Receipt</h2>
+
+        <hr />
+
+        <table>
+          <tbody>
+            <tr>
+              <td><b>Receipt No</b></td>
+              <td>${receipt.receiptNo}</td>
+            </tr>
+
+            <tr>
+              <td><b>Flat</b></td>
+              <td>${flatNo}</td>
+            </tr>
+
+            <tr>
+              <td><b>Total Amount</b></td>
+              <td>₹ ${receipt.totalAmount}</td>
+            </tr>
+
+            <tr>
+              <td><b>Payment Mode</b></td>
+              <td>${receipt.paymentMode || "-"}</td>
+            </tr>
+
+            <tr>
+              <td><b>Date</b></td>
+              <td>
+                ${
+                  receipt.paidDate
+                    ? new Date(receipt.paidDate).toLocaleDateString("en-GB")
+                    : "-"
+                }
+              </td>
+            </tr>
+
+            <tr>
+              <td><b>Transaction ID</b></td>
+              <td>${receipt.transactionId || "-"}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+
+        <br/><br/>
+        <p><b>Authorized Signatory</b></p>
+
+      </body>
+    </html>
+  `;
+
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.write(content);
+    win.document.close();
+    win.print();
+  }
+};
+
+/* ================= COMPONENT ================= */
 const MemberBills: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [groupedBills, setGroupedBills] = useState<any[]>([]);
+  const [sinkingFunds, setSinkingFunds] = useState<any[]>([]);
 
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     fetchBills();
@@ -41,43 +159,82 @@ const MemberBills: React.FC = () => {
 
       const flatIds = flatsRes.data.map((f: any) => Number(f.id));
 
-      if (flatIds.length === 0) {
-        setGroupedBills([]);
-        return;
-      }
-
-      const billsRes = await axios.post(`${BASE_URL}/members/bills`, {
+      const payload = {
         flatIds,
-      });
+        memberId,
+        societyId,
+        financialYearId,
+      };
 
-      const bills: Billing[] = (billsRes.data || [])
-      .filter((b: any) => b.status === "PAID")
-      .sort(
-        (a :any, b:any) =>
-          new Date(b.paidDate ?? 0).getTime() -
-          new Date(a.paidDate ?? 0).getTime()
+      const billsRes = await axios.post(`${BASE_URL}/members/bills`, payload);
+      const sinkingRes = await axios.post(
+        `${BASE_URL}/members/sinking-funds`,
+        payload
       );
 
-      const grouped = bills.reduce((acc: any, item: Billing) => {
-        const key = item.receiptNo || "NO_RECEIPT";
+      /* ================= MAINTENANCE ================= */
+      const bills = (billsRes.data || [])
+        .filter((b: any) => b.status === "PAID")
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.paidDate ?? 0).getTime() -
+            new Date(a.paidDate ?? 0).getTime()
+        );
 
-        if (!acc[key]) {
-          acc[key] = {
-            receiptNo: key,
-            paidDate: item.paidDate,
-            paymentMode: item.paymentMode,
-            totalAmount: 0,
-            items: [],
-          };
-        }
+      const groupedBills = Object.values(
+        bills.reduce((acc: any, item: any) => {
+          const key = item.receiptNo || "NO_RECEIPT";
 
-        acc[key].items.push(item);
-        acc[key].totalAmount += item.totalAmount || 0;
+          if (!acc[key]) {
+            acc[key] = {
+              receiptNo: key,
+              paidDate: item.paidDate,
+              paymentMode: item.paymentMode,
+              totalAmount: 0,
+              transactionId: item.transactionId,
+              flatNo: item.flat?.flatNo,
+              items: [],
+            };
+          }
 
-        return acc;
-      }, {});
+          acc[key].items.push(item);
+          acc[key].totalAmount += item.totalAmount || 0;
 
-      setGroupedBills(Object.values(grouped));
+          return acc;
+        }, {})
+      );
+
+      setGroupedBills(groupedBills);
+
+      /* ================= SINKING FUND ================= */
+      const sinkingData = (sinkingRes.data || []).filter(
+        (i: any) => i.status === "PAID"
+      );
+
+      const groupedSinking = Object.values(
+        sinkingData.reduce((acc: any, item: any) => {
+          const key = item.receiptNo || "NO_RECEIPT";
+
+          if (!acc[key]) {
+            acc[key] = {
+              receiptNo: key,
+              paidDate: item.paidDate,
+              paymentMode: item.paymentMode,
+              totalAmount: 0,
+              transactionId: item.transactionId,
+              flatNo: item.flatNo,
+              items: [],
+            };
+          }
+
+          acc[key].items.push(item);
+          acc[key].totalAmount += Number(item.amount || 0);
+
+          return acc;
+        }, {})
+      );
+
+      setSinkingFunds(groupedSinking);
     } catch (err) {
       console.error(err);
     } finally {
@@ -85,192 +242,24 @@ const MemberBills: React.FC = () => {
     }
   };
 
-  // ================= PRINT =================
-  const handlePrint = (receipt: any) => {
-    if (!receipt) return;
-
-    const rows = receipt.items
-      .map(
-        (b: any) => `
-        <tr>
-          <td>${b.month}</td>
-          <td>${b.year}</td>
-          <td>${b.totalAmount}</td>
-          <td>${b.status}</td>
-        </tr>
-      `
-      )
-      .join("");
-
-    const societyName = sessionStorage.getItem("societyName") || "";
-
-    const content = `
-      <html>
-        <head>
-          <title>Receipt</title>
-          <style>
-            body { font-family: Arial; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th, td { border: 1px solid #ccc; padding: 8px; }
-            h2 { text-align: center; }
-          </style>
-        </head>
-
-        <body>
-
-          <h2>${societyName}</h2>
-          <h2>Maintenance Receipt</h2>
-
-          <hr />
-
-          <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
-            <tbody>
-              <tr>
-                <td style="padding:6px; font-weight:bold; width:180px; background:#f5f5f5;">
-                  Receipt No
-                </td>
-                <td style="padding:6px;">
-                  ${receipt.receiptNo}
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
-                  Flat
-                </td>
-                <td style="padding:6px;">
-                  ${receipt.items?.[0]?.flat?.flatNo || "-"}
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
-                  Total Amount
-                </td>
-                <td style="padding:6px;">
-                  ₹ ${receipt.totalAmount}
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
-                  Payment Mode
-                </td>
-                <td style="padding:6px;">
-                  ${receipt.paymentMode || ""}
-                </td>
-              </tr>
-
-              <tr>
-                <td style="padding:6px; font-weight:bold; background:#f5f5f5;">
-                  Date
-                </td>
-                <td style="padding:6px;">
-                  ${
-                    receipt.paidDate
-                      ? new Date(receipt.paidDate).toLocaleDateString("en-GB")
-                      : "-"
-                  }
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <table>
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-
-          <br/><br/>
-          <p><b>Authorized Signatory</b></p>
-
-        </body>
-      </html>
-    `;
-
-    const win = window.open("", "_blank");
-    if (win) {
-      win.document.write(content);
-      win.document.close();
-      win.print();
-    }
-  };
-
-  // ================= INNER TABLE =================
-  const innerColumns = [
+  /* ================= COLUMNS ================= */
+  const columns = [
     {
-      title: "Flat No",
-      render: (_: any, r: any) => r.flat?.flatNo,
-    },
-    {
-      title: "Month",
-      dataIndex: "month",
-    },
-    {
-      title: "Year",
-      dataIndex: "year",
-    },
-    {
-      title: "Amount",
-      dataIndex: "totalAmount",
-      render: (v: number) => `₹ ${v}`,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      render: (status: string) => (
-        <Tag color={status === "PAID" ? "green" : "red"}>{status}</Tag>
+      title: "Receipt No",
+      dataIndex: "receiptNo",
+      render: (_: any, record: any) => (
+        <span
+          style={{
+            color: "#1677ff",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+          onClick={() => printReceipt(record, "Maintenance")}
+        >
+          {record.receiptNo}
+        </span>
       ),
     },
-    {
-      title:"Transaction Id",
-      dataIndex:"transactionId",
-
-    },
-    {
-      title:"Payment Mode",
-      dataIndex:"paymentMode",
-    },
-
-  ];
-
-  // ================= MAIN TABLE =================
-  const columns = [
-{
-  title: "Receipt No",
-  dataIndex: "receiptNo",
-  render: (_: any, record: any) => {
-    const isValid = record.receiptNo && record.receiptNo !== "NO_RECEIPT";
-
-    return (
-      <span
-        style={{
-          color: isValid ? "#1677ff" : "#999",
-          cursor: isValid ? "pointer" : "not-allowed",
-          fontWeight: 500,
-          textDecoration: isValid ? "underline" : "none",
-        }}
-        onClick={() => {
-          if (isValid) {
-            handlePrint(record);
-          }
-        }}
-      >
-        {record.receiptNo || "NO_RECEIPT"}
-      </span>
-    );
-  },
-},
     {
       title: "Total Amount",
       dataIndex: "totalAmount",
@@ -282,8 +271,55 @@ const MemberBills: React.FC = () => {
       render: (v: string) =>
         v ? new Date(v).toLocaleDateString("en-GB") : "-",
     },
+    {
+      title: "Payment Mode",
+      dataIndex: "paymentMode",
+    },
+    {
+      title: "Transaction Id",
+      dataIndex: "transactionId",
+    },
   ];
 
+  const sinkingColumns = [
+    {
+      title: "Receipt No",
+      dataIndex: "receiptNo",
+      render: (_: any, record: any) => (
+        <span
+          style={{
+            color: "#1677ff",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+          onClick={() => printReceipt(record, "Sinking Fund")}
+        >
+          {record.receiptNo}
+        </span>
+      ),
+    },
+    {
+      title: "Total Amount",
+      dataIndex: "totalAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
+      title: "Paid Date",
+      dataIndex: "paidDate",
+      render: (v: string) =>
+        v ? new Date(v).toLocaleDateString("en-GB") : "-",
+    },
+    {
+      title: "Payment Mode",
+      dataIndex: "paymentMode",
+    },
+    {
+      title: "Transaction Id",
+      dataIndex: "transactionId",
+    },
+  ];
+
+  /* ================= UI ================= */
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider breakpoint="lg" collapsedWidth="0">
@@ -299,24 +335,31 @@ const MemberBills: React.FC = () => {
           {loading ? (
             <Spin size="large" />
           ) : (
-            <Table
-              dataSource={groupedBills}
-              columns={columns}
-              rowKey="receiptNo"
-              bordered
-              pagination={{ pageSize: 8 }}
-              expandable={{
-                expandedRowRender: (record: any) => (
-                  <Table
-                    dataSource={record.items}
-                    columns={innerColumns}
-                    pagination={{pageSize: 8,}}
-                    rowKey="id"
-                    size="small"
-                  />
-                ),
-              }}
-            />
+            <>
+              <Table
+                dataSource={groupedBills}
+                columns={columns}
+                rowKey="receiptNo"
+                bordered
+                size="small"
+                pagination={{ pageSize: 8 }}
+                scroll={{ x: "max-content" }}
+              />
+
+              <div style={{ marginTop: 32 }}>
+                <Title level={3}>Sinking Fund</Title>
+
+                <Table
+                  dataSource={sinkingFunds}
+                  columns={sinkingColumns}
+                  rowKey="receiptNo"
+                  bordered
+                  size="small"
+                  pagination={{ pageSize: 8 }}
+                  scroll={{ x: "max-content" }}
+                />
+              </div>
+            </>
           )}
         </Content>
       </Layout>

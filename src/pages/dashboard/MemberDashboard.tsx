@@ -33,7 +33,7 @@ const MemberDashboard: React.FC = () => {
     receipts: 0,
   });
 
-  const memberName = sessionStorage.getItem("memberName");
+  const memberName = sessionStorage.getItem("userName");
   const societyName = sessionStorage.getItem("societyName");
   const memberId = sessionStorage.getItem("memberId");
 

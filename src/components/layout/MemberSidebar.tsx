@@ -1,32 +1,46 @@
-import React, { useState } from "react";
+import React from "react";
 import { Menu } from "antd";
 import {
   DashboardOutlined,
-  FileTextOutlined,
   DollarOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sider from "antd/es/layout/Sider";
 
 const MemberSidebar: React.FC = () => {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+
+  const handleClick = ({ key }: any) => {
+    if (key === "/member-login") {
+      sessionStorage.clear();
+      navigate("/member-login");
+      return;
+    }
+    navigate(key);
+  };
 
   return (
     <Sider
+      width={200}
       breakpoint="lg"
-      collapsedWidth="0"
-      collapsible
-      onCollapse={(collapsed) => setCollapsed(collapsed)}
-     
+      collapsedWidth={0}
       style={{
-        overflow: "auto",
         height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+        overflowX: "hidden",
       }}
     >
-    <div style={{ height: "100vh" }}>
-      <div style={{ color: "white", padding: 16, fontWeight: "bold" }}>
+      <div
+        style={{
+          color: "white",
+          padding: 16,
+          fontWeight: "bold",
+        }}
+      >
         Member Panel
       </div>
 
@@ -34,7 +48,7 @@ const MemberSidebar: React.FC = () => {
         theme="dark"
         mode="inline"
         selectedKeys={[location.pathname]}
-        onClick={({ key }) => navigate(key)}
+        onClick={handleClick}
         items={[
           {
             key: "/member-dashboard",
@@ -44,23 +58,23 @@ const MemberSidebar: React.FC = () => {
           {
             key: "/member-pending-bills",
             icon: <DollarOutlined />,
-            label: "Pending Bills",
+            label: "Pending Maint.",
           },
           {
-            key: "/member-bills",
-            icon: <DollarOutlined />,
-            label: "Paid Bills",
-          },
-
-
-
-          {
-            key: "/member-sinking-funds",
+            key: "/sinking-funds",
             icon: <DollarOutlined />,
             label: "Pending Funds",
           },
-
-
+          {
+            key: "/contributions",
+            icon: <DollarOutlined />,
+            label: "Pending Contri.",
+          },
+          {
+            key: "/member-receipts",
+            icon: <DollarOutlined />,
+            label: "Receipts",
+          },
           {
             key: "/member-login",
             icon: <LogoutOutlined />,
@@ -68,7 +82,6 @@ const MemberSidebar: React.FC = () => {
           },
         ]}
       />
-    </div>
     </Sider>
   );
 };

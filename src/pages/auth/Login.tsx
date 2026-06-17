@@ -8,6 +8,8 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const onFinish = async (values: any) => {
     setLoading(true);
+    console.log("Values:",values);
+
     try {
       const res = await axios.post(
         import.meta.env.VITE_API_URL + "/auth/login",
@@ -18,9 +20,12 @@ const Login: React.FC = () => {
           },
         },
       );
-
+      console.log("Response:", res.data);
       message.success("Login successful");
       sessionStorage.setItem("userName", res.data.name);
+
+      console.log("Stored Name:",sessionStorage.getItem("userName"));
+      
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("memberId", String(res.data.memberId));
 
@@ -51,7 +56,6 @@ const Login: React.FC = () => {
       sessionStorage.setItem("societyId", String(res.data.societyId));
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("role", res.data.role);
-      sessionStorage.setItem("userName", res.data.name);
       sessionStorage.setItem("userId", String(res.data.auditorId));
       if(res.data.role === "SUPER_ADMIN"){
           navigate("/superadmindashboard");
@@ -64,9 +68,11 @@ const Login: React.FC = () => {
           navigate("/auditordashboard");
       }
     } catch (error: any) {
-      message.error(
-        error?.response?.data?.message || "Invalid username or password",
-      );
+    console.log("ERROR:", error);
+  console.log("STATUS:", error?.response?.status);
+  console.log("DATA:", error?.response?.data);
+
+  message.error("Login failed");
     } finally {
       setLoading(false);
     }

@@ -10,14 +10,18 @@ import {
   Select,
   Modal,
   InputNumber,
-  Input,
 } from "antd";
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import AppHeader from "../../components/layout/Header";
 
 const { Content } = Layout;
 const { Title } = Typography;
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 type Contribution = {
   id: number;
@@ -26,7 +30,6 @@ type Contribution = {
   amount: number;
   flatNo: string;
   dueDate: string;
-  date: string;
   status: string;
   memberId: number;
 };
@@ -45,85 +48,81 @@ const PendingContributions: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [payLoading, setPayLoading] = useState(false);
 
-  const memberId = Number(sessionStorage.getItem("memberId"));
-  const societyId = Number(sessionStorage.getItem("societyId"));
-  const userId = Number(sessionStorage.getItem("userId"));
-  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
   const [amountModalOpen, setAmountModalOpen] = useState(false);
   const [finalAmount, setFinalAmount] = useState<number | null>(null);
   const [minimumAmount, setMinimumAmount] = useState<number>(0);
   const [contributionType, setContributionType] = useState<string>("");
 
+  const role = sessionStorage.getItem("role");
+
+  const memberId = Number(sessionStorage.getItem("memberId"));
+  const societyId = Number(sessionStorage.getItem("societyId"));
+  const userId = Number(sessionStorage.getItem("userId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+
   useEffect(() => {
     loadFlats();
   }, []);
 
+  // ✅ SAFE NORMALIZER
+  const normalize = (v: any) =>
+    (v || "").toString().replace(/\s+/g, "").toUpperCase();
+
   const loadFlats = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/members/flats`, {
-        params: {
-          societyId,
-          memberId,
-        },
+        params: { societyId, memberId },
       });
 
       const flatsData = res.data || [];
       setFlats(flatsData);
 
       if (flatsData.length > 0) {
-        const firstFlatId = Number(flatsData[0].id);
+        const first = Number(flatsData[0].id);
+        setSelectedFlat(first);
 
-        setSelectedFlat(firstFlatId);
-
-        // pass directly from API response
-        fetchContributions(firstFlatId);
+        // ⚠️ avoid race condition
+        setTimeout(() => {
+          fetchContributions(first);
+        }, 0);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       message.error("Failed to load flats");
     }
   };
 
+  // ✅ FRONTEND FILTER ONLY
   const fetchContributions = async (flatId: number | null) => {
-    if (!flatId) {
-      setContributions([]);
-      return;
-    }
+    if (!flatId) return setContributions([]);
 
     try {
       setLoading(true);
 
-      const flatsRes = await axios.get(`${BASE_URL}/members/flats`, {
-        params: {
-          societyId,
-          memberId,
-        },
+      const res = await axios.get(
+        `${BASE_URL}/contribution/${societyId}/${financialYearId}`
+      );
+
+      let data = (res.data || []).filter(
+        (i: any) => i.status !== "PAID"
+      );
+
+      const selectedFlatObj = flats.find(
+        (f) => Number(f.id) === Number(flatId)
+      );
+
+      const selectedFlatNo = normalize(selectedFlatObj?.flatNo);
+
+      // 🔥 MAIN FRONTEND FILTER
+      data = data.filter((item: any) => {
+        return normalize(item.flatNo) === selectedFlatNo;
       });
 
-      const selectedFlatObj = flatsRes.data.find(
-        (f: any) => Number(f.id) === Number(flatId),
-      );
-
-
-      const res = await axios.get(
-        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
-      );
-
-
-      let pendingContributions = (res.data || []).filter(
-        (item: any) => item.status !== "PAID",
-      );
-
-      if (selectedFlatObj) {
-        pendingContributions = pendingContributions.filter(
-          (item: any) =>
-            item.flatNo?.replace(/\s/g, "").toUpperCase() ===
-            selectedFlatObj.flatNo?.replace(/\s/g, "").toUpperCase(),
-        );
+      // MEMBER FILTER
+      if (role === "MEMBER") {
+        data = data.filter((i: any) => i.memberId === memberId);
       }
 
-      setContributions(pendingContributions);
+      setContributions(data);
     } catch (err) {
       console.error(err);
       message.error("Failed to load contributions");
@@ -132,24 +131,24 @@ const PendingContributions: React.FC = () => {
     }
   };
 
-  const selectedContributions = contributions.filter((item) =>
-    selectedRowKeys.includes(item.id),
+  const selectedContributions = contributions.filter((i) =>
+    selectedRowKeys.includes(i.id)
   );
 
   const totalAmount = selectedContributions.reduce(
-    (sum, item) => sum + (item.amount || 0),
-    0,
+    (s, i) => s + (i.amount || 0),
+    0
   );
 
-  const handlePay = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("Select contribution records first");
+  const handlePay = () => {
+    if (!selectedRowKeys.length) {
+      message.warning("Select records first");
       return;
     }
 
-    const firstContribution = selectedContributions[0];
+    const first = selectedContributions[0];
 
-    if (firstContribution?.type?.toUpperCase() === "VOLUNTARY") {
+    if (first?.type?.toUpperCase() === "VOLUNTARY") {
       setContributionType("VOLUNTARY");
       setMinimumAmount(totalAmount);
       setFinalAmount(totalAmount);
@@ -160,20 +159,17 @@ const PendingContributions: React.FC = () => {
     proceedPayment(totalAmount, "COMPULSORY");
   };
 
-  const proceedPayment = async (
-    amountToPay: number,
-    contributionType: string,
-  ) => {
+  const proceedPayment = async (amount: number, type: string) => {
     try {
       setPayLoading(true);
 
       const orderRes = await axios.post(
         `${BASE_URL}/contribution/create-order`,
         {
-          contributionIds: [...selectedRowKeys],
+          contributionIds: selectedRowKeys,
           memberId,
-          amount: amountToPay,
-        },
+          amount,
+        }
       );
 
       const order = orderRes.data;
@@ -183,264 +179,141 @@ const PendingContributions: React.FC = () => {
         amount: order.amount,
         currency: "INR",
         name: "Society Management",
-        description: "Contribution Payment",
         order_id: order.razorpayOrderId,
 
-        modal: {
-          ondismiss: function () {
-            message.warning("Payment cancelled");
-          },
-        },
+        handler: async (response: any) => {
+          await axios.post(`${BASE_URL}/contribution/verify-payment`, {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            contributionIds: selectedRowKeys,
+            memberId,
+            paymentMode: "ONLINE",
+            userId,
+            amount,
+            type,
+            financialYearId,
+          });
 
-        handler: async function (response: any) {
-          try {
-            await axios.post(`${BASE_URL}/contribution/verify-payment`, {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
+          message.success("Payment successful");
 
-              contributionIds: selectedRowKeys,
-              memberId,
-              userId,
-              amount: amountToPay,
-              type: contributionType,
-              paymentMode: response.method || "ONLINE",
-              financialYearId,
-            });
-
-            message.success("Payment successful");
-
-            setSelectedRowKeys([]);
-
-            fetchContributions(selectedFlat);
-          } catch (err) {
-            console.error(err);
-            message.error("Payment verification failed");
-          }
-        },
-
-        prefill: {
-          name: sessionStorage.getItem("memberName") || "Member",
-          email: sessionStorage.getItem("email") || "",
-          contact: sessionStorage.getItem("mobile") || "",
-        },
-
-        theme: {
-          color: "#1677ff",
+          setSelectedRowKeys([]);
+          fetchContributions(selectedFlat);
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
-
-      rzp.on("payment.failed", function (response: any) {
-        message.error(
-          response?.error?.description ||
-            response?.error?.reason ||
-            "Payment failed",
-        );
-      });
-
-      rzp.open();
-    } catch (err) {
-      console.error(err);
-      message.error("Payment initiation failed");
+      new (window as any).Razorpay(options).open();
+    } catch {
+      message.error("Payment failed");
     } finally {
       setPayLoading(false);
     }
   };
 
   const columns = [
-    {
-      title: "Flat No",
-      dataIndex: "flatNo",
-    },
-    {
-      title: "Contribution",
-      dataIndex: "name",
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-    },
-    {
-      title: "Due Date",
-      dataIndex: "dueDate",
-    },
+    { title: "Flat No", dataIndex: "flatNo" },
+    { title: "Name", dataIndex: "name" },
+    { title: "Type", dataIndex: "type" },
+    { title: "Due Date", dataIndex: "dueDate" },
     {
       title: "Amount",
       dataIndex: "amount",
-      render: (value: number) => `₹ ${value}`,
+      render: (v: number) => `₹ ${v}`,
     },
     {
       title: "Status",
       dataIndex: "status",
-      render: (status: string) => (
-        <Tag color={status === "PAID" ? "green" : "orange"}>{status}</Tag>
+      render: (s: string) => (
+        <Tag color={s === "PAID" ? "green" : "orange"}>{s}</Tag>
       ),
     },
   ];
 
   return (
-    <Content style={{ padding: 24, background: "#f0f5ff" }}>
-      <Title level={3}>Pending Contributions</Title>
-
-      <div style={{ marginBottom: 12 }}>
-        <Select
-          placeholder="Select Flat"
-          style={{ width: 220 }}
-          allowClear
-          options={flats.map((flat) => ({
-            label: flat.flatNo,
-            value: flat.id,
-          }))}
-          value={selectedFlat || undefined}
-          onChange={(value) => {
-            setSelectedFlat(value || null);
-            fetchContributions(value || null);
-            setSelectedRowKeys([]);
-          }}
-        />
-      </div>
-
-      <div
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={240}
+        breakpoint="lg"
+        collapsedWidth={0}
         style={{
-          marginBottom: 12,
-          display: "flex",
-          flexWrap:"wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
-        <div>
-          Selected: <b>{selectedContributions.length}</b>
-          {" | "}
-          Total Amount: <b>₹ {totalAmount}</b>
-        </div>
+        {role === "MEMBER" ? <MemberSidebar /> : <Sidebar />}
+      </Layout.Sider>
 
-        <Button
-          type="primary"
-          loading={payLoading}
-          disabled={selectedRowKeys.length === 0 || payLoading}
-          onClick={handlePay}
-        >
-          Pay Contribution (Online)
-        </Button>
-      </div>
+      <Layout>
+        {role === "MEMBER" ? <MemberHeader /> : <AppHeader />}
 
-      {loading ? (
-        <Spin size="large" />
-      ) : (
-        <Table
-          rowKey="id"
-          dataSource={contributions}
-          columns={columns}
-          scroll={{ x:"max-context"}}
-          rowSelection={{
-            selectedRowKeys,
+        <Content style={{ padding: 24, background: "#f0f5ff" }}>
+          <Title level={3}>Pending Contributions</Title>
 
-            onChange: (newSelectedRowKeys) => {
-              if (newSelectedRowKeys.length === 0) {
-                setSelectedRowKeys([]);
-                return;
-              }
+          <Select
+            style={{ width: 220, marginBottom: 12 }}
+            placeholder="Select Flat"
+            options={flats.map((f) => ({
+              label: f.flatNo,
+              value: f.id,
+            }))}
+            value={selectedFlat || undefined}
+            onChange={(v) => {
+              setSelectedFlat(v);
+              fetchContributions(v);
+              setSelectedRowKeys([]);
+            }}
+          />
 
-              const selectedRows = contributions.filter((item) =>
-                newSelectedRowKeys.includes(item.id),
-              );
+          <div style={{ marginBottom: 12 }}>
+            Selected: {selectedRowKeys.length} | Total: ₹{totalAmount}
+          </div>
 
-              const firstRow = selectedRows[0];
+          <Button
+            type="primary"
+            onClick={handlePay}
+            disabled={!selectedRowKeys.length}
+            loading={payLoading}
+          >
+            Pay Online
+          </Button>
 
-              const hasInvalidSelection = selectedRows.some(
-                (row) =>
-                  row.flatNo?.trim().toUpperCase() !==
-                    firstRow.flatNo?.trim().toUpperCase() ||
-                  row.type?.trim().toUpperCase() !==
-                    firstRow.type?.trim().toUpperCase(),
-              );
+          {loading ? (
+            <Spin />
+          ) : (
+            <Table
+              rowKey="id"
+              dataSource={contributions}
+              columns={columns}
+              rowSelection={{
+                selectedRowKeys,
+                onChange: setSelectedRowKeys,
+              }}
+              scroll={{ x: "max-content" }}
+              pagination={{ pageSize: 8 }}
+            />
+          )}
 
-              if (hasInvalidSelection) {
-                message.warning(
-                  "You can select only records having the same Flat No and Type",
-                );
-                return;
-              }
-
-              setSelectedRowKeys(newSelectedRowKeys);
-            },
-
-            getCheckboxProps: (record: Contribution) => {
-              if (selectedRowKeys.length === 0) {
-                return { disabled: false };
-              }
-
-              const firstSelectedRow = contributions.find(
-                (item) => item.id === selectedRowKeys[0],
-              );
-
-              if (!firstSelectedRow) {
-                return { disabled: false };
-              }
-
-              const sameFlat =
-                record.flatNo?.trim().toUpperCase() ===
-                firstSelectedRow.flatNo?.trim().toUpperCase();
-
-              const sameType =
-                record.type?.trim().toUpperCase() ===
-                firstSelectedRow.type?.trim().toUpperCase();
-
-              return {
-                disabled: !(sameFlat && sameType),
-              };
-            },
-          }}
-          pagination={{ pageSize: 8 }}
-          bordered
-        />
-      )}
-
-      <Modal
-        title="Enter Contribution Amount"
-        open={amountModalOpen}
-        destroyOnHidden
-        onCancel={() => {
-          setAmountModalOpen(false);
-          setFinalAmount(null);
-        }}
-        onOk={() => {
-          const enteredAmount = Number(finalAmount || 0);
-
-          if (enteredAmount <= 0) {
-            message.error("Please enter amount");
-            return;
-          }
-
-          if (enteredAmount < minimumAmount) {
-            message.error(
-              `Entered amount cannot be less than ₹${minimumAmount}`,
-            );
-            return;
-          }
-
-          setAmountModalOpen(false);
-          proceedPayment(enteredAmount, contributionType);
-        }}
-      >
-        <p>
-          Minimum Amount: <b>₹{minimumAmount}</b>
-        </p>
-
-        <InputNumber
-          style={{ width: "100%" }}
-          controls={false}
-          value={finalAmount}
-          onChange={(value) => {
-            setFinalAmount(value === null ? null : Number(value));
-          }}
-          placeholder="Enter amount"
-        />
-      </Modal>
-    </Content>
+          <Modal
+            open={amountModalOpen}
+            onCancel={() => setAmountModalOpen(false)}
+            onOk={() => {
+              setAmountModalOpen(false);
+              proceedPayment(finalAmount || 0, contributionType);
+            }}
+          >
+            <p>Minimum: ₹{minimumAmount}</p>
+            <InputNumber
+              style={{ width: "100%" }}
+              value={finalAmount}
+              onChange={(v) => setFinalAmount(Number(v))}
+            />
+          </Modal>
+        </Content>
+      </Layout>
+    </Layout>
   );
 };
 

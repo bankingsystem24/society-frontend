@@ -9,182 +9,123 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
-import "../../App.css";
 
 const { Sider } = Layout;
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
+
+  const onOpenChange = (keys: string[]) => {
+  setOpenKeys(keys);
+};
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    navigate("/");
+  };
 
   return (
     <Sider
-      width={250}
-      breakpoint="md"
+      width={240} // ✅ FIXED WIDTH REQUIRED
+      breakpoint="lg"
       collapsedWidth={0}
-      collapsible
-      collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)}
       style={{
         height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+        overflowX: "hidden",
       }}
     >
+      {/* HEADER */}
       <div
         style={{
           height: 64,
           color: "#fff",
           textAlign: "center",
           lineHeight: "64px",
-          fontSize: 20,
+          fontSize: 15,
           fontWeight: "bold",
         }}
       >
-        Logo
+        Admin Panel
       </div>
 
+      {/* MENU (NO EXTRA DIV) */}
       <Menu
         theme="dark"
         mode="inline"
         selectedKeys={[location.pathname]}
-        onClick={({ key }) => navigate(key)}
+        openKeys={openKeys}
+        onOpenChange={onOpenChange}
+        onClick={({ key }) => {
+          if (key === "logout") handleLogout();
+          else navigate(key);
+        }}
         items={[
           {
             key: "/clientdashboard",
             icon: <DashboardOutlined />,
             label: "Dashboard",
           },
+          { key: "/financial-year", label: "Set Financial Year" },
+
           {
-            key: "/financial-year",
-            label: "Set Financial Year",
-          },
-          {
-            key: "/Policies",
+            key: "Policies",
             label: "Policies",
-            children:[
-              {
-                key: "/billing-policy",
-                label: "Billing Policy",
-              },
-              {
-                key: "/discount-policy",
-                label: "Discount Policy",
-              },
+            children: [
+              { key: "/billing-policy", label: "Billing Policy" },
+              { key: "/discount-policy", label: "Discount Policy" },
             ],
           },
 
-          {
-            key: "/wings",
-            icon: <ApartmentOutlined />,
-            label: "Wings",
-          },
-          {
-            key: "/flats",
-            icon: <HomeOutlined />,
-            label: "Flats",
-          },
-          {
-            key: "/members",
-            icon: <TeamOutlined />,
-            label: "Members",
-          },
-          {
-            key: "/users",
-            icon: <UserOutlined />,
-            label: "Users",
-          },
+          { key: "/wings", icon: <ApartmentOutlined />, label: "Wings" },
+          { key: "/flats", icon: <HomeOutlined />, label: "Flats" },
+          { key: "/members", icon: <TeamOutlined />, label: "Members" },
+          { key: "/users", icon: <UserOutlined />, label: "Users" },
+
           {
             key: "general-ledger",
             icon: <DollarOutlined />,
             label: "General Ledger",
             children: [
-              {
-                key: "/gl-master",
-                label: "Master",
-                icon: <UserOutlined />,
-              },
-              {
-                key: "/gl-balances",
-                label: "Balances",
-                icon: <UserOutlined />,
-              },
+              { key: "/gl-master", label: "Master" },
+              { key: "/gl-balances", label: "Balances" },
+            ],
+          },
+
+          { key: "/add-expenses", label: "Expenses" },
+          { key: "/vendors", label: "Vendors" },
+
+          {
+            key: "Bills",
+            label: "Bills",
+            children: [
+              { key: "/bill-generate", label: "Generate" },
+              { key: "/view-bills", label: "View" },
+              { key: "/pending-bills", label: "Pay Online" },
             ],
           },
 
           {
-            key: "/add-expenses",
-            icon: <UserOutlined />,
-            label: "Expenses",
-          },
-          {
-            key: "/vendors",
-            icon: <UserOutlined />,
-            label: "Vendors",
-          },
-          {
-            key: "Bills",
-            icon: <UserOutlined />,
-            label: "Bills",
-            children: [
-              {
-                key: "/bill-generate",
-                label: "Generate",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/view-bills",
-                label: "View",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/pending-bills",
-                label: "Pay Online",
-                icon: <HomeOutlined />,
-              },
-            ],
-          },
-          {
             key: "Sinking Fund",
-            icon: <UserOutlined />,
             label: "Sinking Fund",
             children: [
-              {
-                key: "/generate-sinking-fund",
-                label: "Generate",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/view-sinking-fund",
-                label: "View",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/pending-sinking-funds",
-                label: "Pay Online",
-                icon: <HomeOutlined />,
-              },
+              { key: "/generate-sinking-fund", label: "Generate" },
+              { key: "/view-sinking-fund", label: "View" },
+              { key: "/sinking-funds", label: "Pay Online" },
             ],
           },
+
           {
             key: "Contributions",
-            icon: <UserOutlined />,
             label: "Contributions",
             children: [
-              {
-                key: "/generate-contribution",
-                label: "Add",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/view-contribution",
-                label: "View",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/pending-contributions",
-                label: "Pay Online",
-                icon: <HomeOutlined />,
-              },
+              { key: "/generate-contribution", label: "Add" },
+              { key: "/view-contribution", label: "View" },
+              { key: "/contributions", label: "Pay Online" },
             ],
           },
           {

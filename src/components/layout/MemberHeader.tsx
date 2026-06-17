@@ -23,7 +23,7 @@ const MemberHeader: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const memberName = sessionStorage.getItem("memberName");
+  const memberName = sessionStorage.getItem("userName");
   const societyName = sessionStorage.getItem("societyName");
   const role = sessionStorage.getItem("role");
   const financialYear = sessionStorage.getItem("financialYear");
@@ -40,7 +40,7 @@ const MemberHeader: React.FC = () => {
 
         sessionStorage.clear();
 
-        navigate("/member-login");
+        navigate("/");
       },
     },
   ];

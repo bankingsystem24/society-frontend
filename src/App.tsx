@@ -62,9 +62,11 @@ export default function App() {
       <Route path="/" element={<Login />} />
       <Route path="/member-login" element={<MemberLogin />} />
       <Route path="/member-dashboard" element={<MemberDashboard />} />
-      <Route path="/member-bills" element={<MemberBills />} />
+      <Route path="/member-receipts" element={<MemberBills />} />
       <Route path="/member-pending-bills" element={<MemberPendingBills />} />
       <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} />
+      <Route path="/contributions" element={<PendingContributions />} />
+      <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
@@ -117,11 +119,7 @@ export default function App() {
         <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
         <Route path="/view-contribution" element={<ViewContribution />}/>
 
-        <Route path="/pending-sinking-funds" element={<PendingSinkingFunds />} />
         <Route path="/generate-contribution" element={<ContributionPage />} />
-        <Route path="/pending-contributions" element={<PendingContributions />} />
-
-
 
         <Route path="/view-journal" element={<JournalView />} />
         <Route path="/view-ledger" element={<LedgerView />} />
