@@ -14,6 +14,8 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 
+
+
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -36,12 +38,9 @@ const SuperAdminUsers: React.FC = () => {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const societyId = sessionStorage.getItem("societyId");
-      if (!societyId) {
         const res = await apiGet("/users");
-
+        console.log("Users:",res.data);
         const filtered = (res || [])
-          // .filter((user: any) => user.role == "SUPER_ADMIN")
           .sort((a: any, b: any) => {
             const societyCompare = (a.societyName || "").localeCompare(
               b.societyName || "",
@@ -56,11 +55,7 @@ const SuperAdminUsers: React.FC = () => {
             return (a.username || "").localeCompare(b.username || "");
           });
         setData(filtered);
-      } else {
-        const res = await apiGet(`/users?societyId=${societyId}`);
-
-        setData(res || []);
-      }
+      
     } catch (error) {
       console.error("Error loading users", error);
     } finally {
@@ -113,6 +108,13 @@ const SuperAdminUsers: React.FC = () => {
       title: "Society",
       dataIndex: "societyName",
       key: "societyName",
+      width:120,
+      ellipsis: true,
+      onCell: () => ({
+        style: {
+          whiteSpace: "nowrap",
+        },
+      }),
     },
     {
       title: "Role",
@@ -138,13 +140,19 @@ const SuperAdminUsers: React.FC = () => {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      ellipsis: true,
+      onCell: () => ({
+        style: {
+          whiteSpace: "nowrap",
+        },
+      }),
     },
 
     {
       title: "Status",
       dataIndex: "active",
       key: "active",
-      width: 180,
+      width: 80,
       render: (_: any, record: any) => (
         <div
           onClick={(e) => {

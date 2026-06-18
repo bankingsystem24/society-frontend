@@ -28,6 +28,7 @@ type Contribution = {
   name: string;
   type: string;
   amount: number;
+  flatId: number;
   flatNo: string;
   dueDate: string;
   status: string;
@@ -41,7 +42,10 @@ type Flat = {
 
 const PendingContributions: React.FC = () => {
   const [loading, setLoading] = useState(false);
+
+  const [allContributions, setAllContributions] = useState<Contribution[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
+
   const [flats, setFlats] = useState<Flat[]>([]);
   const [selectedFlat, setSelectedFlat] = useState<number | null>(null);
 
@@ -61,83 +65,100 @@ const PendingContributions: React.FC = () => {
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
+}, [selectedFlat, contributions]);
+
+  useEffect(() => {
     loadFlats();
+    loadContributions();
   }, []);
 
+  useEffect(() => {
+    if (selectedFlat == null) {
+      setContributions([]);
+      return;
+    }
+
+    const filtered = allContributions.filter(
+      (item) => Number(item.flatId) === Number(selectedFlat),
+    );
+
+    setContributions(filtered);
+  }, [selectedFlat, allContributions]);
+
   // ✅ SAFE NORMALIZER
-  const normalize = (v: any) =>
-    (v || "").toString().replace(/\s+/g, "").toUpperCase();
 
   const loadFlats = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/members/flats`, {
-        params: { societyId, memberId },
+      const flatRes = await axios.get(`${BASE_URL}/members/flats`, {
+        params: {
+          societyId,
+          memberId,
+        },
       });
 
-      const flatsData = res.data || [];
+      const flatsData = flatRes.data || [];
+
       setFlats(flatsData);
 
+      // Select first flat automatically
       if (flatsData.length > 0) {
-        const first = Number(flatsData[0].id);
-        setSelectedFlat(first);
-
-        // ⚠️ avoid race condition
-        setTimeout(() => {
-          fetchContributions(first);
-        }, 0);
+        setSelectedFlat(Number(flatsData[0].id));
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       message.error("Failed to load flats");
     }
   };
 
   // ✅ FRONTEND FILTER ONLY
-  const fetchContributions = async (flatId: number | null) => {
-    if (!flatId) return setContributions([]);
 
+  const loadContributions = async () => {
     try {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/contribution/${societyId}/${financialYearId}`
+        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
       );
 
-      let data = (res.data || []).filter(
-        (i: any) => i.status !== "PAID"
-      );
+      let data = (res.data || []).filter((item: any) => item.status !== "PAID");
 
-      const selectedFlatObj = flats.find(
-        (f) => Number(f.id) === Number(flatId)
-      );
-
-      const selectedFlatNo = normalize(selectedFlatObj?.flatNo);
-
-      // 🔥 MAIN FRONTEND FILTER
-      data = data.filter((item: any) => {
-        return normalize(item.flatNo) === selectedFlatNo;
-      });
-
-      // MEMBER FILTER
       if (role === "MEMBER") {
-        data = data.filter((i: any) => i.memberId === memberId);
+        data = data.filter(
+          (item: any) => Number(item.memberId) === Number(memberId),
+        );
       }
 
-      setContributions(data);
+      setAllContributions(data);
+
+      return data;
     } catch (err) {
       console.error(err);
       message.error("Failed to load contributions");
+      return [];
     } finally {
       setLoading(false);
     }
   };
 
+  const filterContributions = (
+    flatId: number | null,
+    sourceData = allContributions,
+  ) => {
+
+    const filtered = sourceData.filter(
+      (item) => Number(item.flatId) === Number(flatId),
+    );
+
+    setContributions(filtered);
+  };
+
   const selectedContributions = contributions.filter((i) =>
-    selectedRowKeys.includes(i.id)
+    selectedRowKeys.includes(i.id),
   );
 
   const totalAmount = selectedContributions.reduce(
     (s, i) => s + (i.amount || 0),
-    0
+    0,
   );
 
   const handlePay = () => {
@@ -169,7 +190,7 @@ const PendingContributions: React.FC = () => {
           contributionIds: selectedRowKeys,
           memberId,
           amount,
-        }
+        },
       );
 
       const order = orderRes.data;
@@ -198,7 +219,10 @@ const PendingContributions: React.FC = () => {
           message.success("Payment successful");
 
           setSelectedRowKeys([]);
-          fetchContributions(selectedFlat);
+
+          const freshData = await loadContributions();
+
+          filterContributions(selectedFlat, freshData);
         },
       };
 
@@ -252,20 +276,23 @@ const PendingContributions: React.FC = () => {
         <Content style={{ padding: 24, background: "#f0f5ff" }}>
           <Title level={3}>Pending Contributions</Title>
 
-          <Select
-            style={{ width: 220, marginBottom: 12 }}
-            placeholder="Select Flat"
-            options={flats.map((f) => ({
-              label: f.flatNo,
-              value: f.id,
-            }))}
-            value={selectedFlat || undefined}
-            onChange={(v) => {
-              setSelectedFlat(v);
-              fetchContributions(v);
-              setSelectedRowKeys([]);
-            }}
-          />
+<Select
+  style={{ width: 220, marginBottom: 12 }}
+  placeholder="Select Flat"
+  options={flats.map((f) => ({
+    label: f.flatNo,
+    value: f.id,
+  }))}
+  value={selectedFlat ?? undefined}
+  onChange={(v) => {
+    const filtered = allContributions.filter(
+      (item) => Number(item.flatId) === Number(v)
+    );
+    setSelectedFlat(Number(v));
+    setContributions(filtered);
+    setSelectedRowKeys([]);
+  }}
+/>
 
           <div style={{ marginBottom: 12 }}>
             Selected: {selectedRowKeys.length} | Total: ₹{totalAmount}

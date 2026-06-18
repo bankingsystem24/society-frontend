@@ -8,7 +8,6 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const onFinish = async (values: any) => {
     setLoading(true);
-    console.log("Values:",values);
 
     try {
       const res = await axios.post(
@@ -20,17 +19,13 @@ const Login: React.FC = () => {
           },
         },
       );
-      console.log("Response:", res.data);
       message.success("Login successful");
       sessionStorage.setItem("userName", res.data.name);
 
-      console.log("Stored Name:",sessionStorage.getItem("userName"));
-      
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("memberId", String(res.data.memberId));
 
-
-      if (res.data.societyId !== null){
+      if (res.data.societyId !== null) {
         const fyRes = await axios.get(
           `${import.meta.env.VITE_API_URL}/accounting-year/${res.data.societyId}/active`,
           {
@@ -40,8 +35,8 @@ const Login: React.FC = () => {
           },
         );
         sessionStorage.setItem("financialYear", fyRes.data.fyCode);
-        sessionStorage.setItem("financialYearId",fyRes.data.id);
-        }
+        sessionStorage.setItem("financialYearId", fyRes.data.id);
+      }
 
       sessionStorage.setItem("token", res.data.token);
       if (res.data.societyId !== null && res.data.societyId !== undefined) {
@@ -57,22 +52,18 @@ const Login: React.FC = () => {
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("userId", String(res.data.auditorId));
-      if(res.data.role === "SUPER_ADMIN"){
-          navigate("/superadmindashboard");
-      } else if(res.data.role === "ADMIN"){
-          navigate("/clientdashboard");
-      } else if(res.data.role === "MEMBER"){
-          navigate("/member-dashboard");
-      } else if(res.data.role === "AUDITOR"){
-          sessionStorage.setItem("auditorId", res.data.auditorId);
-          navigate("/auditordashboard");
+      if (res.data.role === "SUPER_ADMIN") {
+        navigate("/superadmindashboard");
+      } else if (res.data.role === "ADMIN") {
+        navigate("/clientdashboard");
+      } else if (res.data.role === "MEMBER") {
+        navigate("/member-dashboard");
+      } else if (res.data.role === "AUDITOR") {
+        sessionStorage.setItem("auditorId", res.data.auditorId);
+        navigate("/auditordashboard");
       }
     } catch (error: any) {
-    console.log("ERROR:", error);
-  console.log("STATUS:", error?.response?.status);
-  console.log("DATA:", error?.response?.data);
-
-  message.error("Login failed");
+      message.error("Login failed");
     } finally {
       setLoading(false);
     }

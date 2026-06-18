@@ -27,10 +27,9 @@ type SinkingFund = {
   year: number;
   amount: number;
   status: string;
-  flat?: {
-    id?: number;
-    flatNo?: string;
-  };
+  flatId: Number;
+  flatNo?: string;
+
 };
 
 type Flat = {
@@ -97,13 +96,16 @@ const PendingSinkingFunds: React.FC = () => {
         financialYearId,
       });
 
-      let data = (res.data || []).filter(
-        (fund: SinkingFund) => fund.status !== "PAID"
-      );
+console.log("Res",res);
+let data = (res.data || []).filter(
+  (fund: SinkingFund) =>
+    fund.status !== "PAID" &&
+    Number(fund.flatId) === Number(flatId)
+);
 
-      data = data.filter((fund: SinkingFund) => fund.flat?.id === flatId);
+setSinkingFunds(data);
+console.log("data", data);
 
-      setSinkingFunds(data);
     } catch (err) {
       message.error("Failed to load sinking funds");
     } finally {
@@ -156,6 +158,7 @@ const PendingSinkingFunds: React.FC = () => {
             memberId,
             userId,
             amount: totalAmount,
+            paymentMode:"ONLINE",
             financialYearId,
           });
 
@@ -174,7 +177,7 @@ const PendingSinkingFunds: React.FC = () => {
   };
 
   const columns = [
-    { title: "Flat No", dataIndex: ["flat", "flatNo"] },
+    { title: "Flat No", dataIndex: "flatNo" },
     { title: "Month", dataIndex: "month" },
     { title: "Year", dataIndex: "year" },
     {

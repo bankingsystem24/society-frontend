@@ -12,55 +12,43 @@ import {
   Layout,
 } from "antd";
 
-import {
-  FileDoneOutlined,
-  DollarOutlined,
-} from "@ant-design/icons";
-
+import {FileDoneOutlined,DollarOutlined,} from "@ant-design/icons";
 import axios from "axios";
-
 const { Content } = Layout;
-
 const { Title } = Typography;
-
 const BASE_URL = import.meta.env.VITE_API_URL;
-
 const MemberDashboard: React.FC = () => {
-
   const [stats, setStats] = useState({
-    pendingAmount: 0,
-    paidAmount: 0,
+    pendingMaintenance: 0,
+    paidMaintenance: 0,
     receipts: 0,
+    pendingFunds:0,
+    paidFunds:0,
+    pendingContributions:0,
+    paidContributions:0
   });
-
   const memberName = sessionStorage.getItem("userName");
   const societyName = sessionStorage.getItem("societyName");
   const memberId = sessionStorage.getItem("memberId");
-
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   useEffect(() => {
     loadDashboard();
   }, []);
 
   const loadDashboard = async () => {
-
     try {
-
       const res = await axios.post(
-        `${BASE_URL}/member/dashboard`,
-        {
-          memberId: Number(memberId),
-        }
-      );
+        `${BASE_URL}/member/dashboard`,{memberId: Number(memberId),financialYearId:financialYearId});
 
+        console.log("Data",res.data);
       setStats({
-        pendingAmount:
-          res.data.pendingAmount || 0,
-
-        paidAmount:
-          res.data.paidAmount || 0,
-
-        receipts:
-          res.data.receiptCount || 0,
+        pendingMaintenance:res.data.pendingMaintenance || 0,
+        paidMaintenance:res.data.paidMaintenance || 0,
+        receipts:res.data.receiptCount || 0,
+        pendingFunds:res.data.pendingFunds || 0,
+        paidFunds:res.data.paidFunds || 0,
+        pendingContributions:res.data.pendingContributions || 0,
+        paidContributions:res.data.paidContributions || 0,
       });
 
     } catch (error) {
@@ -126,8 +114,8 @@ const MemberDashboard: React.FC = () => {
           <Col xs={24} sm={12} md={8}>
             <Card style={cardStyle}>
               <Statistic
-                title={<span style={{ color: "#1677ff" }}>Pending Amount</span>}
-                value={stats.pendingAmount}
+                title={<span style={{ color: "#1677ff" }}>Pending Maintenance</span>}
+                value={stats.pendingMaintenance}
                 prefix={<DollarOutlined style={{ color: "#ff4d4f" }} />}
                 suffix="₹"
               />
@@ -137,14 +125,54 @@ const MemberDashboard: React.FC = () => {
           <Col xs={24} sm={12} md={8}>
             <Card style={cardStyle}>
               <Statistic
-                title={<span style={{ color: "#1677ff" }}>Paid Amount</span>}
-                value={stats.paidAmount}
-                prefix={<DollarOutlined style={{ color: "#52c41a" }} />}
+                title={<span style={{ color: "#1677ff" }}>Pending Sinking Funds</span>}
+                value={stats.pendingFunds}
+                prefix={<DollarOutlined style={{ color: "#ff4d4f" }} />}
+                suffix="₹"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8}>
+            <Card style={cardStyle}>
+              <Statistic
+                title={<span style={{ color: "#1677ff" }}>Pending Contributions</span>}
+                value={stats.pendingContributions}
+                prefix={<DollarOutlined style={{ color: "#ff4d4f" }} />}
                 suffix="₹"
               />
             </Card>
           </Col>
 
+          <Col xs={24} sm={12} md={8}>
+            <Card style={cardStyle}>
+              <Statistic
+                title={<span style={{ color: "#1677ff" }}>Paid Maintenance</span>}
+                value={stats.paidMaintenance}
+                prefix={<DollarOutlined style={{ color: "#52c41a" }} />}
+                suffix="₹"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8}>
+            <Card style={cardStyle}>
+              <Statistic
+                title={<span style={{ color: "#1677ff" }}>Paid Funds</span>}
+                value={stats.paidFunds}
+                prefix={<DollarOutlined style={{ color: "#52c41a" }} />}
+                suffix="₹"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={8}>
+            <Card style={cardStyle}>
+              <Statistic
+                title={<span style={{ color: "#1677ff" }}>Paid Contributions</span>}
+                value={stats.paidContributions}
+                prefix={<DollarOutlined style={{ color: "#52c41a" }} />}
+                suffix="₹"
+              />
+            </Card>
+          </Col>
           <Col xs={24} sm={12} md={8}>
             <Card style={cardStyle}>
               <Statistic

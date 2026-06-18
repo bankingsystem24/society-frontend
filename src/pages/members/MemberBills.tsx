@@ -140,6 +140,8 @@ const MemberBills: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [groupedBills, setGroupedBills] = useState<any[]>([]);
   const [sinkingFunds, setSinkingFunds] = useState<any[]>([]);
+  const [contributions, setContributions] = useState<any[]>([]);
+
 
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
@@ -171,6 +173,12 @@ const MemberBills: React.FC = () => {
         `${BASE_URL}/members/sinking-funds`,
         payload
       );
+      const contributionRes = await axios.post(
+        `${BASE_URL}/members/contributions `,
+        payload
+      );
+
+      console.log(contributionRes);
 
       /* ================= MAINTENANCE ================= */
       const bills = (billsRes.data || [])
@@ -235,6 +243,47 @@ const MemberBills: React.FC = () => {
       );
 
       setSinkingFunds(groupedSinking);
+
+
+      const contributionsData = (contributionRes.data || [])
+        .filter((b: any) => b.status === "PAID")
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.paidDate ?? 0).getTime() -
+            new Date(a.paidDate ?? 0).getTime()
+        );
+
+      const groupedContributions = Object.values(
+        contributionsData.reduce((acc: any, item: any) => {
+          const key = item.receiptNo || "NO_RECEIPT";
+
+          if (!acc[key]) {
+            acc[key] = {
+              receiptNo: key,
+              paidDate: item.paidDate,
+              paymentMode: item.paymentMode,
+              totalAmount: Number(item.receiptAmount || 0), 
+              transactionId: item.transactionId,
+              flatNo: item.flatNo,
+              items: [],
+            };
+          }
+
+    acc[key].items.push({
+      ...item,
+      amount: item.contributionAmount, // item-wise amount
+    });
+
+
+          return acc;
+        }, {})
+      );
+
+      setContributions(groupedContributions);
+
+      console.log("G.Contri.",groupedContributions);
+
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -319,6 +368,45 @@ const MemberBills: React.FC = () => {
     },
   ];
 
+    const contributionColumns = [
+    {
+      title: "Receipt No",
+      dataIndex: "receiptNo",
+      render: (_: any, record: any) => (
+        <span
+          style={{
+            color: "#1677ff",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+          onClick={() => printReceipt(record, "Contributions")}
+        >
+          {record.receiptNo}
+        </span>
+      ),
+    },
+    {
+      title: "Total Amount",
+      dataIndex: "totalAmount",
+      render: (v: number) => `₹ ${v}`,
+    },
+    {
+      title: "Paid Date",
+      dataIndex: "paidDate",
+      render: (v: string) =>
+        v ? new Date(v).toLocaleDateString("en-GB") : "-",
+    },
+    {
+      title: "Payment Mode",
+      dataIndex: "paymentMode",
+    },
+    {
+      title: "Transaction Id",
+      dataIndex: "transactionId",
+    },
+  ];
+
+
   /* ================= UI ================= */
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -352,6 +440,20 @@ const MemberBills: React.FC = () => {
                 <Table
                   dataSource={sinkingFunds}
                   columns={sinkingColumns}
+                  rowKey="receiptNo"
+                  bordered
+                  size="small"
+                  pagination={{ pageSize: 8 }}
+                  scroll={{ x: "max-content" }}
+                />
+              </div>
+
+              <div style={{ marginTop: 32 }}>
+                <Title level={3}>Contributions</Title>
+
+                <Table
+                  dataSource={contributions}
+                  columns={contributionColumns}
                   rowKey="receiptNo"
                   bordered
                   size="small"
