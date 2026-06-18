@@ -10,7 +10,6 @@ const AuditorHeaderBar: React.FC = () => {
   const navigate = useNavigate();
 
   const userName = sessionStorage.getItem("userName");
-  const societyName = sessionStorage.getItem("societyName");
   const role = sessionStorage.getItem("role");
   const [financialYear, setFinancialYear] = useState(
     sessionStorage.getItem("financialYear") || "",
@@ -61,7 +60,7 @@ const AuditorHeaderBar: React.FC = () => {
             lineHeight: 1.2,
           }}
         >
-          No.of Societies
+          Group of Societies
         </Text>
 
         <Text

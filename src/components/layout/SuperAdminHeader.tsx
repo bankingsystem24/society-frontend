@@ -9,8 +9,7 @@ const { Text } = Typography;
 const SuperAdminHeaderBar: React.FC = () => {
   const navigate = useNavigate();
 
-  const username = sessionStorage.getItem("username");
-  const societyName = sessionStorage.getItem("societyName");
+  const userName = sessionStorage.getItem("userName");
   const [financialYear, setFinancialYear] = useState(
     sessionStorage.getItem("financialYear") || "",
   );
@@ -94,7 +93,7 @@ const SuperAdminHeaderBar: React.FC = () => {
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Text style={{ color: "#fff", fontWeight: 500 }}>
-              {username || "SuperAdmin"}
+              {userName || "SuperAdmin"}
             </Text>
             <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>
               Online
