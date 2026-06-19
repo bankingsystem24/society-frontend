@@ -8,6 +8,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
+import "../../App.css";
 
 const SuperAdminSidebar: React.FC = () => {
   const navigate = useNavigate();

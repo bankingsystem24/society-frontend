@@ -55,7 +55,7 @@ const Login: React.FC = () => {
       if (res.data.role === "SUPER_ADMIN") {
         navigate("/superadmindashboard");
       } else if (res.data.role === "ADMIN") {
-        navigate("/clientdashboard");
+        navigate("/admindashboard");
       } else if (res.data.role === "MEMBER") {
         navigate("/member-dashboard");
       } else if (res.data.role === "AUDITOR") {

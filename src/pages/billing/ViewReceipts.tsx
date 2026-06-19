@@ -1,9 +1,20 @@
-import { Button, Card, Form, Modal, Select, Table, Tag } from "antd";
+import { Button, Card, Form, Modal, Select, Table, Tag, Typography,Layout } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
+import Sidebar from "../../components/layout/Sidebar";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import Header from "../../components/layout/Header";
+import MemberHeader from "../../components/layout/MemberHeader";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import AuditorHeader from "../../components/layout/AuditorHeader";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
+
+const { Content } = Layout;
+const { Title } = Typography;
 
 interface Flat {
   id: number;
@@ -55,6 +66,7 @@ export default function ViewReceipts() {
   const societyId = sessionStorage.getItem("societyId");
   const financialYear = sessionStorage.getItem("financialYear");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+  const role = sessionStorage.getItem("role");
 
   useEffect(() => {
     loadFlats();
@@ -78,14 +90,18 @@ const loadReceipts = async (flatId?: number) => {
   try {
     setLoading(true);
 
-    const res = await axios.post(
-      `${BASE_URL}/receipts/viewReceipts`,
-      {
-        societyId: Number(societyId),
-        flatId: flatId || null,
-        financialYearId,
-      }
-    );
+const payload = {
+  societyId: societyId && !isNaN(Number(societyId)) ? Number(societyId) : null,
+  flatId: flatId ? Number(flatId) : null,
+  financialYearId: Number(financialYearId),
+};
+
+console.log("Payload:", payload);
+
+const res = await axios.post(
+  `${BASE_URL}/receipts/viewReceipts`,
+  payload
+);
 
     if (!financialYear) {
       setReceipts(res.data);
@@ -670,22 +686,49 @@ const loadReceipts = async (flatId?: number) => {
   ];
 
   return (
-    <Card title="View Receipts">
+  <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content>
+    <Card title="View Receipts"
+      style={{ padding:0,
+        marginTop:-10,
+        marginBottom:-5,
+      }}
+      >
       <Form form={form} layout="vertical">
         <div
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 12,
+            gap: 5,
+            marginBottom: 0,
           }}
         >
           <Form.Item
             label="Select Flat"
             style={{
               flex: "1 1 250px",
-              minWidth: 220,
+              minWidth: 200,
               marginBottom: 0,
+              marginTop:-10,
               maxWidth:"200px"
             }}
           >
@@ -703,7 +746,7 @@ const loadReceipts = async (flatId?: number) => {
         </div>
       </Form>
 
-      <div style={{ width: "100%", overflowX: "auto" }}>
+      <div style={{ width: "100%", overflowX: "auto", fontSize:"5px" }}>
         <Table
           rowKey="id"
           dataSource={receipts}
@@ -961,5 +1004,8 @@ const loadReceipts = async (flatId?: number) => {
       </Modal>
 
     </Card>
+    </Content>
+    </Layout>
+    </Layout>
   );
 }

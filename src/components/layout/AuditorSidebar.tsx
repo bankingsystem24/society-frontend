@@ -7,6 +7,7 @@ import {
   FileTextOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
+import "../../App.css";
 
 const AuditorSidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -36,6 +37,18 @@ const AuditorSidebar: React.FC = () => {
           {
             key: "/auditorsocieties",
             label: "Society List",
+          },
+          {
+            key: "/financial-year",
+            label: "Financial Year",
+          },
+          {
+            key: "/set-society",
+            label: "Set Society",
+          },
+          {
+            key: "/view-receipts",
+            label: "Receipts",
           },
         ]}
       />

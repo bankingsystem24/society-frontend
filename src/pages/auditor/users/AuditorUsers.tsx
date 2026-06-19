@@ -50,23 +50,14 @@ const AuditorUsers: React.FC = () => {
 
       // Get users
       let users = [];
+      users = await apiGet("/users");
 
-      if (societyId) {
-        users = await apiGet(`/users?societyId=${societyId}`);
-      } else {
-        users = await apiGet("/users");
-      }
 
+      console.log("Users:",users);
       // Keep only users belonging to auditor's societies
       const filtered = (users || [])
-        .filter(
-          (user: any) =>
-            (user.role !== "SUPER_ADMIN" &&
-            auditorSocietyIds.includes(Number(user.societyId)) || user.id === auditorId))
-        .sort((a: any, b: any) => {
-          const societyCompare = (a.societyName || "").localeCompare(
-            b.societyName || "",
-          );
+        .filter((user: any) =>(user.role !== "AUDITOR" && auditorSocietyIds.includes(Number(user.societyId)) || user.id === auditorId))
+        .sort((a: any, b: any) => {const societyCompare = (a.societyName || "").localeCompare(b.societyName || "",);
 
           if (societyCompare !== 0) {
             return societyCompare;
@@ -80,8 +71,6 @@ const AuditorUsers: React.FC = () => {
 
           return (a.username || "").localeCompare(b.username || "");
         });
-
-
       setData(filtered);
     } catch (error) {
       console.error("Error loading users", error);
@@ -135,6 +124,12 @@ const AuditorUsers: React.FC = () => {
       title: "Society",
       dataIndex: "societyName",
       key: "societyName",
+      ellipsis: true,
+      onCell: () => ({
+        style: {
+          whiteSpace: "nowrap",
+        },
+      }),
     },
     {
       title: "Role",
@@ -160,13 +155,19 @@ const AuditorUsers: React.FC = () => {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      ellipsis: true,
+      onCell: () => ({
+        style: {
+          whiteSpace: "nowrap",
+        },
+      }),
     },
 
     {
       title: "Status",
       dataIndex: "active",
       key: "active",
-      width: 180,
+      width: 80,
       render: (_: any, record: any) => (
         <div
           onClick={(e) => {
@@ -255,6 +256,7 @@ const AuditorUsers: React.FC = () => {
         dataSource={filteredData}
         rowKey="id"
         loading={loading}
+        size="small"
         pagination={{
           pageSize: 8,
         }}

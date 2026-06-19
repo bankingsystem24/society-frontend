@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sider from "antd/es/layout/Sider";
+import "../../App.css";
 
 const MemberSidebar: React.FC = () => {
   const navigate = useNavigate();

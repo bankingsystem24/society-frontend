@@ -1,8 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/auth/Login";
-// import MainLayout from "./components/layout/MainLayout";
 import Layout from "./components/layout/Layout";
-import ClientDashboard from "./pages/dashboard/ClientDashboard";
 import Wings from "./pages/society/Wings";
 import Flats from "./pages/society/Flats";
 import Members from "./pages/members/Members";
@@ -53,6 +51,8 @@ import DiscountPolicy from "./pages/billing/DiscountPolicy";
 import ContributionPage from "./pages/billing/ContributionPage";
 import ViewContribution from "./pages/billing/ViewContribution";
 import PendingContributions from "./pages/billing/PendingContributions";
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import SetSociety from "./pages/auditor/societies/SetSociety";
 
 export default function App() {
   return (
@@ -67,6 +67,11 @@ export default function App() {
       <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} />
       <Route path="/contributions" element={<PendingContributions />} />
       <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
+      <Route path="/view-receipts" element={<ViewReceipts />} />
+      <Route path="/financial-year" element={<FinancialYear/>} />
+      <Route path="/set-society" element={<SetSociety/>} />
+
+
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
@@ -86,9 +91,8 @@ export default function App() {
 
       {/* Layout Pages */}
       <Route element={<Layout />}>
-        <Route path="/clientdashboard" element={<ClientDashboard />} />
+        <Route path="/admindashboard" element={<AdminDashboard />} />
 
-        <Route path="/financial-year" element={<FinancialYear/>} />
         <Route path="/billing-policy" element={<BillingPolicy />} />
         <Route path="/discount-policy" element={<DiscountPolicy />} />
 
@@ -113,7 +117,6 @@ export default function App() {
 
         <Route path="/bill-generate" element={<BillGenerate />}/>
         <Route path="/view-bills" element={<ViewBills />} />
-        <Route path="/view-receipts" element={<ViewReceipts />} />
         <Route path="/pending-bills" element={<PendingBills />} />
         <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
         <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>

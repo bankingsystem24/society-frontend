@@ -3,6 +3,7 @@ import { Card, Row, Col, Statistic, Typography } from "antd";
 import { CalendarOutlined, HomeOutlined, TeamOutlined } from "@ant-design/icons";
 import { apiGet } from "../../api/axios";
 import axios from "axios";
+import Societies from "../society/Societies";
 
 const { Title } = Typography;
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -10,12 +11,13 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const SuperAdminDashboard: React.FC = () => {
   const [stats, setStats] = useState({
     users: 0,
+    Societies:0,
   });
   const [financialYear, setFinancialYear] = useState<string>("-");
 
   useEffect(() => {
     loadStats();
-    loadFinancialYear();
+    // loadFinancialYear();
   }, []);
 
   const loadFinancialYear = async () => {
@@ -35,84 +37,56 @@ const SuperAdminDashboard: React.FC = () => {
 
   const loadStats = async () => {
     try {
-        const res = await apiGet("/users");
+        const usersRes = await apiGet("/users");
+        const societiesRes = await apiGet("/societies");
+
+        setStats({
+          users:usersRes.length | 0,
+          Societies:societiesRes.length | 0,
+        })
+
           } catch (error) {
       console.error("Error loading dashboard stats", error);
     }
   };
 
   const cardStyle: React.CSSProperties = {
-    borderRadius: 12,
+    borderRadius: 5,
     boxShadow: "0 4px 12px rgba(22, 119, 255, 0.15)",
     border: "1px solid #d6e4ff",
   };
 
   return (
-    <div style={{ padding: 24, background: "#f0f5ff", minHeight: "100vh" }}>
+    <div style={{ padding: 5, background: "#f0f5ff", minHeight: "100vh" }}>
       <Title
-        level={2}
+        level={4}
         style={{ color: "#1677ff", marginBottom: 24 }}
       >
-        Super Admin Dashboard
+        Administrator Dashboard
       </Title>
 
-      {/* <Row gutter={16}>
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Wings</span>}
-              value={stats.wings}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Flats</span>}
-              value={stats.flats}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Members</span>}
-              value={stats.members}
-              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col span={6}>
+      <Row gutter={[16,16]}>
+        <Col xs={24} sm={12} md={4} lg={4} xl={4}>
           <Card style={cardStyle}>
             <Statistic
               title={<span style={{ color: "#1677ff" }}>Users</span>}
               value={stats.users}
-              prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
+              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+              valueStyle={{ color: "#1677ff" }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={4} lg={4} xl={4}>
+          <Card style={cardStyle}>
+            <Statistic
+              title={<span style={{ color: "#1677ff" }}>Societies</span>}
+              value={stats.Societies}
+              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
               valueStyle={{ color: "#1677ff" }}
             />
           </Card>
         </Col>
       </Row>
-      <Row gutter={16} style={{ marginTop: 20 }}>
-        <Col span={6}>
-          <Card style={cardStyle}>
-            <Statistic
-              title={<span style={{ color: "#1677ff" }}>Financial Year</span>}
-              value={financialYear}
-              prefix={<CalendarOutlined  style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
-            />
-          </Card>
-        </Col>
-    </Row> */}
 
     </div>
   );

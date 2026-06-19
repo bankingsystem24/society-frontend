@@ -11,21 +11,44 @@ const AuditorHeaderBar: React.FC = () => {
 
   const userName = sessionStorage.getItem("userName");
   const role = sessionStorage.getItem("role");
+
   const [financialYear, setFinancialYear] = useState(
-    sessionStorage.getItem("financialYear") || "",
+    sessionStorage.getItem("financialYear") || ""
+  );
+
+  const [societyName, setSocietyName] = useState(
+    sessionStorage.getItem("societyName") || ""
   );
 
   useEffect(() => {
-    const updateFinancialYear = () => {
+    const updateHeaderData = () => {
       setFinancialYear(sessionStorage.getItem("financialYear") || "");
+      setSocietyName(sessionStorage.getItem("societyName") || "");
     };
 
-    window.addEventListener("financialYearChanged", updateFinancialYear);
+    window.addEventListener(
+      "financialYearChanged",
+      updateHeaderData as EventListener
+    );
+
+    window.addEventListener(
+      "societyChanged",
+      updateHeaderData as EventListener
+    );
 
     return () => {
-      window.removeEventListener("financialYearChanged", updateFinancialYear);
+      window.removeEventListener(
+        "financialYearChanged",
+        updateHeaderData as EventListener
+      );
+
+      window.removeEventListener(
+        "societyChanged",
+        updateHeaderData as EventListener
+      );
     };
   }, []);
+
   const items = [
     {
       key: "logout",
@@ -69,7 +92,7 @@ const AuditorHeaderBar: React.FC = () => {
             fontSize: 16,
           }}
         >
-          Dashboard {financialYear && `| FY: ${financialYear}`}
+          Society : {societyName || "-"} | FY : {financialYear || "-"}
         </Text>
       </div>
 
@@ -80,7 +103,6 @@ const AuditorHeaderBar: React.FC = () => {
             cursor: "pointer",
             padding: "6px 10px",
             borderRadius: 10,
-            transition: "0.3s",
           }}
         >
           <Avatar
@@ -96,7 +118,12 @@ const AuditorHeaderBar: React.FC = () => {
             <Text style={{ color: "#fff", fontWeight: 500 }}>
               {userName} ({role})
             </Text>
-            <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11 }}>
+            <Text
+              style={{
+                color: "rgba(255,255,255,0.75)",
+                fontSize: 11,
+              }}
+            >
               Online
             </Text>
           </div>

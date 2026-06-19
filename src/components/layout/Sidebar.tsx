@@ -9,7 +9,7 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import "../../App.css"
 const { Sider } = Layout;
 
 const Sidebar: React.FC = () => {
@@ -57,6 +57,7 @@ const Sidebar: React.FC = () => {
       <Menu
         theme="dark"
         mode="inline"
+        style={{ lineHeight:"30px", fontSize:10}}
         selectedKeys={[location.pathname]}
         openKeys={openKeys}
         onOpenChange={onOpenChange}
@@ -66,7 +67,7 @@ const Sidebar: React.FC = () => {
         }}
         items={[
           {
-            key: "/clientdashboard",
+            key: "/admindashboard",
             icon: <DashboardOutlined />,
             label: "Dashboard",
           },
@@ -129,16 +130,9 @@ const Sidebar: React.FC = () => {
             ],
           },
           {
-            key: "Receipts",
-            icon: <UserOutlined />,
+            key: "/view-receipts",
             label: "Receipts",
-            children: [
-              {
-                key: "/view-receipts",
-                label: "View Receipts",
-                icon: <HomeOutlined />,
-              },
-            ],
+            icon: <HomeOutlined />,
           },
           {
             key: "Reports",

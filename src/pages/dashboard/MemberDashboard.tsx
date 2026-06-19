@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MemberHeader from "../../components/layout/MemberHeader";
 import MemberSidebar from "../../components/layout/MemberSidebar";
-
-
 import {
   Card,
   Row,
@@ -14,9 +12,13 @@ import {
 
 import {FileDoneOutlined,DollarOutlined,} from "@ant-design/icons";
 import axios from "axios";
+
+
 const { Content } = Layout;
 const { Title } = Typography;
 const BASE_URL = import.meta.env.VITE_API_URL;
+
+
 const MemberDashboard: React.FC = () => {
   const [stats, setStats] = useState({
     pendingMaintenance: 0,
@@ -31,6 +33,7 @@ const MemberDashboard: React.FC = () => {
   const societyName = sessionStorage.getItem("societyName");
   const memberId = sessionStorage.getItem("memberId");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+  
   useEffect(() => {
     loadDashboard();
   }, []);
