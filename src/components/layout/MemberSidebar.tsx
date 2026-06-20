@@ -3,7 +3,9 @@ import { Menu } from "antd";
 import {
   DashboardOutlined,
   DollarOutlined,
+  HomeOutlined,
   LogoutOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sider from "antd/es/layout/Sider";
@@ -57,7 +59,7 @@ const MemberSidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key: "/member-pending-bills",
+            key: "/member-paying-maintenance",
             icon: <DollarOutlined />,
             label: "Pending Maint.",
           },
@@ -76,6 +78,34 @@ const MemberSidebar: React.FC = () => {
             icon: <DollarOutlined />,
             label: "Receipts",
           },
+          {
+            key: "Reports",
+            icon: <UserOutlined />,
+            label: "Reports",
+            children: [
+              {
+                key: "/view-journal",
+                label: "View Journal",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-ledger",
+                label: "View Ledger",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/trial-balance",
+                label: "Trial Balance",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/profit-and-loss",
+                label: "Profit & Loss",
+                icon: <HomeOutlined />,
+              },
+            ],
+          },
+
           {
             key: "/member-login",
             icon: <LogoutOutlined />,

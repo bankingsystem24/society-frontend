@@ -106,7 +106,7 @@ const Sidebar: React.FC = () => {
             children: [
               { key: "/bill-generate", label: "Generate" },
               { key: "/view-bills", label: "View" },
-              { key: "/pending-bills", label: "Pay Online" },
+              { key: "/member-paying-maintenance", label: "Pay Online" },
             ],
           },
 
@@ -128,6 +128,11 @@ const Sidebar: React.FC = () => {
               { key: "/view-contribution", label: "View" },
               { key: "/contributions", label: "Pay Online" },
             ],
+          },
+          {
+            key: "/verify-payment",
+            label: "Verify Payment",
+            icon: <HomeOutlined />,
           },
           {
             key: "/view-receipts",

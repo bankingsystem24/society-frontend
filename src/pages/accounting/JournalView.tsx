@@ -8,12 +8,22 @@ import {
   Row,
   Col,
   Collapse,
+  Layout
 } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
+import Sidebar from "../../components/layout/Sidebar";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+const { Content } = Layout;
 const { Title } = Typography;
 
 interface JournalData {
@@ -33,6 +43,8 @@ const JournalView: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const societyId = sessionStorage.getItem("societyId");
+  const role = sessionStorage.getItem("role");
+
 
   useEffect(() => {
     fetchJournal();
@@ -143,6 +155,29 @@ const JournalView: React.FC = () => {
 
 
   return (
+  <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content>
+
+
     <Card style={{ margin: 10 }}>
       {/* HEADER */}
       <Row justify="space-between" align="middle">
@@ -263,6 +298,9 @@ const JournalView: React.FC = () => {
         })}
       />
     </Card>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

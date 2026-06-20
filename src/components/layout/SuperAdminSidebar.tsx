@@ -6,6 +6,7 @@ import {
   UserOutlined,
   FileTextOutlined,
   TeamOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../App.css";
@@ -31,16 +32,52 @@ const SuperAdminSidebar: React.FC = () => {
             icon: <DashboardOutlined />,
             label: "Dashboard",
           },
+          {
+            key: "/superadminusers",
+            icon: <TeamOutlined />,
+            label: "Users",
+          },
+          {
+            key: "/superadmin-view-societies",
+            icon: <BankOutlined />,
+            label: "Society List",
+          },
+          {
+            key: "/set-society",
+            icon: <BankOutlined />,
+            label: "Set Society",
+          },
+          {
+            key: "/view-receipts",
+            label: "Receipts",
+          },
+          {
+            key: "Reports",
+            icon: <UserOutlined />,
+            label: "Reports",
+            children: [
               {
-                key: "/superadminusers",
-                icon: <TeamOutlined />,
-                label: "Users",
+                key: "/view-journal",
+                label: "View Journal",
+                icon: <HomeOutlined />,
               },
               {
-                key: "/superadmin-view-societies",
-                icon: <BankOutlined />,
-                label: "Societies",
+                key: "/view-ledger",
+                label: "View Ledger",
+                icon: <HomeOutlined />,
               },
+              {
+                key: "/trial-balance",
+                label: "Trial Balance",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/profit-and-loss",
+                label: "Profit & Loss",
+                icon: <HomeOutlined />,
+              },
+            ],
+          },
         ]}
       />
     </div>

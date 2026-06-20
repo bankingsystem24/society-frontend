@@ -91,6 +91,8 @@ const BillGenerate: React.FC = () => {
         financialYearId:financialYearId
       };
 
+      console.log("Payload:",payload);
+      
       await apiPost("/billing/generate", payload);
 
       message.success("Bills generated successfully");

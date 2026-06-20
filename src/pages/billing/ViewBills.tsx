@@ -1,4 +1,4 @@
-import { Button, Card, Form, Modal, Select, Table, message } from "antd";
+import { Button, Card, Form, Input, Modal, Select, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
@@ -17,13 +17,14 @@ interface Bill {
   maintenanceAmount: number;
   penaltyAmount: number;
   interestAmount: number;
-  discountAmount:number;
+  discountAmount: number;
   totalAmount: number;
   status: string;
   dueDate: string;
   createdDate: string;
   flatNo: string;
   memberName: string;
+  transactionId: string;
 }
 
 interface Members {
@@ -54,6 +55,7 @@ export default function ViewBills() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
+  const [transactionId, setTransactionId] = useState<string>("");
 
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
@@ -79,7 +81,7 @@ export default function ViewBills() {
       setLoading(true);
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
         societyId: societyId,
-        financialYearId:financialYearId,
+        financialYearId: financialYearId,
       });
       setBills(res.data);
     } catch {
@@ -111,6 +113,7 @@ export default function ViewBills() {
         billIds,
         paymentMode,
         financialYearId,
+        transactionId,
       });
 
       message.success(res.data);
@@ -135,7 +138,7 @@ export default function ViewBills() {
         month: values.month || null,
         status: values.status || null,
         memberId: values.memberId || null,
-        financialYearId:financialYearId,
+        financialYearId: financialYearId,
       };
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, payload);
       setBills(res.data);
@@ -157,6 +160,7 @@ export default function ViewBills() {
     { title: "Discount", dataIndex: "discountAmount" },
 
     { title: "Total", dataIndex: "totalAmount" },
+    { title: "Trans.Id",dataIndex:"transactionId"},
     {
       title: "Status",
       dataIndex: "status",
@@ -198,11 +202,12 @@ export default function ViewBills() {
             display: "flex",
             flexWrap: "wrap",
             gap: 16,
-            marginBottom: 16,
+            marginBottom: 5,
+            marginTop:-5,
           }}
         >
           {/* Flat */}
-          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <div style={{ flex: "1 1 100px", minWidth: 100 }}>
             <Form.Item label="Flat" name="flatId">
               <Select
                 allowClear
@@ -217,7 +222,7 @@ export default function ViewBills() {
           </div>
 
           {/* Year */}
-          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <div style={{ flex: "1 1 100px", minWidth: 100 }}>
             <Form.Item label="Financial Year" name="fromYear">
               <Select
                 allowClear
@@ -232,7 +237,7 @@ export default function ViewBills() {
           </div>
 
           {/* Month */}
-          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <div style={{ flex: "1 1 100px", minWidth: 100 }}>
             <Form.Item label="Month" name="month">
               <Select
                 allowClear
@@ -243,13 +248,14 @@ export default function ViewBills() {
           </div>
 
           {/* Status */}
-          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <div style={{ flex: "1 1 100px", minWidth: 100 }}>
             <Form.Item label="Status" name="status">
               <Select
                 allowClear
                 onChange={filterBills}
                 options={[
                   { label: "PENDING", value: "PENDING" },
+                  { label: "SUBMITTED", value: "SUBMITTED" },
                   { label: "PAID", value: "PAID" },
                   { label: "OVERDUE", value: "OVERDUE" },
                 ]}
@@ -258,7 +264,7 @@ export default function ViewBills() {
           </div>
 
           {/* Member */}
-          <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+          <div style={{ flex: "1 1 100px", minWidth: 100 }}>
             <Form.Item label="Member" name="memberId">
               <Select
                 allowClear
@@ -279,10 +285,10 @@ export default function ViewBills() {
           display: "flex",
           flexWrap: "wrap",
           gap: 16,
-          marginBottom: 20,
+          marginBottom: 5,
         }}
       >
-        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+        <div style={{ flex: "1 1 100px", minWidth: 100 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Total Maintenance</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>
@@ -291,7 +297,7 @@ export default function ViewBills() {
           </Card>
         </div>
 
-        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+        <div style={{ flex: "1 1 100px", minWidth: 100 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Total Penalty</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>
@@ -300,7 +306,7 @@ export default function ViewBills() {
           </Card>
         </div>
 
-        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+        <div style={{ flex: "1 1 100px", minWidth: 100 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Total Interest</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>
@@ -309,7 +315,7 @@ export default function ViewBills() {
           </Card>
         </div>
 
-        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+        <div style={{ flex: "1 1 100px", minWidth: 100 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Total Discount</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>
@@ -318,7 +324,7 @@ export default function ViewBills() {
           </Card>
         </div>
 
-        <div style={{ flex: "1 1 220px", minWidth: 220 }}>
+        <div style={{ flex: "1 1 100px", minWidth: 100 }}>
           <Card styles={{ body: { padding: "6px 10px" } }}>
             <div style={{ fontSize: 13 }}>Grand Total</div>
             <div style={{ fontSize: 18, fontWeight: 600 }}>
@@ -347,7 +353,7 @@ export default function ViewBills() {
         loading={loading}
         size="small"
         scroll={{ x: 800 }}
-        pagination={{pageSize: 8,}}
+        pagination={{ pageSize: 8 }}
         rowSelection={{
           selectedRowKeys,
           hideSelectAll: true,
@@ -381,6 +387,13 @@ export default function ViewBills() {
                 { label: "CARD", value: "CARD" },
                 { label: "NETBANKING", value: "NETBANKING" },
               ]}
+            />
+          </Form.Item>
+          <Form.Item label="Transaction Id">
+            <Input
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+              placeholder="Enter transaction id"
             />
           </Form.Item>
         </Form>

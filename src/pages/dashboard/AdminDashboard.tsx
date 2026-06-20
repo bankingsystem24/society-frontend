@@ -35,6 +35,8 @@ const AdminDashboard: React.FC = () => {
 
   const loadMemberDashboard = async () => {
     try {
+      const memberId = Number(sessionStorage.getItem("memberId"));
+      const financialYearId = Number(sessionStorage.getItem("financialYearId"));
       const res = await axios.post(`${BASE_URL}/member/dashboard`, {
         memberId: Number(memberId),
         financialYearId: financialYearId,

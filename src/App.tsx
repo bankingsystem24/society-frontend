@@ -19,7 +19,6 @@ import ViewReceipts from "./pages/billing/ViewReceipts";
 import MemberLogin from "./pages/auth/MemberLogin";
 import MemberDashboard from "./pages/dashboard/MemberDashboard";
 import MemberBills from "./pages/members/MemberBills";
-import MemberPendingBills from "./pages/members/MemberPendingBills";
 import JournalView from "./pages/accounting/JournalView";
 import LedgerView from "./pages/accounting/LedgerView";
 import TrialBalance from "./pages/accounting/TrialBalance";
@@ -53,6 +52,8 @@ import ViewContribution from "./pages/billing/ViewContribution";
 import PendingContributions from "./pages/billing/PendingContributions";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import SetSociety from "./pages/auditor/societies/SetSociety";
+import MemberPayingMaintenance from "./pages/members/MemberPayingMaintenance";
+import VerifyPayemnt from "./pages/billing/VerifyPayment";
 
 export default function App() {
   return (
@@ -63,14 +64,20 @@ export default function App() {
       <Route path="/member-login" element={<MemberLogin />} />
       <Route path="/member-dashboard" element={<MemberDashboard />} />
       <Route path="/member-receipts" element={<MemberBills />} />
-      <Route path="/member-pending-bills" element={<MemberPendingBills />} />
+      {/* <Route path="/member-pending-bills" element={<MemberPendingBills />} /> */}
+      <Route path="/member-paying-maintenance" element={<MemberPayingMaintenance />} />
+
       <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} />
       <Route path="/contributions" element={<PendingContributions />} />
       <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
       <Route path="/view-receipts" element={<ViewReceipts />} />
       <Route path="/financial-year" element={<FinancialYear/>} />
       <Route path="/set-society" element={<SetSociety/>} />
-
+      <Route path="/view-journal" element={<JournalView />} />
+      <Route path="/view-ledger" element={<LedgerView />} />
+      <Route path="/trial-balance" element={<TrialBalance />} />
+      <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
+      <Route path="/verify-payment" element={<VerifyPayemnt />} />
 
 
       <Route element={<SuperAdminLayout />}>
@@ -124,10 +131,7 @@ export default function App() {
 
         <Route path="/generate-contribution" element={<ContributionPage />} />
 
-        <Route path="/view-journal" element={<JournalView />} />
-        <Route path="/view-ledger" element={<LedgerView />} />
-        <Route path="/trial-balance" element={<TrialBalance />} />
-        <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
+
         
 
         <Route path="/add-expenses" element={<Expenses />} />

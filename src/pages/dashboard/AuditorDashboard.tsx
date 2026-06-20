@@ -32,6 +32,7 @@ const AuditorDashboard: React.FC = () => {
       const res = await apiGet(`/accounting-year/${societyId}/active`);
       setFinancialYear(res.fyCode || "-");
       sessionStorage.setItem("financialYear",res.fyCode);
+      sessionStorage.setItem("financialYearId",res.id); 
 
     } catch (error) {
       console.error("Error loading financial year", error);
@@ -63,7 +64,6 @@ const AuditorDashboard: React.FC = () => {
         sessionStorage.setItem("societyName", String(firstSociety.societyName));
           window.dispatchEvent(new Event("societyChanged"));
           await loadFinancialYear();
-
        }
 
     } catch (error) {

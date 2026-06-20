@@ -3,7 +3,7 @@ import { Layout, Dropdown, Avatar, Space, Typography } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-const { Header } = Layout;
+const { Header } = Layout; 
 const { Text } = Typography;
 
 const AuditorHeaderBar: React.FC = () => {

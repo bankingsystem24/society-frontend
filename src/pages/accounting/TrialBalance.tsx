@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Table, Card, Typography, Spin, message, Row, Col, Tag } from "antd";
+import { Table, Card, Typography, Spin, message, Row, Col, Tag, Layout } from "antd";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 const { Title } = Typography;
 
 const BASE_URL = import.meta.env.VITE_API_URL;
+const { Content } = Layout;
 
 interface TrialBalanceRow {
   glCode: number;
@@ -26,6 +35,7 @@ interface TrialBalanceRow {
 const TrialBalance: React.FC = () => {
   const [data, setData] = useState<TrialBalanceRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const role = sessionStorage.getItem("role");
 
   const societyId = Number(sessionStorage.getItem("societyId"));
 
@@ -153,6 +163,29 @@ const TrialBalance: React.FC = () => {
   const isBalanced = Math.abs(difference) < 0.01;
 
   return (
+  <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content>
+
+
     <Card style={{ borderRadius: 12 }}>
       <Title level={3}>Trial Balance</Title>
 
@@ -239,6 +272,9 @@ const TrialBalance: React.FC = () => {
         </>
       )}
     </Card>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

@@ -35,8 +35,18 @@ const SetSociety: React.FC = () => {
     try {
       setLoading(true);
       const response = await axios.get(`${BASE_URL}/societies`);
-      const filteredSocieties = (response.data || []).filter((society: any) => society.auditor?.id === userId);
+
+      console.log("Response:",response.data);
+
+      let filteredSocieties;
+
+      if (role ==="SUPER_ADMIN"){
+          filteredSocieties = response.data;
+      } else {
+        filteredSocieties = (response.data || []).filter((society: any) => society.auditor?.id === userId);
+      }
       setSocieties(filteredSocieties);
+
     } catch (error) {
       console.error(error);
       message.error("Failed to load societies");
@@ -55,6 +65,7 @@ const handleSetSociety = async (record: Society) => {
     sessionStorage.setItem("societyId", String(record.id));
     sessionStorage.setItem("societyName", record.societyName);
     sessionStorage.setItem("financialYear", financialYear);
+    sessionStorage.setItem("financialYearId",fyRes.data?.id);
     window.dispatchEvent(new Event("societyChanged"));
     window.dispatchEvent(new Event("financialYearChanged"));
     message.success(`${record.societyName} selected successfully`);

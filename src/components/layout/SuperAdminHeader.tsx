@@ -13,18 +13,50 @@ const SuperAdminHeaderBar: React.FC = () => {
   const [financialYear, setFinancialYear] = useState(
     sessionStorage.getItem("financialYear") || "",
   );
+  const [societyName, setSocietyName] = useState(
+    sessionStorage.getItem("societyName") || ""
+  );
 
-  useEffect(() => {
-    const updateFinancialYear = () => {
-      setFinancialYear(sessionStorage.getItem("financialYear") || "");
-    };
+  // useEffect(() => {
+  //   const updateFinancialYear = () => {
+  //     setFinancialYear(sessionStorage.getItem("financialYear") || "");
+  //   };
 
-    window.addEventListener("financialYearChanged", updateFinancialYear);
+  //   window.addEventListener("financialYearChanged", updateFinancialYear);
 
-    return () => {
-      window.removeEventListener("financialYearChanged", updateFinancialYear);
+  //   return () => {
+  //     window.removeEventListener("financialYearChanged", updateFinancialYear);
+  //   };
+  // }, []);
+
+    useEffect(() => {
+      const updateHeaderData = () => {
+        setFinancialYear(sessionStorage.getItem("financialYear") || "");
+        setSocietyName(sessionStorage.getItem("societyName") || "");
+      };
+  
+      window.addEventListener(
+        "financialYearChanged",
+        updateHeaderData as EventListener
+      );
+  
+      window.addEventListener(
+        "societyChanged",
+        updateHeaderData as EventListener
+      );
+ return () => {
+      window.removeEventListener(
+        "financialYearChanged",
+        updateHeaderData as EventListener
+      );
+
+      window.removeEventListener(
+        "societyChanged",
+        updateHeaderData as EventListener
+      );
     };
   }, []);
+
   const items = [
     {
       key: "logout",
@@ -68,7 +100,7 @@ const SuperAdminHeaderBar: React.FC = () => {
             fontSize: 16,
           }}
         >
-          Dashboard {financialYear && `| FY: ${financialYear}`}
+          Society : {societyName || "-"} | FY : {financialYear || "-"}
         </Text>
       </div>
 

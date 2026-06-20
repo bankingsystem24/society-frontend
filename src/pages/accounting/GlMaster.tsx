@@ -278,15 +278,15 @@ const GlMaster: React.FC = () => {
             ]}
           >
             <Select>
-              <Select.Option value="ASSET">ASSET</Select.Option>
+              <Select.Option value="ASSETS">ASSETS</Select.Option>
 
-              <Select.Option value="LIABILITY">LIABILITY</Select.Option>
+              <Select.Option value="LIABILITIES">LIABILITIES</Select.Option>
 
               <Select.Option value="INCOME">INCOME</Select.Option>
 
-              <Select.Option value="EXPENSE">EXPENSE</Select.Option>
+              <Select.Option value="EXPENSES">EXPENSES</Select.Option>
 
-              <Select.Option value="EQUITY">EQUITY</Select.Option>
+              <Select.Option value="EQUITY">RESERVES</Select.Option>
             </Select>
           </Form.Item>
 

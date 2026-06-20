@@ -14,6 +14,8 @@ const SuperAdminDashboard: React.FC = () => {
     Societies:0,
   });
   const [financialYear, setFinancialYear] = useState<string>("-");
+  const saId = Number(sessionStorage.getItem("userId"));
+
 
   useEffect(() => {
     loadStats();
@@ -28,7 +30,10 @@ const SuperAdminDashboard: React.FC = () => {
       `/accounting-year/${societyId}/active`
     );
 
-    setFinancialYear(res.fyCode || "-");
+    setFinancialYear(res.fyCode || "-");      
+    sessionStorage.setItem("financialYear",res.fyCode);
+    sessionStorage.setItem("financialYearId",res.id); 
+
   } catch (error) {
     console.error("Error loading financial year", error);
     setFinancialYear("-");
@@ -37,15 +42,30 @@ const SuperAdminDashboard: React.FC = () => {
 
   const loadStats = async () => {
     try {
-        const usersRes = await apiGet("/users");
-        const societiesRes = await apiGet("/societies");
+      const usersRes = await apiGet("/users");
+      const societiesRes = await apiGet("/societies");
+      const filteredSocieties = societiesRes;
+      const societyIds = filteredSocieties.map((society: any) => society.id);
+      const filteredUsers = usersRes.filter((user: any) =>
+        societyIds.includes(user.societyId),
+      );
 
         setStats({
           users:usersRes.length | 0,
           Societies:societiesRes.length | 0,
         })
+      const firstSociety = filteredSocieties[0];
 
-          } catch (error) {
+      console.log("Filtered :",filteredSocieties);
+
+      if (firstSociety) {
+        sessionStorage.setItem("societyId", firstSociety.id);
+        sessionStorage.setItem("societyName", String(firstSociety.societyName));
+        window.dispatchEvent(new Event("societyChanged"));
+        await loadFinancialYear();
+       }
+
+    } catch (error) {
       console.error("Error loading dashboard stats", error);
     }
   };
