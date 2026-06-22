@@ -44,7 +44,8 @@ const Login: React.FC = () => {
       } else {
         sessionStorage.removeItem("societyId");
       }
-
+      console.log("Response:",res.data);
+      
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("memberToken", res.data.token);
       sessionStorage.setItem("memberName", res.data.memberName);
@@ -52,6 +53,7 @@ const Login: React.FC = () => {
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("userId", String(res.data.auditorId));
+      sessionStorage.setItem("upi",res.data.upi);
       if (res.data.role === "SUPER_ADMIN") {
         navigate("/superadmindashboard");
       } else if (res.data.role === "ADMIN") {

@@ -62,9 +62,11 @@ const MemberPayingMaintenance: React.FC = () => {
   const memberId = Number(sessionStorage.getItem("memberId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
+  const societyName = sessionStorage.getItem("societyName");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
-  
+  const upi = sessionStorage.getItem("upi");
+
   useEffect(() => {
     loadFlats();
   }, []);
@@ -156,12 +158,10 @@ const MemberPayingMaintenance: React.FC = () => {
     }
 
     const billRef = `BILL-${Date.now()}`;
-
-    const societyUpiId = "dipalikhochare4267@oksbi"; // from DB/API
-    const societyName = "ABC Housing Society";
+    const societyUpiId = upi; // from DB/API
 
     const qr = `upi://pay?pa=${societyUpiId}
-    &pn=${encodeURIComponent(societyName)}
+    &pn=${encodeURIComponent(societyName ?? "")}
     &am=${1}
     &cu=INR
     &tn=${billRef}`;

@@ -9,6 +9,7 @@ import {
   Row,
   Col,
   Space,
+  Switch,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiGet, apiPut } from "../../../api/axios";
@@ -19,6 +20,8 @@ const SuperAdminEditSociety: React.FC = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  
 
   const [loading, setLoading] = useState(false);
   const [auditors, setAuditors] = useState<any[]>([]);
@@ -42,6 +45,10 @@ const SuperAdminEditSociety: React.FC = () => {
         mobile: res.mobile,
         secretaryName: res.secretaryName,
         auditorId: res.auditor?.id,
+        upi1:res.upi1,
+        upi2:res.upi2,
+        upi1Active:res.upi1Active,
+        upi2Active:res.upi2Active,
       });
     } catch (error) {
       console.error("Error loading society:", error);
@@ -88,6 +95,10 @@ const SuperAdminEditSociety: React.FC = () => {
         auditor: {
           id: values.auditorId,
         },
+        upi1 : values.upi1,
+        upi2 : values.upi2,
+        upi1Active : values.upi1Active,
+        upi2Active : values.upi2Active,
       };
      
       await apiPut(`/societies/${id}`, payload);
@@ -107,7 +118,7 @@ const SuperAdminEditSociety: React.FC = () => {
     <Card title="Edit Society" style={{ margin: "auto" }}>
       <Form layout="vertical" form={form} onFinish={onFinish}>
         <Row gutter={16}>
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item
               label="Society Name"
               name="societyName"
@@ -117,59 +128,107 @@ const SuperAdminEditSociety: React.FC = () => {
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Registration Number" name="registrationNumber">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Address" name="address">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="City" name="city">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="State" name="state">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Country" name="country">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Pin Code" name="pinCode">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Email" name="email">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Mobile" name="mobile">
               <Input />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
+          <Col xs={24} md={6}>
             <Form.Item label="Secretary Name" name="secretaryName">
               <Input />
             </Form.Item>
           </Col>
+          <Col xs={24} md={6}>
+            <Form.Item label="Upi1" name="upi1">
+              <Input placeholder="Enter UPI Id1" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={6}>
+            <Form.Item
+              label="Is Active"
+              name="upi1Active"
+              valuePropName="checked"
+            >
+              <Switch
+                onChange={(checked) => {
+                  if (checked) {
+                    form.setFieldsValue({
+                      upi2Active: false,
+                    });
+                  }
+                }}
+              />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} md={6}>
+            <Form.Item label="Upi2" name="upi2">
+              <Input placeholder="Enter UPI Id2" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={6}>
+            <Form.Item
+              label="Is Active"
+              name="upi2Active"
+              valuePropName="checked"
+            >
+              <Switch
+                onChange={(checked) => {
+                  if (checked) {
+                    form.setFieldsValue({
+                      upi1Active: false,
+                    });
+                  }
+                }}
+              />
+            </Form.Item>
+          </Col>
+
+
+
 
           {/* AUDITOR */}
           <Col xs={24}>

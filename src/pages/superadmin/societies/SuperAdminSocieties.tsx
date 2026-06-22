@@ -17,6 +17,7 @@ const SuperAdminSocieties: React.FC = () => {
       const res = await apiGet("/societies");
       setSocieties(res || []);
 
+      console.log("socities:", res);
     } catch (error) {
       console.error("Error loading societies:", error);
       message.error("Failed to load societies");
@@ -57,7 +58,7 @@ const SuperAdminSocieties: React.FC = () => {
       title: "Address",
       dataIndex: "address",
       key: "address",
-      hidden:true,
+      hidden: true,
     },
     {
       title: "City",
@@ -68,7 +69,7 @@ const SuperAdminSocieties: React.FC = () => {
       title: "Country",
       dataIndex: "country",
       key: "country",
-      hidden:true,
+      hidden: true,
     },
     {
       title: "Mobile",
@@ -79,20 +80,49 @@ const SuperAdminSocieties: React.FC = () => {
       title: "EMail",
       dataIndex: "email",
       key: "email",
-      hidden:true,
+      hidden: true,
     },
+    {
+      title: "Upi1",
+      dataIndex: "upi1",
+      key: "upi1",
+      render: (text: string, record: any) => (
+        <span
+          style={{
+            color: record.upi1Active ? "blue" : "inherit",
+            fontWeight: record.upi1Active ? "bold" : "normal",
+          }}
+        >
+          {text}
+        </span>
+      ),
+    },
+    {
+      title: "Upi2",
+      dataIndex: "upi2",
+      key: "upi2",
+      render: (text: string, record: any) => (
+        <span
+          style={{
+            color: record.upi2Active ? "blue" : "inherit",
+            fontWeight: record.upi2Active ? "bold" : "normal",
+          }}
+        >
+          {text}
+        </span>
+      ),
+    },
+
     {
       title: "Auditor",
       key: "auditor",
-      render: (_: any, record: any) =>
-        record.auditor?.username || "-",
+      render: (_: any, record: any) => record.auditor?.username || "-",
     },
     {
       title: "Status",
       dataIndex: "active",
       key: "active",
-      render: (active: boolean) =>
-        active ? "Active" : "Inactive",
+      render: (active: boolean) => (active ? "Active" : "Inactive"),
     },
     {
       title: "Actions",
@@ -101,9 +131,7 @@ const SuperAdminSocieties: React.FC = () => {
         <Space>
           <Button
             type="primary"
-            onClick={() =>
-              navigate(`/superadmin-edit-society/${record.id}`)
-            }
+            onClick={() => navigate(`/superadmin-edit-society/${record.id}`)}
           >
             Edit
           </Button>
@@ -125,7 +153,10 @@ const SuperAdminSocieties: React.FC = () => {
     <Card
       title="Societies List"
       extra={
-        <Button type="primary" onClick={() => navigate("/superadmin-create-society")}>
+        <Button
+          type="primary"
+          onClick={() => navigate("/superadmin-create-society")}
+        >
           + Add Society
         </Button>
       }
