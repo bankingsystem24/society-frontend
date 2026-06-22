@@ -10,6 +10,7 @@ import {
   Select,
   Modal,
   InputNumber,
+  Input,
 } from "antd";
 import axios from "axios";
 
@@ -17,6 +18,7 @@ import MemberHeader from "../../components/layout/MemberHeader";
 import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import AppHeader from "../../components/layout/Header";
+import { QRCodeCanvas } from "qrcode.react";
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -57,6 +59,10 @@ const PendingContributions: React.FC = () => {
   const [minimumAmount, setMinimumAmount] = useState<number>(0);
   const [contributionType, setContributionType] = useState<string>("");
 
+  const [upiUrl, setUpiUrl] = useState("");
+  const [qrVisible, setQrVisible] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
+
   const role = sessionStorage.getItem("role");
 
   const memberId = Number(sessionStorage.getItem("memberId"));
@@ -64,8 +70,10 @@ const PendingContributions: React.FC = () => {
   const userId = Number(sessionStorage.getItem("userId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
-  useEffect(() => {
-}, [selectedFlat, contributions]);
+  const societyName = sessionStorage.getItem("societyName");
+  const upi = sessionStorage.getItem("upi");
+
+  useEffect(() => {}, [selectedFlat, contributions]);
 
   useEffect(() => {
     loadFlats();
@@ -110,6 +118,59 @@ const PendingContributions: React.FC = () => {
     }
   };
 
+  const handleManualPayment = () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning("Select row first");
+      return;
+    }
+
+    const paymentRef = `SF-${Date.now()}`;
+
+    const qr = `upi://pay?pa=${upi}
+    &pn=${encodeURIComponent(societyName ?? "")}
+    &am=${1}
+    &cu=INR
+    &tn=${paymentRef}`;
+
+    setUpiUrl(qr.replace(/\s+/g, ""));
+    setQrVisible(true);
+  };
+
+  const saveManualPayment = async () => {
+    if (!transactionId.trim()) {
+      message.warning("Please enter transaction ID");
+      return;
+    }
+
+    try {
+      setPayLoading(true);
+
+      await axios.post(`${BASE_URL}/contribution/manual-payment`, {
+        contributionIds: selectedRowKeys,
+        memberId,
+        userId,
+        financialYearId,
+        paymentMode: "UPI",
+        transactionId,
+        amount: totalAmount,
+      });
+
+      message.success("Payment submitted successfully");
+
+      setQrVisible(false);
+      setTransactionId("");
+      setSelectedRowKeys([]);
+
+      const freshData = await loadContributions();
+      filterContributions(selectedFlat, freshData);
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to submit payment");
+    } finally {
+      setPayLoading(false);
+    }
+  };
+
   // ✅ FRONTEND FILTER ONLY
 
   const loadContributions = async () => {
@@ -144,7 +205,6 @@ const PendingContributions: React.FC = () => {
     flatId: number | null,
     sourceData = allContributions,
   ) => {
-
     const filtered = sourceData.filter(
       (item) => Number(item.flatId) === Number(flatId),
     );
@@ -276,23 +336,23 @@ const PendingContributions: React.FC = () => {
         <Content style={{ padding: 24, background: "#f0f5ff" }}>
           <Title level={3}>Pending Contributions</Title>
 
-<Select
-  style={{ width: 220, marginBottom: 12 }}
-  placeholder="Select Flat"
-  options={flats.map((f) => ({
-    label: f.flatNo,
-    value: f.id,
-  }))}
-  value={selectedFlat ?? undefined}
-  onChange={(v) => {
-    const filtered = allContributions.filter(
-      (item) => Number(item.flatId) === Number(v)
-    );
-    setSelectedFlat(Number(v));
-    setContributions(filtered);
-    setSelectedRowKeys([]);
-  }}
-/>
+          <Select
+            style={{ width: 220, marginBottom: 12 }}
+            placeholder="Select Flat"
+            options={flats.map((f) => ({
+              label: f.flatNo,
+              value: f.id,
+            }))}
+            value={selectedFlat ?? undefined}
+            onChange={(v) => {
+              const filtered = allContributions.filter(
+                (item) => Number(item.flatId) === Number(v),
+              );
+              setSelectedFlat(Number(v));
+              setContributions(filtered);
+              setSelectedRowKeys([]);
+            }}
+          />
 
           <div style={{ marginBottom: 12 }}>
             Selected: {selectedRowKeys.length} | Total: ₹{totalAmount}
@@ -300,11 +360,21 @@ const PendingContributions: React.FC = () => {
 
           <Button
             type="primary"
+            style={{ marginLeft: 10 }}
+            onClick={() => handleManualPayment()}
+            disabled={!selectedRowKeys.length}
+          >
+            Pay via UPI QR
+          </Button>
+
+          <Button
+            type="default"
+            style={{ marginLeft: 10 }}
             onClick={handlePay}
             disabled={!selectedRowKeys.length}
             loading={payLoading}
           >
-            Pay Online
+            Pay via Razorpay
           </Button>
 
           {loading ? (
@@ -337,6 +407,42 @@ const PendingContributions: React.FC = () => {
               value={finalAmount}
               onChange={(v) => setFinalAmount(Number(v))}
             />
+          </Modal>
+          <Modal
+            title="Scan & Pay"
+            open={qrVisible}
+            footer={null}
+            onCancel={() => setQrVisible(false)}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <QRCodeCanvas value={upiUrl} size={250} />
+
+              <div>
+                <strong>Amount:</strong> ₹{totalAmount}
+              </div>
+
+              <Input
+                placeholder="Enter UPI Transaction ID"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+              />
+
+              <Button
+                type="primary"
+                loading={payLoading}
+                onClick={saveManualPayment}
+                block
+              >
+                Submit Payment
+              </Button>
+            </div>
           </Modal>
         </Content>
       </Layout>

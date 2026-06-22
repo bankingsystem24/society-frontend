@@ -15,6 +15,8 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import MemberHeader from "../../components/layout/MemberHeader";
 import Header from "../../components/layout/Header";
+import { Modal, Input } from "antd";
+import { QRCodeCanvas } from "qrcode.react";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -29,7 +31,6 @@ type SinkingFund = {
   status: string;
   flatId: Number;
   flatNo?: string;
-
 };
 
 type Flat = {
@@ -51,6 +52,13 @@ const PendingSinkingFunds: React.FC = () => {
   const userId = Number(sessionStorage.getItem("userId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
+  const [qrVisible, setQrVisible] = useState(false);
+
+  const [transactionId, setTransactionId] = useState("");
+  const [upiUrl, setUpiUrl] = useState("");
+
+  const societyName = sessionStorage.getItem("societyName");
+  const upi = sessionStorage.getItem("upi");
 
   useEffect(() => {
     loadFlats();
@@ -96,16 +104,14 @@ const PendingSinkingFunds: React.FC = () => {
         financialYearId,
       });
 
-console.log("Res",res);
-let data = (res.data || []).filter(
-  (fund: SinkingFund) =>
-    fund.status !== "PAID" &&
-    Number(fund.flatId) === Number(flatId)
-);
+      console.log("Res", res);
+      let data = (res.data || []).filter(
+        (fund: SinkingFund) =>
+          fund.status !== "PAID" && Number(fund.flatId) === Number(flatId),
+      );
 
-setSinkingFunds(data);
-console.log("data", data);
-
+      setSinkingFunds(data);
+      console.log("data", data);
     } catch (err) {
       message.error("Failed to load sinking funds");
     } finally {
@@ -114,30 +120,78 @@ console.log("data", data);
   };
 
   const selectedFunds = sinkingFunds.filter((f) =>
-    selectedRowKeys.includes(f.id)
+    selectedRowKeys.includes(f.id),
   );
 
   const totalAmount = selectedFunds.reduce(
     (sum, f) => sum + (f.amount || 0),
-    0
+    0,
   );
 
   const handlePay = async () => {
-    if (!selectedRowKeys.length) {
-      message.warning("Select records first");
+    if (selectedRowKeys.length === 0) {
+      message.warning("Select sinking funds first");
       return;
     }
 
-    setPayLoading(true);
+    const paymentRef = `SF-${Date.now()}`;
+
+    const qr = `upi://pay?pa=${upi}
+    &pn=${encodeURIComponent(societyName ?? "")}
+    &am=${1}
+    &cu=INR
+    &tn=${paymentRef}`;
+
+    setUpiUrl(qr.replace(/\s+/g, ""));
+    setQrVisible(true);
+  };
+
+  const confirmPayment = async () => {
+    if (!transactionId) {
+      message.error("Enter UTR / Transaction Id");
+      return;
+    }
 
     try {
+      await axios.post(`${BASE_URL}/members/sinking-fund/manual-payment`, {
+        sinkingFundIds: selectedRowKeys,
+        memberId,
+        amount: totalAmount,
+        paymentMode: "UPI",
+        transactionId,
+        financialYearId,
+        userId,
+      });
+
+      message.success("Payment submitted. Awaiting verification.");
+
+      setQrVisible(false);
+      setTransactionId("");
+      setSelectedRowKeys([]);
+
+      fetchSinkingFunds(selectedFlat);
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to submit payment");
+    }
+  };
+
+  const handleRazorPay = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning("Select sinking funds first");
+      return;
+    }
+
+    try {
+      setPayLoading(true);
+
       const orderRes = await axios.post(
         `${BASE_URL}/sinking-fund/create-order`,
         {
-          sinkingFundIds: selectedRowKeys,
+          sinkingFundIds: [...selectedRowKeys],
           memberId,
           amount: totalAmount,
-        }
+        },
       );
 
       const order = orderRes.data;
@@ -147,6 +201,7 @@ console.log("data", data);
         amount: order.amount,
         currency: "INR",
         name: "Society Management",
+        description: "Sinking Fund Payment",
         order_id: order.razorpayOrderId,
 
         handler: async (response: any) => {
@@ -156,10 +211,10 @@ console.log("data", data);
             razorpaySignature: response.razorpay_signature,
             sinkingFundIds: selectedRowKeys,
             memberId,
-            userId,
             amount: totalAmount,
-            paymentMode:"ONLINE",
+            paymentMode: response.method || "ONLINE",
             financialYearId,
+            userId,
           });
 
           message.success("Payment successful");
@@ -170,7 +225,7 @@ console.log("data", data);
 
       new (window as any).Razorpay(options).open();
     } catch (err) {
-      message.error("Payment failed");
+      message.error("Payment initiation failed");
     } finally {
       setPayLoading(false);
     }
@@ -192,105 +247,142 @@ console.log("data", data);
     },
   ];
 
-return (
-  <Layout style={{ minHeight: "100vh" }}>
-
-    {/* SIDEBAR */}
-    <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "MEMBER" ? <MemberSidebar /> : <Sidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "MEMBER" ? <MemberHeader /> : <Header />}
-
-      {/* CONTENT */}
-      <Content
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      {/* SIDEBAR */}
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
         style={{
-          padding: 24,
-          background: "#f0f5ff",
-          minWidth: 0,
-          overflowX: "auto",
+          height: "100vh",
+          position: "sticky",
+          top: 0,
           overflowY: "auto",
         }}
       >
-        <Title level={3}>Pending Sinking Funds</Title>
+        {role === "MEMBER" ? <MemberSidebar /> : <Sidebar />}
+      </Layout.Sider>
 
-        {/* Flat Selector */}
-        <div style={{ marginBottom: 12 }}>
-          <Select
-            placeholder="Select Flat"
-            style={{ width: 220 }}
-            allowClear
-            options={flats.map((flat) => ({
-              label: flat.flatNo,
-              value: flat.id,
-            }))}
-            value={selectedFlat || undefined}
-            onChange={(value) => {
-              setSelectedFlat(value || null);
-              fetchSinkingFunds(value || null);
-              setSelectedRowKeys([]);
-            }}
-          />
-        </div>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "MEMBER" ? <MemberHeader /> : <Header />}
 
-        {/* Summary */}
-        <div
+        {/* CONTENT */}
+        <Content
           style={{
-            marginBottom: 12,
-            display: "flex",
-            justifyContent: "space-between",
+            padding: 24,
+            background: "#f0f5ff",
+            minWidth: 0,
+            overflowX: "auto",
+            overflowY: "auto",
           }}
         >
-          <div>
-            Selected: <b>{selectedFunds.length}</b> | Total:{" "}
-            <b>₹ {totalAmount}</b>
+          <Title level={3}>Pending Sinking Funds</Title>
+
+          {/* Flat Selector */}
+          <div style={{ marginBottom: 12 }}>
+            <Select
+              placeholder="Select Flat"
+              style={{ width: 220 }}
+              allowClear
+              options={flats.map((flat) => ({
+                label: flat.flatNo,
+                value: flat.id,
+              }))}
+              value={selectedFlat || undefined}
+              onChange={(value) => {
+                setSelectedFlat(value || null);
+                fetchSinkingFunds(value || null);
+                setSelectedRowKeys([]);
+              }}
+            />
           </div>
 
-          <Button
-            type="primary"
-            loading={payLoading}
-            disabled={!selectedRowKeys.length}
-            onClick={handlePay}
-          >
-            Pay Sinking Fund
-          </Button>
-        </div>
-
-        {/* TABLE */}
-        {loading ? (
-          <Spin />
-        ) : (
-          <Table
-            rowKey="id"
-            dataSource={sinkingFunds}
-            columns={columns}
-            rowSelection={{
-              selectedRowKeys,
-              onChange: setSelectedRowKeys,
+          {/* Summary */}
+          <div
+            style={{
+              marginBottom: 12,
+              display: "flex",
+              justifyContent: "space-between",
             }}
-            pagination={{ pageSize: 8 }}
-            bordered
-            scroll={{ x: "max-content" }}
-          />
-        )}
-      </Content>
+          >
+            <div>
+              Selected: <b>{selectedFunds.length}</b>
+              {" | "}Total: <b>₹ {totalAmount}</b>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <Button
+              type="primary"
+              disabled={selectedRowKeys.length === 0}
+              onClick={handlePay}
+            >
+              Pay via UPI QR
+            </Button>
+
+            <Button
+              type="primary"
+              style={{ marginLeft: 10 }}
+              disabled={selectedRowKeys.length === 0}
+              loading={payLoading}
+              onClick={handleRazorPay}
+            >
+              Pay via Razorpay
+            </Button>
+          </div>
+          {/* TABLE */}
+          {loading ? (
+            <Spin />
+          ) : (
+            <Table
+              rowKey="id"
+              dataSource={sinkingFunds}
+              columns={columns}
+              rowSelection={{
+                selectedRowKeys,
+                onChange: setSelectedRowKeys,
+                getCheckboxProps: (record: SinkingFund) => ({
+                  disabled: record.status !== "PENDING",
+                }),
+              }}
+              pagination={{ pageSize: 8 }}
+              bordered
+              scroll={{ x: "max-content" }}
+            />
+          )}
+          <Modal
+            title="Pay Sinking Fund"
+            open={qrVisible}
+            onCancel={() => setQrVisible(false)}
+            onOk={confirmPayment}
+            okText="Submit Payment"
+          >
+            <div style={{ textAlign: "center" }}>
+              <QRCodeCanvas value={upiUrl} size={250} />
+
+              <div style={{ marginTop: 15 }}>
+                <b>Amount:</b> ₹ {totalAmount}
+              </div>
+
+              <div style={{ marginTop: 15 }}>
+                Scan using Google Pay / PhonePe / Paytm
+              </div>
+            </div>
+
+            <Input
+              style={{ marginTop: 20 }}
+              placeholder="Enter UTR / Transaction Id"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+            />
+          </Modal>
+        </Content>
+      </Layout>
     </Layout>
-  </Layout>
-);
+  );
 };
 
 export default PendingSinkingFunds;

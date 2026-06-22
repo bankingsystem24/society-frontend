@@ -645,8 +645,20 @@ export default function VerifyPayemnt() {
     }
   };
 
-  const confirmPayment = async (receiptId: number) => {
-    const paymentTable="billing";
+  const confirmPayment = async (receiptId: number,receiptNo:string) => {
+
+    console.log(receiptNo);
+
+    let paymentTable;
+    if (receiptNo.startsWith("RCPT")) {
+      paymentTable="billing";
+    } else if (receiptNo.startsWith("SFRCPT"))
+    {
+      paymentTable="sinkingfund";
+    } else if(receiptNo.startsWith("CONTR")){
+      paymentTable="contribution";
+    }
+
     try {
         await axios.put(`${BASE_URL}/receipts/confirm`, {receiptId, paymentTable,});
 
@@ -723,7 +735,7 @@ export default function VerifyPayemnt() {
           size="small"
           onClick={(e) => {
             e.stopPropagation(); // prevent row click modal
-            confirmPayment(record.id);
+            confirmPayment(record.id,record.receiptNo);
           }}
         >
           Confirm Payment

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Table, Tag, Spin, Typography } from "antd";
+import { Layout, Table,  Spin, Typography } from "antd";
 import MemberSidebar from "../../components/layout/MemberSidebar";
 import MemberHeader from "../../components/layout/MemberHeader";
 import axios from "axios";
@@ -7,21 +7,6 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
 const { Title } = Typography;
-
-/* ================= TYPES ================= */
-type Billing = {
-  id: number;
-  month: string;
-  year: number;
-  totalAmount: number;
-  status: string;
-  paidDate?: string;
-  paymentMode?: string;
-  receiptNo?: string;
-  transactionId: string;
-  flat?: { flatNo?: string };
-  flatNo?: string;
-};
 
 /* ================= PRINT FUNCTION ================= */
 const printReceipt = (receipt: any, type: string) => {

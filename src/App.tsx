@@ -44,7 +44,7 @@ import ProfitAndLoss from "./pages/accounting/ProfitAndLoss";
 import GenerateSinkingFund from "./pages/billing/GenerateSinkingFund";
 import ViewSinkingFund from "./pages/billing/ViewSinkingFund";
 import PendingSinkingFunds from "./pages/billing/PendingSinkingFunds";
-import MemberSinkingFunds from "./pages/members/MemberSinkingFunds";
+import MemberSinkingFunds from "./pages/members/MemberSinkingFunds_Deleted";
 import GlMaster from "./pages/accounting/GlMaster";
 import DiscountPolicy from "./pages/billing/DiscountPolicy";
 import ContributionPage from "./pages/billing/ContributionPage";
@@ -67,7 +67,7 @@ export default function App() {
       {/* <Route path="/member-pending-bills" element={<MemberPendingBills />} /> */}
       <Route path="/member-paying-maintenance" element={<MemberPayingMaintenance />} />
 
-      <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} />
+      {/* <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} /> */}
       <Route path="/contributions" element={<PendingContributions />} />
       <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
       <Route path="/view-receipts" element={<ViewReceipts />} />
