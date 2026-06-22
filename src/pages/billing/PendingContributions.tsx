@@ -72,6 +72,9 @@ const PendingContributions: React.FC = () => {
 
   const societyName = sessionStorage.getItem("societyName");
   const upi = sessionStorage.getItem("upi");
+  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "QR" | "">(
+    "",
+  );
 
   useEffect(() => {}, [selectedFlat, contributions]);
 
@@ -118,24 +121,38 @@ const PendingContributions: React.FC = () => {
     }
   };
 
+  const openQr = (amount: number) => {
+    const paymentRef = `SF-${Date.now()}`;
+
+    const qr = `upi://pay?pa=${upi}
+      &pn=${encodeURIComponent(societyName ?? "")}
+      &am=${amount}
+      &cu=INR
+      &tn=${paymentRef}`;
+
+    setUpiUrl(qr.replace(/\s+/g, ""));
+    setQrVisible(true);
+  };
+
   const handleManualPayment = () => {
     if (selectedRowKeys.length === 0) {
       message.warning("Select row first");
       return;
     }
 
-    const paymentRef = `SF-${Date.now()}`;
+    const first = selectedContributions[0];
 
-    const qr = `upi://pay?pa=${upi}
-    &pn=${encodeURIComponent(societyName ?? "")}
-    &am=${1}
-    &cu=INR
-    &tn=${paymentRef}`;
+    if (first?.type?.toUpperCase() === "VOLUNTARY") {
+      setContributionType("VOLUNTARY");
+      setMinimumAmount(totalAmount);
+      setFinalAmount(totalAmount);
+      setPaymentMethod("QR");
+      setAmountModalOpen(true);
+      return;
+    }
 
-    setUpiUrl(qr.replace(/\s+/g, ""));
-    setQrVisible(true);
+    openQr(totalAmount);
   };
-
   const saveManualPayment = async () => {
     if (!transactionId.trim()) {
       message.warning("Please enter transaction ID");
@@ -145,6 +162,9 @@ const PendingContributions: React.FC = () => {
     try {
       setPayLoading(true);
 
+      console.log("Final :",finalAmount);
+      console.log("Total:",totalAmount);
+
       await axios.post(`${BASE_URL}/contribution/manual-payment`, {
         contributionIds: selectedRowKeys,
         memberId,
@@ -152,7 +172,7 @@ const PendingContributions: React.FC = () => {
         financialYearId,
         paymentMode: "UPI",
         transactionId,
-        amount: totalAmount,
+        amount: finalAmount || totalAmount,
       });
 
       message.success("Payment submitted successfully");
@@ -233,6 +253,7 @@ const PendingContributions: React.FC = () => {
       setContributionType("VOLUNTARY");
       setMinimumAmount(totalAmount);
       setFinalAmount(totalAmount);
+      setPaymentMethod("RAZORPAY");
       setAmountModalOpen(true);
       return;
     }
@@ -313,6 +334,10 @@ const PendingContributions: React.FC = () => {
     },
   ];
 
+  const firstSelectedContribution = contributions.find((c) =>
+    selectedRowKeys.includes(c.id),
+  );
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
@@ -387,6 +412,20 @@ const PendingContributions: React.FC = () => {
               rowSelection={{
                 selectedRowKeys,
                 onChange: setSelectedRowKeys,
+
+                getCheckboxProps: (record) => {
+                  if (!firstSelectedContribution) {
+                    return { disabled: false };
+                  }
+                  const firstType =
+                    firstSelectedContribution.type?.toUpperCase();
+                  const currentType = record.type?.toUpperCase();
+                  return {
+                    disabled:
+                      currentType !== firstType &&
+                      !selectedRowKeys.includes(record.id),
+                  };
+                },
               }}
               scroll={{ x: "max-content" }}
               pagination={{ pageSize: 8 }}
@@ -394,20 +433,57 @@ const PendingContributions: React.FC = () => {
           )}
 
           <Modal
+            title="Enter Contribution Amount"
             open={amountModalOpen}
-            onCancel={() => setAmountModalOpen(false)}
-            onOk={() => {
+            onCancel={() => {
               setAmountModalOpen(false);
-              proceedPayment(finalAmount || 0, contributionType);
+              setFinalAmount(minimumAmount);
+            }}
+            onOk={() => {
+              if (!finalAmount || finalAmount <= 0) {
+                message.error("Please enter amount");
+                return;
+              }
+
+              if (finalAmount < minimumAmount) {
+                message.error(
+                  `Amount cannot be less than ₹${minimumAmount}. Please enter a valid amount.`,
+                );
+                return;
+              }
+
+              setAmountModalOpen(false);
+
+              if (paymentMethod === "RAZORPAY") {
+                proceedPayment(finalAmount, contributionType);
+              } else if (paymentMethod === "QR") {
+                openQr(finalAmount);
+              }
             }}
           >
-            <p>Minimum: ₹{minimumAmount}</p>
+            <div style={{ marginBottom: 12 }}>
+              <strong>Minimum Amount:</strong> ₹{minimumAmount}
+            </div>
+
             <InputNumber
               style={{ width: "100%" }}
               value={finalAmount}
-              onChange={(v) => setFinalAmount(Number(v))}
+              onChange={(v) => setFinalAmount(v ? Number(v) : 0)}
+              placeholder="Enter amount"
             />
+
+            {(finalAmount || 0) < minimumAmount && (
+              <div
+                style={{
+                  color: "red",
+                  marginTop: 8,
+                }}
+              >
+                Amount must be at least ₹{minimumAmount}
+              </div>
+            )}
           </Modal>
+
           <Modal
             title="Scan & Pay"
             open={qrVisible}
@@ -425,7 +501,7 @@ const PendingContributions: React.FC = () => {
               <QRCodeCanvas value={upiUrl} size={250} />
 
               <div>
-                <strong>Amount:</strong> ₹{totalAmount}
+                <strong>Amount:</strong> ₹{finalAmount || totalAmount}
               </div>
 
               <Input
