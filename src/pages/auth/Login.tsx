@@ -3,9 +3,12 @@ import { Card, Form, Input, Button, message } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const onFinish = async (values: any) => {
     setLoading(true);
 
@@ -44,7 +47,7 @@ const Login: React.FC = () => {
       } else {
         sessionStorage.removeItem("societyId");
       }
-     
+
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("memberToken", res.data.token);
       sessionStorage.setItem("memberName", res.data.memberName);
@@ -52,7 +55,10 @@ const Login: React.FC = () => {
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("userId", String(res.data.auditorId));
-      sessionStorage.setItem("upi",res.data.upi);
+      sessionStorage.setItem("upi", res.data.upi);
+
+      fetchGlMapping();
+
       if (res.data.role === "SUPER_ADMIN") {
         navigate("/superadmindashboard");
       } else if (res.data.role === "ADMIN") {
@@ -69,6 +75,40 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const fetchGlMapping = async () => {
+    console.log("I am in");
+    const societyId = Number(sessionStorage.getItem("societyId"));
+      try {
+        const res = await axios.get(
+          `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
+        );
+
+        const mapping = res.data.find(
+          (item: any) =>
+            item.description?.trim().toLowerCase() === "cash in hand",
+        );
+        if (!mapping) {
+          message.error("Cash in Hand Mapping not configured");
+          return;
+        }
+        sessionStorage.setItem("GlCashInHand", mapping.gl_receivable);
+        const mapping1 = res.data.find(
+          (item: any) =>
+            item.description?.trim().toLowerCase() === "bank account",
+        );
+        if (!mapping1) {
+          message.error("Cash in Hand Mapping not configured");
+          return;
+        }
+        sessionStorage.setItem("GlBankAccount", mapping1.gl_receivable);
+
+      } catch (err) {
+        console.error(err);
+        message.error("Unable to load GL Mapping");
+      }
+    };
+  
 
   return (
     <div

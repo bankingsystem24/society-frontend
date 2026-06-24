@@ -18,8 +18,7 @@ const GenerateSinkingFund: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const societyId = Number(sessionStorage.getItem("societyId"));
 
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
-  
+ 
     const [glReceivable, setGlReceivable] = useState<number>(0);
     const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
   
@@ -45,14 +44,6 @@ const GenerateSinkingFund: React.FC = () => {
           item.description?.trim().toLowerCase() === "sinking fund receivable",
       );
 
-      if (!mapping) {
-        setMaintenanceMappingExists(false);
-        message.error("Monthly Maintenance GL Mapping not configured");
-        return;
-      }
-
-      setMaintenanceMappingExists(true);
-
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
 
@@ -75,7 +66,6 @@ const GenerateSinkingFund: React.FC = () => {
       setGlDiscount(Number(Discount));
     } catch (err) {
       console.error(err);
-      setMaintenanceMappingExists(false);
       message.error("Unable to load GL Mapping");
     }
   };

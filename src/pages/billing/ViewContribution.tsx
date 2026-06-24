@@ -9,6 +9,7 @@ import {
   Form,
   Modal,
   InputNumber,
+  Input,
 } from "antd";
 import axios from "axios";
 
@@ -32,47 +33,43 @@ interface Contribution {
   createdBy: number;
   financialYearId: number;
   flatNo: string;
+  glReceivable:number;
+  glCreditAccount:number;
 }
 
 const ViewContribution: React.FC = () => {
   const [data, setData] = useState<Contribution[]>([]);
   const [filteredData, setFilteredData] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [type, setType] = useState<string>();
   const [flatNo, setFlatNo] = useState<string>();
   const [status, setStatus] = useState<string>();
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState("CASH");
   const [contributionAmount, setContributionAmount] = useState<number>(0);
-
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const userId = Number(sessionStorage.getItem("userId"));
-
+  const [transactionId, setTransactionId] = useState("");
   const selectedContributions = filteredData.filter((c) =>
     selectedRowKeys.includes(c.id),
   );
-
   const selectedFlatNo =
     selectedContributions.length > 0 ? selectedContributions[0].flatNo : null;
-
   const selectedType =
     selectedContributions.length > 0 ? selectedContributions[0].type : null;
-
   const totalSelectedAmount = selectedContributions.reduce(
     (sum, contribution) => sum + Number(contribution.amount || 0),
     0,
   );
+
   useEffect(() => {
     if (selectedType === "VOLUNTARY") {
       setContributionAmount(totalSelectedAmount);
-    } else{
-          setContributionAmount(totalSelectedAmount);
+    } else {
+      setContributionAmount(totalSelectedAmount);
     }
-    
   }, [selectedType, totalSelectedAmount]);
 
   const fetchData = async () => {
@@ -84,6 +81,7 @@ const ViewContribution: React.FC = () => {
       );
       setData(res.data || []);
       setFilteredData(res.data || []);
+      console.log("Response", res.data);
     } catch {
       message.error("Failed to load contributions");
     } finally {
@@ -121,6 +119,11 @@ const ViewContribution: React.FC = () => {
     try {
       const contributionIds = selectedRowKeys.map(Number);
 
+      const selectedContributions = filteredData.filter((c) =>selectedRowKeys.includes(c.id));
+      const glReceivable = selectedContributions.length > 0 ? selectedContributions[0].glReceivable : null;
+      const glCreditAccount = selectedContributions.length > 0 ? selectedContributions[0].glCreditAccount : null;
+
+
       if (
         selectedType === "VOLUNTARY" &&
         contributionAmount < totalSelectedAmount
@@ -130,14 +133,21 @@ const ViewContribution: React.FC = () => {
         );
         return;
       }
-      
-      const res = await axios.put(`${BASE_URL}/contribution/pay`, {
+
+      const payload = {
         contributionIds,
         paymentMode,
         financialYearId,
         contributionAmount,
-        userId
-      });
+        userId,
+        glReceivable,
+        glCreditAccount,
+
+      }
+
+      console.log("Payload:",payload);
+
+      const res = await axios.put(`${BASE_URL}/contribution/pay`,payload );
 
       message.success(res.data);
 
@@ -185,6 +195,18 @@ const ViewContribution: React.FC = () => {
       title: "Description",
       dataIndex: "description",
       key: "description",
+    },
+    {
+      title: "GlReceivable",
+      dataIndex: "glReceivable",
+      key: "glReceivable",
+      hidden: true,
+    },
+    {
+      title: "Gl Credit",
+      dataIndex: "glCreditAccount",
+      key: "glCreditAccount",
+      hidden: true,
     },
     {
       title: "Status",
@@ -287,7 +309,7 @@ const ViewContribution: React.FC = () => {
           columns={columns}
           pagination={{ pageSize: 10 }}
           size="small"
-          scroll={{ x:"max-content"}}
+          scroll={{ x: "max-content" }}
           rowSelection={{
             selectedRowKeys,
             hideSelectAll: true,
@@ -341,13 +363,24 @@ const ViewContribution: React.FC = () => {
                 ]}
               />
             </Form.Item>
+            {paymentMode !== "CASH" && (
+              <Form.Item label="Transaction ID" required>
+                <Input
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  placeholder="Enter Transaction ID"
+                />
+              </Form.Item>
+            )}
             {selectedContributions.some((c) => c.type === "VOLUNTARY") && (
               <Form.Item label="Voluntary Amount" required>
                 <InputNumber
                   style={{ width: "100%" }}
                   min={1}
                   value={contributionAmount}
-                  onChange={(value) => setContributionAmount(Number(value || 0))}
+                  onChange={(value) =>
+                    setContributionAmount(Number(value || 0))
+                  }
                   placeholder="Enter Amount"
                 />
               </Form.Item>
