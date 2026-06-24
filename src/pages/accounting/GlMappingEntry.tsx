@@ -69,9 +69,10 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
       const data: GLMaster[] = res.data;
 
       // Receivable Accounts
-      setReceivableAccounts(
-        data.filter((x) => x.accountName.toLowerCase().includes("receivable")),
-      );
+      // setReceivableAccounts(
+      //   data.filter((x) => x.accountName.toLowerCase().includes("receivable")),
+      // );
+      setReceivableAccounts(data);
 
       // Income + Reserve Accounts
       setCreditAccounts(
@@ -193,7 +194,7 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
 
                   <Col xs={24} sm={24} md={12} lg={8}>
                     <Form.Item
-                      label="Receivable Account"
+                      label="Account"
                       name="gl_receivable"
                       rules={[
                         {
@@ -218,11 +219,11 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
 
                   <Col xs={24} sm={24} md={12} lg={8}>
                     <Form.Item
-                      label="Income / Fund Account"
+                      label="MAP to Account"
                       name="gl_credit_account"
                       rules={[
                         {
-                          required: true,
+                          required: false,
                           message: "Select Credit Account",
                         },
                       ]}

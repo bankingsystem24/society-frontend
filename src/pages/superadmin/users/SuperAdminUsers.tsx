@@ -39,7 +39,6 @@ const SuperAdminUsers: React.FC = () => {
     try {
       setLoading(true);
         const res = await apiGet("/users");
-        console.log("Users:",res.data);
         const filtered = (res || [])
           .sort((a: any, b: any) => {
             const societyCompare = (a.societyName || "").localeCompare(

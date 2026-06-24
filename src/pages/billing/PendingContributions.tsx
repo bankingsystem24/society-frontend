@@ -162,9 +162,6 @@ const PendingContributions: React.FC = () => {
     try {
       setPayLoading(true);
 
-      console.log("Final :",finalAmount);
-      console.log("Total:",totalAmount);
-
       await axios.post(`${BASE_URL}/contribution/manual-payment`, {
         contributionIds: selectedRowKeys,
         memberId,

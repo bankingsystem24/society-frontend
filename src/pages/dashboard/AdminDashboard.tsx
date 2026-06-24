@@ -42,7 +42,6 @@ const AdminDashboard: React.FC = () => {
         financialYearId: financialYearId,
       });
 
-      console.log("Data", res.data);
       setMemberStats({
         pendingMaintenance: res.data.pendingMaintenance || 0,
         paidMaintenance: res.data.paidMaintenance || 0,

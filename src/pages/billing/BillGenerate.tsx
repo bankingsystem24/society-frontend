@@ -44,8 +44,6 @@ const BillGenerate: React.FC = () => {
         `${BASE_URL}/gl/master/mapping?societyId=${societyId}`
       );
 
-      console.log("Mappings:", res.data);
-
       const mapping = res.data.find(
         (item: any) =>
           item.description?.trim().toLowerCase() ===
@@ -66,8 +64,6 @@ const BillGenerate: React.FC = () => {
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
 
-      console.log("GL Receivable:", mapping.gl_receivable);
-      console.log("GL Credit Account:", mapping.gl_credit_account);
     } catch (err) {
       console.error(err);
 
@@ -155,8 +151,6 @@ const BillGenerate: React.FC = () => {
         glReceivable,
         glCreditAccount,
       };
-
-      console.log("Payload:", payload);
 
       await apiPost("/billing/generate", payload);
 

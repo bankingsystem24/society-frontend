@@ -36,8 +36,6 @@ const SetSociety: React.FC = () => {
       setLoading(true);
       const response = await axios.get(`${BASE_URL}/societies`);
 
-      console.log("Response:",response.data);
-
       let filteredSocieties;
 
       if (role ==="SUPER_ADMIN"){

@@ -60,9 +60,24 @@ const PendingSinkingFunds: React.FC = () => {
   const societyName = sessionStorage.getItem("societyName");
   const upi = sessionStorage.getItem("upi");
 
+    const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  
+    const [glReceivable, setGlReceivable] = useState<number>(0);
+    const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  
+    const [glCashInHand, setGlCashInHand] = useState<number>(0);
+    const [glBankAccount, setGlBankAccount] = useState<number>(0);
+    const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
+    const [glDiscount, setGlDiscount] = useState<number>(0);
+
   useEffect(() => {
     loadFlats();
+    loadGlMapping();
+
   }, []);
+
+  useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
+  
 
   const loadFlats = async () => {
     try {
@@ -83,6 +98,53 @@ const PendingSinkingFunds: React.FC = () => {
     }
   };
 
+
+    const loadGlMapping = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
+      );
+
+      const mapping = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "sinking fund receivable",
+      );
+
+      if (!mapping) {
+        setMaintenanceMappingExists(false);
+        message.error(" GL Mapping not configured");
+        return;
+      }
+
+      setMaintenanceMappingExists(true);
+
+      setGlReceivable(mapping.gl_receivable);
+      setGlCreditAccount(mapping.gl_credit_account);
+
+      const CashInHand = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "cash in hand",
+      )?.gl_receivable;
+      setGlCashInHand(Number(CashInHand));
+      const BankAccount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "bank account",
+      )?.gl_receivable;
+      setGlBankAccount(Number(BankAccount));
+      const InterestIncome = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() == "interest income",
+      )?.gl_receivable;
+      setGlInterestIncome(Number(InterestIncome));
+      const Discount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "discount",
+      )?.gl_receivable;
+      setGlDiscount(Number(Discount));
+    } catch (err) {
+      console.error(err);
+      setMaintenanceMappingExists(false);
+      message.error("Unable to load GL Mapping");
+    }
+  };
+
   const fetchSinkingFunds = async (flatId: number | null) => {
     if (!flatId) {
       setSinkingFunds([]);
@@ -98,20 +160,19 @@ const PendingSinkingFunds: React.FC = () => {
 
       const flatIds = flatsRes.data.map((f: any) => Number(f.id));
 
-      const res = await axios.post(`${BASE_URL}/members/sinking-funds`, {
+      const payload = {
         flatIds,
         societyId,
         financialYearId,
-      });
+      }
+      const res = await axios.post(`${BASE_URL}/members/sinking-funds`,payload);
 
-      console.log("Res", res);
       let data = (res.data || []).filter(
         (fund: SinkingFund) =>
           fund.status !== "PAID" && Number(fund.flatId) === Number(flatId),
       );
 
       setSinkingFunds(data);
-      console.log("data", data);
     } catch (err) {
       message.error("Failed to load sinking funds");
     } finally {
@@ -161,6 +222,12 @@ const PendingSinkingFunds: React.FC = () => {
         transactionId,
         financialYearId,
         userId,
+        glReceivable,
+        glCreditAccount,
+        glCashInHand,
+        glBankAccount,
+        glInterestIncome,
+        glDiscount
       });
 
       message.success("Payment submitted. Awaiting verification.");

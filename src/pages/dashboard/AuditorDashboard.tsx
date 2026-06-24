@@ -27,8 +27,6 @@ const AuditorDashboard: React.FC = () => {
   const loadFinancialYear = async () => {
     try {
       const societyId = Number(sessionStorage.getItem("societyId"));
-      console.log("My Society Id",societyId);
-
       const res = await apiGet(`/accounting-year/${societyId}/active`);
       setFinancialYear(res.fyCode || "-");
       sessionStorage.setItem("financialYear",res.fyCode);
@@ -56,8 +54,6 @@ const AuditorDashboard: React.FC = () => {
                 societies: filteredSocieties.length | 0, });
 
       const firstSociety = filteredSocieties[0];
-
-      console.log("Filtered :",filteredSocieties);
 
       if (firstSociety) {
         sessionStorage.setItem("societyId", firstSociety.id);

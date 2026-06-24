@@ -97,11 +97,7 @@ const payload = {
   financialYearId: Number(financialYearId),
 };
 
-console.log("Payload:", payload);
-
 const res = await axios.post(`${BASE_URL}/receipts/viewReceipts`, payload);
-
-  console.log("res:",res);
 
     if (!financialYear) {setReceipts(res.data); return; }
 

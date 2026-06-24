@@ -17,7 +17,6 @@ const SuperAdminSocieties: React.FC = () => {
       const res = await apiGet("/societies");
       setSocieties(res || []);
 
-      console.log("socities:", res);
     } catch (error) {
       console.error("Error loading societies:", error);
       message.error("Failed to load societies");

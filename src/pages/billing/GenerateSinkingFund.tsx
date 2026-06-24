@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Select, Input, message, Card, Form, Row, Col } from "antd";
 import { apiPost } from "../../api/axios";
+import axios from "axios";
 
 const { Option } = Select;
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface SinkingFundFormValues {
   month: string;
@@ -13,6 +16,69 @@ interface SinkingFundFormValues {
 const GenerateSinkingFund: React.FC = () => {
   const [form] = Form.useForm<SinkingFundFormValues>();
   const [loading, setLoading] = useState(false);
+  const societyId = Number(sessionStorage.getItem("societyId"));
+
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  
+    const [glReceivable, setGlReceivable] = useState<number>(0);
+    const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  
+    const [glCashInHand, setGlCashInHand] = useState<number>(0);
+    const [glBankAccount, setGlBankAccount] = useState<number>(0);
+    const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
+    const [glDiscount, setGlDiscount] = useState<number>(0);
+  
+    useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
+    
+  useEffect(() => {
+    loadGlMapping();
+  }, []);
+
+    const loadGlMapping = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
+      );
+
+      const mapping = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "sinking fund receivable",
+      );
+
+      if (!mapping) {
+        setMaintenanceMappingExists(false);
+        message.error("Monthly Maintenance GL Mapping not configured");
+        return;
+      }
+
+      setMaintenanceMappingExists(true);
+
+      setGlReceivable(mapping.gl_receivable);
+      setGlCreditAccount(mapping.gl_credit_account);
+
+      const CashInHand = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "cash in hand",
+      )?.gl_receivable;
+      setGlCashInHand(Number(CashInHand));
+      const BankAccount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "bank account",
+      )?.gl_receivable;
+      setGlBankAccount(Number(BankAccount));
+      const InterestIncome = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() == "interest income",
+      )?.gl_receivable;
+      setGlInterestIncome(Number(InterestIncome));
+      const Discount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "discount",
+      )?.gl_receivable;
+      setGlDiscount(Number(Discount));
+    } catch (err) {
+      console.error(err);
+      setMaintenanceMappingExists(false);
+      message.error("Unable to load GL Mapping");
+    }
+  };
 
   const onFinish = async (values: SinkingFundFormValues) => {
     const financialYear = sessionStorage.getItem("financialYear");
@@ -70,7 +136,13 @@ const GenerateSinkingFund: React.FC = () => {
         amount:selectedAmount,
         societyId: Number(societyId),
         createdBy: Number(sessionStorage.getItem("userId")),
-        financialYearId
+        financialYearId,
+        glReceivable,
+        glCreditAccount,
+        glCashInHand,
+        glBankAccount,
+        glInterestIncome,
+        glDiscount,
       };
 
       await apiPost("/sinking-fund/generate", payload);

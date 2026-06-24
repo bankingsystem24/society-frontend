@@ -163,8 +163,6 @@ const MemberBills: React.FC = () => {
         payload
       );
 
-      console.log(contributionRes);
-
       /* ================= MAINTENANCE ================= */
       const bills = (billsRes.data || [])
         .filter((b: any) => b.status === "PAID")
@@ -265,9 +263,6 @@ const MemberBills: React.FC = () => {
       );
 
       setContributions(groupedContributions);
-
-      console.log("G.Contri.",groupedContributions);
-
 
     } catch (err) {
       console.error(err);

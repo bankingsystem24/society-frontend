@@ -56,8 +56,6 @@ const SuperAdminDashboard: React.FC = () => {
         })
       const firstSociety = filteredSocieties[0];
 
-      console.log("Filtered :",filteredSocieties);
-
       if (firstSociety) {
         sessionStorage.setItem("societyId", firstSociety.id);
         sessionStorage.setItem("societyName", String(firstSociety.societyName));

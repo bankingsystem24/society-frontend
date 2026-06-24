@@ -44,8 +44,7 @@ const Login: React.FC = () => {
       } else {
         sessionStorage.removeItem("societyId");
       }
-      console.log("Response:",res.data);
-      
+     
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("memberToken", res.data.token);
       sessionStorage.setItem("memberName", res.data.memberName);

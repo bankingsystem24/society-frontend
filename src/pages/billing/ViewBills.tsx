@@ -60,11 +60,15 @@ export default function ViewBills() {
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-  const [maintenanceMappingExists, setMaintenanceMappingExists] =
-    useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+
+  const [glCashInHand, setGlCashInHand] = useState<number>(0);
+  const [glBankAccount, setGlBankAccount] = useState<number>(0);
+  const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
+  const [glDiscount, setGlDiscount] = useState<number>(0);
 
   useEffect(() => {
     loadFlats();
@@ -73,26 +77,27 @@ export default function ViewBills() {
     loadGlMapping();
   }, []);
 
-    const loadGlMapping = async () => {
+  useEffect(() => {}, [
+    glCashInHand,
+    glBankAccount,
+    glInterestIncome,
+    glDiscount,
+  ]);
+
+  const loadGlMapping = async () => {
     try {
       const res = await axios.get(
-        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
       );
-
-      console.log("Mappings:", res.data);
 
       const mapping = res.data.find(
         (item: any) =>
-          item.description?.trim().toLowerCase() ===
-          "monthly maintenance"
+          item.description?.trim().toLowerCase() === "monthly maintenance",
       );
 
       if (!mapping) {
         setMaintenanceMappingExists(false);
-
-        message.error(
-          "Monthly Maintenance GL Mapping not configured"
-        );
+        message.error("Monthly Maintenance GL Mapping not configured");
         return;
       }
 
@@ -101,18 +106,29 @@ export default function ViewBills() {
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
 
-      console.log("GL Receivable:", mapping.gl_receivable);
-      console.log("GL Credit Account:", mapping.gl_credit_account);
+      const CashInHand = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "cash in hand",
+      )?.gl_receivable;
+      setGlCashInHand(Number(CashInHand));
+      const BankAccount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "bank account",
+      )?.gl_receivable;
+      setGlBankAccount(Number(BankAccount));
+      const InterestIncome = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() == "interest income",
+      )?.gl_receivable;
+      setGlInterestIncome(Number(InterestIncome));
+      const Discount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "discount",
+      )?.gl_receivable;
+      setGlDiscount(Number(Discount));
     } catch (err) {
       console.error(err);
-
       setMaintenanceMappingExists(false);
-
       message.error("Unable to load GL Mapping");
     }
   };
-
-
 
   const loadFlats = async () => {
     try {
@@ -163,6 +179,10 @@ export default function ViewBills() {
         transactionId,
         glReceivable,
         glCreditAccount,
+        glCashInHand,
+        glBankAccount,
+        glInterestIncome,
+        glDiscount,
       });
 
       message.success(res.data);
@@ -209,7 +229,7 @@ export default function ViewBills() {
     { title: "Discount", dataIndex: "discountAmount" },
 
     { title: "Total", dataIndex: "totalAmount" },
-    { title: "Trans.Id",dataIndex:"transactionId"},
+    { title: "Trans.Id", dataIndex: "transactionId" },
     {
       title: "Status",
       dataIndex: "status",
@@ -252,7 +272,7 @@ export default function ViewBills() {
             flexWrap: "wrap",
             gap: 16,
             marginBottom: 5,
-            marginTop:-5,
+            marginTop: -5,
           }}
         >
           {/* Flat */}

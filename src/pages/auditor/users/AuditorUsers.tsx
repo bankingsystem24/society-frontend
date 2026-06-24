@@ -52,8 +52,6 @@ const AuditorUsers: React.FC = () => {
       let users = [];
       users = await apiGet("/users");
 
-
-      console.log("Users:",users);
       // Keep only users belonging to auditor's societies
       const filtered = (users || [])
         .filter((user: any) =>(user.role !== "AUDITOR" && auditorSocietyIds.includes(Number(user.societyId)) || user.id === auditorId))

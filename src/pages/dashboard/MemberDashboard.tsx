@@ -43,7 +43,6 @@ const MemberDashboard: React.FC = () => {
       const res = await axios.post(
         `${BASE_URL}/member/dashboard`,{memberId: Number(memberId),financialYearId:financialYearId});
 
-        console.log("Data",res.data);
       setStats({
         pendingMaintenance:res.data.pendingMaintenance || 0,
         paidMaintenance:res.data.paidMaintenance || 0,
