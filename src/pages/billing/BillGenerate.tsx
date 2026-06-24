@@ -1,6 +1,6 @@
 // src/pages/billing/BillingGenerate.tsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Select,
@@ -11,10 +11,11 @@ import {
   Row,
   Col,
 } from "antd";
-
+import axios from "axios";
 import { apiPost } from "../../api/axios";
 
 const { Option } = Select;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface BillingFormValues {
   month: string;
@@ -25,12 +26,72 @@ const BillGenerate: React.FC = () => {
   const [form] = Form.useForm<BillingFormValues>();
   const [loading, setLoading] = useState(false);
 
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
+
+  const [glReceivable, setGlReceivable] = useState<number>(0);
+  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+
+  const societyId = Number(sessionStorage.getItem("societyId"));
+
+  useEffect(() => {
+    loadGlMapping();
+  }, []);
+
+  const loadGlMapping = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`
+      );
+
+      console.log("Mappings:", res.data);
+
+      const mapping = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() ===
+          "monthly maintenance"
+      );
+
+      if (!mapping) {
+        setMaintenanceMappingExists(false);
+
+        message.error(
+          "Monthly Maintenance GL Mapping not configured"
+        );
+        return;
+      }
+
+      setMaintenanceMappingExists(true);
+
+      setGlReceivable(mapping.gl_receivable);
+      setGlCreditAccount(mapping.gl_credit_account);
+
+      console.log("GL Receivable:", mapping.gl_receivable);
+      console.log("GL Credit Account:", mapping.gl_credit_account);
+    } catch (err) {
+      console.error(err);
+
+      setMaintenanceMappingExists(false);
+
+      message.error("Unable to load GL Mapping");
+    }
+  };
+
   const onFinish = async (values: BillingFormValues) => {
     const financialYear = sessionStorage.getItem("financialYear");
-    const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+    const financialYearId = Number(
+      sessionStorage.getItem("financialYearId")
+    );
 
     if (!financialYear) {
       message.error("Financial Year not found");
+      return;
+    }
+
+    if (!glReceivable || !glCreditAccount) {
+      message.error(
+        "Monthly Maintenance GL Mapping not configured"
+      );
       return;
     }
 
@@ -87,12 +148,16 @@ const BillGenerate: React.FC = () => {
         month: selectedMonth,
         year: selectedYear,
         societyId: Number(societyId),
-        createdBy: sessionStorage.getItem("userId"),
-        financialYearId:financialYearId
+        createdBy: Number(
+          sessionStorage.getItem("userId")
+        ),
+        financialYearId,
+        glReceivable,
+        glCreditAccount,
       };
 
-      console.log("Payload:",payload);
-      
+      console.log("Payload:", payload);
+
       await apiPost("/billing/generate", payload);
 
       message.success("Bills generated successfully");
@@ -185,6 +250,7 @@ const BillGenerate: React.FC = () => {
               type="primary"
               htmlType="submit"
               loading={loading}
+              disabled={!maintenanceMappingExists}
               block
             >
               Generate Bills

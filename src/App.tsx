@@ -44,7 +44,6 @@ import ProfitAndLoss from "./pages/accounting/ProfitAndLoss";
 import GenerateSinkingFund from "./pages/billing/GenerateSinkingFund";
 import ViewSinkingFund from "./pages/billing/ViewSinkingFund";
 import PendingSinkingFunds from "./pages/billing/PendingSinkingFunds";
-import MemberSinkingFunds from "./pages/members/MemberSinkingFunds_Deleted";
 import GlMaster from "./pages/accounting/GlMaster";
 import DiscountPolicy from "./pages/billing/DiscountPolicy";
 import ContributionPage from "./pages/billing/ContributionPage";
@@ -54,6 +53,7 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import SetSociety from "./pages/auditor/societies/SetSociety";
 import MemberPayingMaintenance from "./pages/members/MemberPayingMaintenance";
 import VerifyPayemnt from "./pages/billing/VerifyPayment";
+import GlMappingEntry from "./pages/accounting/GlMappingEntry";
 
 export default function App() {
   return (
@@ -78,6 +78,7 @@ export default function App() {
       <Route path="/trial-balance" element={<TrialBalance />} />
       <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
       <Route path="/verify-payment" element={<VerifyPayemnt />} />
+      <Route path="/gl-mapping" element={<GlMappingEntry />} />
 
 
       <Route element={<SuperAdminLayout />}>

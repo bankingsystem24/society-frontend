@@ -60,12 +60,59 @@ export default function ViewBills() {
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
+
+  const [glReceivable, setGlReceivable] = useState<number>(0);
+  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
 
   useEffect(() => {
     loadFlats();
     loadBills();
     loadMembers();
+    loadGlMapping();
   }, []);
+
+    const loadGlMapping = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`
+      );
+
+      console.log("Mappings:", res.data);
+
+      const mapping = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() ===
+          "monthly maintenance"
+      );
+
+      if (!mapping) {
+        setMaintenanceMappingExists(false);
+
+        message.error(
+          "Monthly Maintenance GL Mapping not configured"
+        );
+        return;
+      }
+
+      setMaintenanceMappingExists(true);
+
+      setGlReceivable(mapping.gl_receivable);
+      setGlCreditAccount(mapping.gl_credit_account);
+
+      console.log("GL Receivable:", mapping.gl_receivable);
+      console.log("GL Credit Account:", mapping.gl_credit_account);
+    } catch (err) {
+      console.error(err);
+
+      setMaintenanceMappingExists(false);
+
+      message.error("Unable to load GL Mapping");
+    }
+  };
+
+
 
   const loadFlats = async () => {
     try {
@@ -114,6 +161,8 @@ export default function ViewBills() {
         paymentMode,
         financialYearId,
         transactionId,
+        glReceivable,
+        glCreditAccount,
       });
 
       message.success(res.data);

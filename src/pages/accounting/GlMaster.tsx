@@ -18,7 +18,6 @@ interface GlMaster {
   glCode: number;
   accountName: string;
   groupName: string;
-  accountType: string;
   parentGlCode?: number | null;
   isActive: boolean;
   societyId: number;
@@ -28,7 +27,6 @@ const emptyForm: GlMaster = {
   glCode: 0,
   accountName: "",
   groupName: "",
-  accountType: "",
   parentGlCode: null,
   isActive: true,
   societyId: 1,
@@ -148,11 +146,6 @@ const GlMaster: React.FC = () => {
       key: "groupName",
     },
     {
-      title: "Account Type",
-      dataIndex: "accountType",
-      key: "accountType",
-    },
-    {
       title: "Parent GL",
       dataIndex: "parentGlCode",
       key: "parentGlCode",
@@ -265,29 +258,6 @@ const GlMaster: React.FC = () => {
             ]}
           >
             <Input />
-          </Form.Item>
-
-          <Form.Item
-            label="Account Type"
-            name="accountType"
-            rules={[
-              {
-                required: true,
-                message: "Select Account Type",
-              },
-            ]}
-          >
-            <Select>
-              <Select.Option value="ASSETS">ASSETS</Select.Option>
-
-              <Select.Option value="LIABILITIES">LIABILITIES</Select.Option>
-
-              <Select.Option value="INCOME">INCOME</Select.Option>
-
-              <Select.Option value="EXPENSES">EXPENSES</Select.Option>
-
-              <Select.Option value="EQUITY">RESERVES</Select.Option>
-            </Select>
           </Form.Item>
 
           <Form.Item label="Parent GL Code" name="parentGlCode">

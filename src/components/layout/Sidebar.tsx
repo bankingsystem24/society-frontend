@@ -72,6 +72,7 @@ const Sidebar: React.FC = () => {
             label: "Dashboard",
           },
           { key: "/financial-year", label: "Set Financial Year" },
+          { key: "/gl-mapping",label:"Gl Mapping"},
 
           {
             key: "Policies",
