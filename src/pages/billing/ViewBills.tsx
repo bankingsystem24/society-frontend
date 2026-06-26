@@ -60,7 +60,8 @@ export default function ViewBills() {
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
@@ -172,7 +173,7 @@ export default function ViewBills() {
     try {
       const billIds = selectedRowKeys.map(Number);
 
-      const res = await axios.put(`${BASE_URL}/billing/pay`, {
+      const payload= {
         billIds,
         paymentMode,
         financialYearId,
@@ -183,7 +184,11 @@ export default function ViewBills() {
         glBankAccount,
         glInterestIncome,
         glDiscount,
-      });
+      }
+
+      console.log("Payload:",payload);
+      
+      const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
 
       message.success(res.data);
       setSelectedRowKeys([]);
@@ -458,13 +463,25 @@ export default function ViewBills() {
               ]}
             />
           </Form.Item>
-          <Form.Item label="Transaction Id">
-            <Input
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              placeholder="Enter transaction id"
-            />
-          </Form.Item>
+
+          {paymentMode !== "CASH" && (
+            <Form.Item
+              label="Transaction Id"
+              required
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter Transaction Id",
+                },
+              ]}
+            >
+              <Input
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                placeholder="Enter transaction id"
+              />
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </Card>

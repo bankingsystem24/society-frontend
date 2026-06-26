@@ -243,60 +243,60 @@ const PendingSinkingFunds: React.FC = () => {
     }
   };
 
-  const handleRazorPay = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("Select sinking funds first");
-      return;
-    }
+  // const handleRazorPay = async () => {
+  //   if (selectedRowKeys.length === 0) {
+  //     message.warning("Select sinking funds first");
+  //     return;
+  //   }
 
-    try {
-      setPayLoading(true);
+  //   try {
+  //     setPayLoading(true);
 
-      const orderRes = await axios.post(
-        `${BASE_URL}/sinking-fund/create-order`,
-        {
-          sinkingFundIds: [...selectedRowKeys],
-          memberId,
-          amount: totalAmount,
-        },
-      );
+  //     const orderRes = await axios.post(
+  //       `${BASE_URL}/sinking-fund/create-order`,
+  //       {
+  //         sinkingFundIds: [...selectedRowKeys],
+  //         memberId,
+  //         amount: totalAmount,
+  //       },
+  //     );
 
-      const order = orderRes.data;
+  //     const order = orderRes.data;
 
-      const options = {
-        key: order.key,
-        amount: order.amount,
-        currency: "INR",
-        name: "Society Management",
-        description: "Sinking Fund Payment",
-        order_id: order.razorpayOrderId,
+  //     const options = {
+  //       key: order.key,
+  //       amount: order.amount,
+  //       currency: "INR",
+  //       name: "Society Management",
+  //       description: "Sinking Fund Payment",
+  //       order_id: order.razorpayOrderId,
 
-        handler: async (response: any) => {
-          await axios.post(`${BASE_URL}/sinking-fund/verify-payment`, {
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-            sinkingFundIds: selectedRowKeys,
-            memberId,
-            amount: totalAmount,
-            paymentMode: response.method || "ONLINE",
-            financialYearId,
-            userId,
-          });
+  //       handler: async (response: any) => {
+  //         await axios.post(`${BASE_URL}/sinking-fund/verify-payment`, {
+  //           razorpayOrderId: response.razorpay_order_id,
+  //           razorpayPaymentId: response.razorpay_payment_id,
+  //           razorpaySignature: response.razorpay_signature,
+  //           sinkingFundIds: selectedRowKeys,
+  //           memberId,
+  //           amount: totalAmount,
+  //           paymentMode: response.method || "ONLINE",
+  //           financialYearId,
+  //           userId,
+  //         });
 
-          message.success("Payment successful");
-          setSelectedRowKeys([]);
-          fetchSinkingFunds(selectedFlat);
-        },
-      };
+  //         message.success("Payment successful");
+  //         setSelectedRowKeys([]);
+  //         fetchSinkingFunds(selectedFlat);
+  //       },
+  //     };
 
-      new (window as any).Razorpay(options).open();
-    } catch (err) {
-      message.error("Payment initiation failed");
-    } finally {
-      setPayLoading(false);
-    }
-  };
+  //     new (window as any).Razorpay(options).open();
+  //   } catch (err) {
+  //     message.error("Payment initiation failed");
+  //   } finally {
+  //     setPayLoading(false);
+  //   }
+  // };
 
   const columns = [
     { title: "Flat No", dataIndex: "flatNo" },
@@ -390,7 +390,7 @@ const PendingSinkingFunds: React.FC = () => {
               Pay via UPI QR
             </Button>
 
-            <Button
+            {/* <Button
               type="primary"
               style={{ marginLeft: 10 }}
               disabled={selectedRowKeys.length === 0}
@@ -398,7 +398,7 @@ const PendingSinkingFunds: React.FC = () => {
               onClick={handleRazorPay}
             >
               Pay via Razorpay
-            </Button>
+            </Button> */}
           </div>
           {/* TABLE */}
           {loading ? (

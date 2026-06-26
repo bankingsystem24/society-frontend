@@ -35,6 +35,7 @@ type Contribution = {
   dueDate: string;
   status: string;
   memberId: number;
+  transactionId:number;
 };
 
 type Flat = {
@@ -72,9 +73,7 @@ const PendingContributions: React.FC = () => {
 
   const societyName = sessionStorage.getItem("societyName");
   const upi = sessionStorage.getItem("upi");
-  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "QR" | "">(
-    "",
-  );
+  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "QR" | "">("", );
 
   useEffect(() => {}, [selectedFlat, contributions]);
 
@@ -162,6 +161,7 @@ const PendingContributions: React.FC = () => {
     try {
       setPayLoading(true);
 
+      
       await axios.post(`${BASE_URL}/contribution/manual-payment`, {
         contributionIds: selectedRowKeys,
         memberId,
@@ -238,25 +238,25 @@ const PendingContributions: React.FC = () => {
     0,
   );
 
-  const handlePay = () => {
-    if (!selectedRowKeys.length) {
-      message.warning("Select records first");
-      return;
-    }
+  // const handlePay = () => {
+  //   if (!selectedRowKeys.length) {
+  //     message.warning("Select records first");
+  //     return;
+  //   }
 
-    const first = selectedContributions[0];
+  //   const first = selectedContributions[0];
 
-    if (first?.type?.toUpperCase() === "VOLUNTARY") {
-      setContributionType("VOLUNTARY");
-      setMinimumAmount(totalAmount);
-      setFinalAmount(totalAmount);
-      setPaymentMethod("RAZORPAY");
-      setAmountModalOpen(true);
-      return;
-    }
+  //   if (first?.type?.toUpperCase() === "VOLUNTARY") {
+  //     setContributionType("VOLUNTARY");
+  //     setMinimumAmount(totalAmount);
+  //     setFinalAmount(totalAmount);
+  //     setPaymentMethod("RAZORPAY");
+  //     setAmountModalOpen(true);
+  //     return;
+  //   }
 
-    proceedPayment(totalAmount, "COMPULSORY");
-  };
+  //   proceedPayment(totalAmount, "COMPULSORY");
+  // };
 
   const proceedPayment = async (amount: number, type: string) => {
     try {
@@ -389,7 +389,7 @@ const PendingContributions: React.FC = () => {
             Pay via UPI QR
           </Button>
 
-          <Button
+          {/* <Button
             type="default"
             style={{ marginLeft: 10 }}
             onClick={handlePay}
@@ -397,7 +397,7 @@ const PendingContributions: React.FC = () => {
             loading={payLoading}
           >
             Pay via Razorpay
-          </Button>
+          </Button> */}
 
           {loading ? (
             <Spin />

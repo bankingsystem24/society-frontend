@@ -77,7 +77,6 @@ const Login: React.FC = () => {
   };
 
   const fetchGlMapping = async () => {
-    console.log("I am in");
     const societyId = Number(sessionStorage.getItem("societyId"));
       try {
         const res = await axios.get(

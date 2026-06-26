@@ -52,17 +52,12 @@ const ViewContribution: React.FC = () => {
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const [transactionId, setTransactionId] = useState("");
-  const selectedContributions = filteredData.filter((c) =>
-    selectedRowKeys.includes(c.id),
-  );
-  const selectedFlatNo =
-    selectedContributions.length > 0 ? selectedContributions[0].flatNo : null;
-  const selectedType =
-    selectedContributions.length > 0 ? selectedContributions[0].type : null;
-  const totalSelectedAmount = selectedContributions.reduce(
-    (sum, contribution) => sum + Number(contribution.amount || 0),
-    0,
-  );
+  const selectedContributions = filteredData.filter((c) => selectedRowKeys.includes(c.id),);
+  const selectedFlatNo = selectedContributions.length > 0 ? selectedContributions[0].flatNo : null;
+  const selectedType = selectedContributions.length > 0 ? selectedContributions[0].type : null;
+  const totalSelectedAmount = selectedContributions.reduce((sum, contribution) => sum + Number(contribution.amount || 0),0,);
+  const glCashInHand = Number(sessionStorage.getItem("GlCashInHand"));
+  const glBankAccount = Number(sessionStorage.getItem("GlBankAccount"));
 
   useEffect(() => {
     if (selectedType === "VOLUNTARY") {
@@ -76,12 +71,9 @@ const ViewContribution: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/contribution/${societyId}/${financialYearId}`,);
       setData(res.data || []);
       setFilteredData(res.data || []);
-      console.log("Response", res.data);
     } catch {
       message.error("Failed to load contributions");
     } finally {
@@ -91,6 +83,9 @@ const ViewContribution: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    if(!glCashInHand || !glBankAccount){
+      message.error("Cash In Hand and Bank Account Gl are not mapped");
+    }
   }, []);
 
   useEffect(() => {
@@ -142,18 +137,15 @@ const ViewContribution: React.FC = () => {
         userId,
         glReceivable,
         glCreditAccount,
+        transactionId,
+        glCashInHand,
+        glBankAccount
 
       }
-
-      console.log("Payload:",payload);
-
       const res = await axios.put(`${BASE_URL}/contribution/pay`,payload );
-
       message.success(res.data);
-
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
-
       fetchData();
     } catch {
       message.error("Payment failed");

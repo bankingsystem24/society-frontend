@@ -51,7 +51,7 @@ const GlMappingEntry: React.FC = () => {
   const [receivableAccounts, setReceivableAccounts] = useState<GLMaster[]>([]);
   const [creditAccounts, setCreditAccounts] = useState<GLMaster[]>([]);
 
-  const societyId = Number(localStorage.getItem("societyId"));
+  const societyId = Number(sessionStorage.getItem("societyId"));
   const role = sessionStorage.getItem("role");
 const [mappings, setMappings] = useState<GlMapping[]>([]);
 
@@ -61,17 +61,13 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
   }, []);
 
   const loadGLAccounts = async () => {
+    
     try {
       const res = await axios.get(
         `${BASE_URL}/gl/master?societyId=${societyId}`,
       );
-
       const data: GLMaster[] = res.data;
 
-      // Receivable Accounts
-      // setReceivableAccounts(
-      //   data.filter((x) => x.accountName.toLowerCase().includes("receivable")),
-      // );
       setReceivableAccounts(data);
 
       // Income + Reserve Accounts
@@ -90,7 +86,6 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
       const mappingres = await axios.get(
         `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
       );
-
       setMappings(mappingres.data);
     } catch (err) {
       message.error("Unable to load GL Mappings");

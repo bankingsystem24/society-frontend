@@ -105,9 +105,6 @@ const ContributionPage: React.FC = () => {
         x.accountName?.toLowerCase().includes("receivable"),
       );
       setGlAccounts(filteredgl);
-
-      console.log("Gl Response data :", glres.data);
-
       const filteredglcredit = glres.data.filter((x: any) =>
         x.groupName?.toLowerCase().includes("reserves"),
       );

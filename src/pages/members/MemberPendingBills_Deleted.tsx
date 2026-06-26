@@ -135,88 +135,89 @@ const MemberPendingBills: React.FC = () => {
     0,
   );
 
-  const handlePay = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("Select bills first");
-      return;
-    }
+  // const handlePay = async () => {
+  //   if (selectedRowKeys.length === 0) {
+  //     message.warning("Select bills first");
+  //     return;
+  //   }
 
-    try {
-      setPayLoading(true);
-      const orderRes = await axios.post(`${BASE_URL}/billing/create-order`, {
-        billIds: [...selectedRowKeys],
-        memberId,
-        amount: totalAmount,
-        financialYearId,
-        userId
-      });
+  //   try {
+  //     setPayLoading(true);
+  //     const orderRes = await axios.post(`${BASE_URL}/billing/create-order`, {
+  //       billIds: [...selectedRowKeys],
+  //       memberId,
+  //       amount: totalAmount,
+  //       financialYearId,
+  //       userId
+  //     });
 
-      const order = orderRes.data;
-      const options = {
-        key: order.key,
-        amount: order.amount,
-        currency: "INR",
-        name: "Society Management",
-        description: "Maintenance Bill Payment",
-        order_id: order.razorpayOrderId,
-        modal: {
-          ondismiss: function () {
-            message.warning("Payment cancelled");
-          },
-        },
+  //     const order = orderRes.data;
+  //     const options = {
+  //       key: order.key,
+  //       amount: order.amount,
+  //       currency: "INR",
+  //       name: "Society Management",
+  //       description: "Maintenance Bill Payment",
+  //       order_id: order.razorpayOrderId,
+  //       modal: {
+  //         ondismiss: function () {
+  //           message.warning("Payment cancelled");
+  //         },
+  //       },
 
-        handler: async function (response: any) {
-          try {
-            await axios.post(`${BASE_URL}/billing/verify-payment`, {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-              billIds: selectedRowKeys,
-              memberId,
-              amount: totalAmount,
-              paymentMode: response.method || "ONLINE",
-              financialYearId,
-              userId,
-            });
+  //       handler: async function (response: any) {
+  //         try {
+  //           await axios.post(`${BASE_URL}/billing/verify-payment`, {
+  //             razorpayOrderId: response.razorpay_order_id,
+  //             razorpayPaymentId: response.razorpay_payment_id,
+  //             razorpaySignature: response.razorpay_signature,
+  //             billIds: selectedRowKeys,
+  //             memberId,
+  //             amount: totalAmount,
+  //             paymentMode: response.method || "ONLINE",
+  //             financialYearId,
+  //             userId,
+  //           });
 
-            message.success("Payment successful");
-            setSelectedRowKeys([]);
-            fetchBills(selectedFlat);
-          } catch (err) {
-            console.error(err);
-            message.error("Payment verification failed");
-          }
-        },
-        prefill: {
-          name: sessionStorage.getItem("memberName") || "Member",
-          email: sessionStorage.getItem("email") || "",
-          contact: sessionStorage.getItem("mobile") || "",
-        },
+  //           message.success("Payment successful");
+  //           setSelectedRowKeys([]);
+  //           fetchBills(selectedFlat);
+  //         } catch (err) {
+  //           console.error(err);
+  //           message.error("Payment verification failed");
+  //         }
+  //       },
+  //       prefill: {
+  //         name: sessionStorage.getItem("memberName") || "Member",
+  //         email: sessionStorage.getItem("email") || "",
+  //         contact: sessionStorage.getItem("mobile") || "",
+  //       },
 
-        theme: {
-          color: "#1677ff",
-        },
-      };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        console.error(response);
+  //       theme: {
+  //         color: "#1677ff",
+  //       },
+  //     };
+  //     const rzp = new (window as any).Razorpay(options);
+  //     rzp.on("payment.failed", function (response: any) {
+  //       console.error(response);
 
-        message.error(
-          response?.error?.description ||
-            response?.error?.reason ||
-            "Payment failed",
-        );
-      });
+  //       message.error(
+  //         response?.error?.description ||
+  //           response?.error?.reason ||
+  //           "Payment failed",
+  //       );
+  //     });
 
-      rzp.open();
-    } catch (err) {
-      console.error(err);
+  //     rzp.open();
+  //   } catch (err) {
+  //     console.error(err);
 
-      message.error("Payment initiation failed");
-    } finally {
-      setPayLoading(false);
-    }
-  };
+  //     message.error("Payment initiation failed");
+  //   } finally {
+  //     setPayLoading(false);
+  //   }
+  // };
+
   const columns = [
     {
       title: "Flat No",
@@ -304,14 +305,14 @@ const MemberPendingBills: React.FC = () => {
               {" | "}Total: <b>₹ {totalAmount}</b>
             </div>
 
-            <Button
+            {/* <Button
               type="primary"
               loading={payLoading}
               disabled={selectedRowKeys.length === 0 || payLoading}
               onClick={handlePay}
             >
               Pay Bill (Online)
-            </Button>
+            </Button> */}
           </div>
 
           {/* ================= TABLE ================= */}

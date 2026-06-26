@@ -65,7 +65,7 @@ const CreateUser: React.FC = () => {
         role: values.role,
         active: true,
         society: {
-          id: Number(societyId),
+          id: values.role === "AUDITOR" ? null : Number(societyId),
         },
         member: {
           id: values.memberId,

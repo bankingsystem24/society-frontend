@@ -228,7 +228,7 @@ const LedgerView: React.FC = () => {
     <Card variant="outlined">
       <Row justify="space-between" align="middle">
         <Col>
-          <Space direction="vertical" size={0}>
+          <Space orientation="vertical" size={0}>
             <Title level={3} style={{ margin: 0 }}>
               Ledger Report
             </Title>

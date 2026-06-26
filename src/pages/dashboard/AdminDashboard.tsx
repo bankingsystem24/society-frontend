@@ -132,9 +132,9 @@ const AdminDashboard: React.FC = () => {
                 title={<span style={{ color: "#1677ff" }}>Financial Year</span>}
                 value={financialYear}
                 prefix={<CalendarOutlined style={{ color: "#1677ff" }} />}
-                valueStyle={{
+                styles={{ content : {
                   color: "#1677ff",
-                  fontSize: 20,
+                  fontSize: 20,}
                 }}
               />
             </Card>
@@ -145,7 +145,7 @@ const AdminDashboard: React.FC = () => {
                 title={<span style={{ color: "#1677ff" }}>Wings</span>}
                 value={stats.wings}
                 prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -156,7 +156,7 @@ const AdminDashboard: React.FC = () => {
                 title={<span style={{ color: "#1677ff" }}>Flats</span>}
                 value={stats.flats}
                 prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
                 title={<span style={{ color: "#1677ff" }}>Members</span>}
                 value={stats.members}
                 prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -178,7 +178,7 @@ const AdminDashboard: React.FC = () => {
                 title={<span style={{ color: "#1677ff" }}>Users</span>}
                 value={stats.users}
                 prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -209,7 +209,7 @@ const AdminDashboard: React.FC = () => {
                 title={<span style={{ color: "#1677ff" }}>Pending Maint.</span>}
                 value={memberStats.pendingMaintenance}
                 prefix={<TeamOutlined style={{ color: "#1677ff" }} />}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -219,7 +219,7 @@ const AdminDashboard: React.FC = () => {
               <Statistic
                 title={<span style={{ color: "#1677ff" }}>Pending Funds</span>}
                 value={memberStats.pendingFunds}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -228,7 +228,7 @@ const AdminDashboard: React.FC = () => {
               <Statistic
                 title={<span style={{ color: "#1677ff" }}>Pending Contri.</span>}
                 value={memberStats.pendingContributions}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -239,7 +239,7 @@ const AdminDashboard: React.FC = () => {
               <Statistic
                 title={<span style={{ color: "#1677ff" }}>Paid Maint.</span>}
                 value={memberStats.paidMaintenance}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -249,7 +249,7 @@ const AdminDashboard: React.FC = () => {
               <Statistic
                 title={<span style={{ color: "#1677ff" }}>Paid Funds</span>}
                 value={memberStats.paidFunds}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -259,7 +259,7 @@ const AdminDashboard: React.FC = () => {
               <Statistic
                 title={<span style={{ color: "#1677ff" }}>Paid Contri.</span>}
                 value={memberStats.paidContributions}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>
@@ -268,7 +268,7 @@ const AdminDashboard: React.FC = () => {
               <Statistic
                 title={<span style={{ color: "#1677ff" }}>Receipts</span>}
                 value={memberStats.receipts}
-                valueStyle={{ color: "#1677ff" }}
+                styles={{ content : { color: "#1677ff"} }}
               />
             </Card>
           </Col>

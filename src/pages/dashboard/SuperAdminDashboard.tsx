@@ -75,7 +75,14 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: 5, background: "#f0f5ff", minHeight: "100vh" }}>
+    <div
+  style={{
+    padding: 16,
+    background: "#f0f5ff",
+    minHeight: "100vh",
+  }}
+  className="dashboard-container"
+>
       <Title
         level={4}
         style={{ color: "#1677ff", marginBottom: 24 }}
@@ -90,7 +97,7 @@ const SuperAdminDashboard: React.FC = () => {
               title={<span style={{ color: "#1677ff" }}>Users</span>}
               value={stats.users}
               prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
+              styles={{ content : { color: "#1677ff"} }}
             />
           </Card>
         </Col>
@@ -100,7 +107,7 @@ const SuperAdminDashboard: React.FC = () => {
               title={<span style={{ color: "#1677ff" }}>Societies</span>}
               value={stats.Societies}
               prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
+              styles={{ content : { color: "#1677ff"} }}
             />
           </Card>
         </Col>

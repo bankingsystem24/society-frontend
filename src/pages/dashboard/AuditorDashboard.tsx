@@ -85,7 +85,7 @@ const AuditorDashboard: React.FC = () => {
               title={<span style={{ color: "#1677ff" }}>Users</span>}
               value={stats.users + 1}
               prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
+              styles={{ content : { color: "#1677ff"} }}
             />
           </Card>
         </Col>
@@ -95,7 +95,7 @@ const AuditorDashboard: React.FC = () => {
               title={<span style={{ color: "#1677ff" }}>Societies</span>}
               value={stats.societies}
               prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
-              valueStyle={{ color: "#1677ff" }}
+              styles={{ content : { color: "#1677ff"} }}
             />
           </Card>
         </Col>

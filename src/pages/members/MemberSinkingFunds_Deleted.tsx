@@ -129,96 +129,96 @@ const MemberSinkingFunds: React.FC = () => {
     0,
   );
 
-  const handlePay = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("Select sinking fund records first");
-      return;
-    }
+  // const handlePay = async () => {
+  //   if (selectedRowKeys.length === 0) {
+  //     message.warning("Select sinking fund records first");
+  //     return;
+  //   }
 
-    try {
-      setPayLoading(true);
+  //   try {
+  //     setPayLoading(true);
 
-      const orderRes = await axios.post(
-        `${BASE_URL}/sinking-fund/create-order`,
-        {
-          sinkingFundIds: [...selectedRowKeys],
-          memberId,
-          amount: totalAmount,
-          userId
-        },
-      );
+  //     const orderRes = await axios.post(
+  //       `${BASE_URL}/sinking-fund/create-order`,
+  //       {
+  //         sinkingFundIds: [...selectedRowKeys],
+  //         memberId,
+  //         amount: totalAmount,
+  //         userId
+  //       },
+  //     );
 
-      const order = orderRes.data;
+  //     const order = orderRes.data;
 
-      const options = {
-        key: order.key,
-        amount: order.amount,
-        currency: "INR",
-        name: "Society Management",
-        description: "Sinking Fund Payment",
-        order_id: order.razorpayOrderId,
+  //     const options = {
+  //       key: order.key,
+  //       amount: order.amount,
+  //       currency: "INR",
+  //       name: "Society Management",
+  //       description: "Sinking Fund Payment",
+  //       order_id: order.razorpayOrderId,
 
-        modal: {
-          ondismiss: function () {
-            message.warning("Payment cancelled");
-          },
-        },
+  //       modal: {
+  //         ondismiss: function () {
+  //           message.warning("Payment cancelled");
+  //         },
+  //       },
 
-        handler: async function (response: any) {
-          try {
-            await axios.post(`${BASE_URL}/sinking-fund/verify-payment`, {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-              sinkingFundIds: selectedRowKeys,
-              memberId,
-              userId,
-              amount: totalAmount,
-              paymentMode: response.method || "ONLINE",
-            });
+  //       handler: async function (response: any) {
+  //         try {
+  //           await axios.post(`${BASE_URL}/sinking-fund/verify-payment`, {
+  //             razorpayOrderId: response.razorpay_order_id,
+  //             razorpayPaymentId: response.razorpay_payment_id,
+  //             razorpaySignature: response.razorpay_signature,
+  //             sinkingFundIds: selectedRowKeys,
+  //             memberId,
+  //             userId,
+  //             amount: totalAmount,
+  //             paymentMode: response.method || "ONLINE",
+  //           });
 
-            message.success("Payment successful");
+  //           message.success("Payment successful");
 
-            setSelectedRowKeys([]);
+  //           setSelectedRowKeys([]);
 
-            fetchSinkingFunds(selectedFlat);
-          } catch (err) {
-            console.error(err);
-            message.error("Payment verification failed");
-          }
-        },
+  //           fetchSinkingFunds(selectedFlat);
+  //         } catch (err) {
+  //           console.error(err);
+  //           message.error("Payment verification failed");
+  //         }
+  //       },
 
-        prefill: {
-          name: sessionStorage.getItem("memberName") || "Member",
-          email: sessionStorage.getItem("email") || "",
-          contact: sessionStorage.getItem("mobile") || "",
-        },
+  //       prefill: {
+  //         name: sessionStorage.getItem("memberName") || "Member",
+  //         email: sessionStorage.getItem("email") || "",
+  //         contact: sessionStorage.getItem("mobile") || "",
+  //       },
 
-        theme: {
-          color: "#1677ff",
-        },
-      };
+  //       theme: {
+  //         color: "#1677ff",
+  //       },
+  //     };
 
-      const rzp = new (window as any).Razorpay(options);
+  //     const rzp = new (window as any).Razorpay(options);
 
-      rzp.on("payment.failed", function (response: any) {
-        console.error(response);
+  //     rzp.on("payment.failed", function (response: any) {
+  //       console.error(response);
 
-        message.error(
-          response?.error?.description ||
-            response?.error?.reason ||
-            "Payment failed",
-        );
-      });
+  //       message.error(
+  //         response?.error?.description ||
+  //           response?.error?.reason ||
+  //           "Payment failed",
+  //       );
+  //     });
 
-      rzp.open();
-    } catch (err) {
-      console.error(err);
-      message.error("Payment initiation failed");
-    } finally {
-      setPayLoading(false);
-    }
-  };
+  //     rzp.open();
+  //   } catch (err) {
+  //     console.error(err);
+  //     message.error("Payment initiation failed");
+  //   } finally {
+  //     setPayLoading(false);
+  //   }
+  // };
 
   const columns = [
     {
@@ -290,14 +290,14 @@ const MemberSinkingFunds: React.FC = () => {
               Total Amount: <b>₹ {totalAmount}</b>
             </div>
 
-            <Button
+            {/* <Button
               type="primary"
               loading={payLoading}
               disabled={selectedRowKeys.length === 0 || payLoading}
               onClick={handlePay}
             >
               Pay Sinking Fund (Online)
-            </Button>
+            </Button> */}
           </div>
 
           {/* Table */}

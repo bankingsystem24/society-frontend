@@ -189,3 +189,37 @@
   height: 25px !important;
   line-height: 25px !important;
 }
+
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .mobile-menu-btn {
+    display: none;
+  }
+}
+
+@media (max-width: 991px) {
+  .dashboard-container {
+    padding-top: 60px !important;
+  }
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+    position: fixed;
+    left: 10px;
+    top: 10px;
+    z-index: 1001;
+  }
+}

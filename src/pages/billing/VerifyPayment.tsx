@@ -1,4 +1,15 @@
-import {  Button,  Card,  Form,  Modal,  Select,  Table,  Tag,  Typography,  Layout,  message,} from "antd";
+import {
+  Button,
+  Card,
+  Form,
+  Modal,
+  Select,
+  Table,
+  Tag,
+  Typography,
+  Layout,
+  message,
+} from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
@@ -68,7 +79,8 @@ export default function VerifyPayemnt() {
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
 
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
@@ -77,8 +89,7 @@ export default function VerifyPayemnt() {
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
-const [mappings, setMappings] = useState<any[]>([]);
-
+  const [mappings, setMappings] = useState<any[]>([]);
 
   useEffect(() => {
     loadFlats();
@@ -86,8 +97,15 @@ const [mappings, setMappings] = useState<any[]>([]);
     loadGlMapping();
   }, []);
 
-  useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
-  
+  useEffect(() => {}, [
+    glCashInHand,
+    glBankAccount,
+    glInterestIncome,
+    glDiscount,
+    glReceivable,
+    glCreditAccount,
+  ]);
+
   useEffect(() => {}, [receiptBills]);
 
   const loadFlats = async () => {
@@ -100,13 +118,16 @@ const [mappings, setMappings] = useState<any[]>([]);
     }
   };
 
-    const loadGlMapping = async () => {
+  const loadGlMapping = async () => {
     try {
       const res = await axios.get(
         `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
       );
 
-      const mapping = res.data.find((item: any) => item.description?.trim().toLowerCase() === "monthly maintenance",);
+      const mapping = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "monthly maintenance",
+      );
       setMappings(res.data);
 
       if (!mapping) {
@@ -121,20 +142,25 @@ const [mappings, setMappings] = useState<any[]>([]);
       setGlCreditAccount(mapping.gl_credit_account);
 
       const CashInHand = res.data.find(
-        (item: any) => item.description?.trim().toLowerCase() == "cash in hand",
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "cash in hand",
       )?.gl_receivable;
       setGlCashInHand(Number(CashInHand));
+
       const BankAccount = res.data.find(
-        (item: any) => item.description?.trim().toLowerCase() == "bank account",
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "bank account",
       )?.gl_receivable;
       setGlBankAccount(Number(BankAccount));
+
       const InterestIncome = res.data.find(
         (item: any) =>
-          item.description?.trim().toLowerCase() == "interest income",
+          item.description?.trim().toLowerCase() === "interest income",
       )?.gl_receivable;
       setGlInterestIncome(Number(InterestIncome));
+
       const Discount = res.data.find(
-        (item: any) => item.description?.trim().toLowerCase() == "discount",
+        (item: any) => item.description?.trim().toLowerCase() === "discount",
       )?.gl_receivable;
       setGlDiscount(Number(Discount));
     } catch (err) {
@@ -155,7 +181,10 @@ const [mappings, setMappings] = useState<any[]>([]);
         financialYearId: Number(financialYearId),
       };
 
-      const res = await axios.post(`${BASE_URL}/receipts/viewReceipts`, payload,);
+      const res = await axios.post(
+        `${BASE_URL}/receipts/viewReceipts`,
+        payload,
+      );
 
       if (!financialYear) {
         setReceipts(res.data);
@@ -686,50 +715,69 @@ const [mappings, setMappings] = useState<any[]>([]);
     }
   };
 
-  
-
-  const confirmPayment = async (receiptId: number,receiptNo:string) => {
-
+  const confirmPayment = async (receiptId: number, receiptNo: string) => {
     let paymentTable;
     let mapping;
+
     if (receiptNo.startsWith("RCPT")) {
-      paymentTable="billing";
-      mapping = mappings.find((item: any) => item.description?.trim().toLowerCase() === "monthly maintenance",);
+      paymentTable = "billing";
+      mapping = mappings.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "monthly maintenance",
+      );
+    } else if (receiptNo.startsWith("SF")) {
+      paymentTable = "sinkingfund";
+      mapping = mappings.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "sinking fund receivable",
+      );
+    } else if (receiptNo.startsWith("CON")) {
+      paymentTable = "contribution";
 
-    } else if (receiptNo.startsWith("SFRCPT"))
-    {
-      paymentTable="sinkingfund";
-      mapping = mappings.find((item: any) => item.description?.trim().toLowerCase() === "sinking fund receivable",);
-
-    } else if(receiptNo.startsWith("CONTR")){
-      paymentTable="contribution";
-      mapping = mappings.find((item: any) => item.description?.trim().toLowerCase() === "contribution receivable",);
-
+      try {
+        const { data: contribution } = await axios.get(
+          `${BASE_URL}/contribution/${societyId}/${financialYearId}/${receiptId}`,
+        );
+        if (contribution.length > 0) {
+          mapping = {
+            glReceivable: contribution[0].glReceivable,
+            glCreditAccount: contribution[0].glCreditAccount,
+          };
+        } else {
+          message.error("Contribution record not found.");
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to fetch contribution:", error);
+        message.error("Unable to load contribution details.");
+        return;
+      }
     }
 
     if (!mapping) {
-    message.error("GL Mapping not found");
-    return;
-      }
-
-
-    const payload = {
-        receiptId, 
-        paymentTable,
-        glReceivable : mapping.gl_receivable,
-        glCreditAccount: mapping.gl_credit_account,
-        glCashInHand,
-        glBankAccount,
-        glInterestIncome,
-        glDiscount,
+      message.error("GL Mapping not found");
+      return;
     }
 
+    const payload = {
+      receiptId,
+      paymentTable,
+      glReceivable: mapping.glReceivable,
+      glCreditAccount: mapping.glCreditAccount,
+      glCashInHand,
+      glBankAccount,
+      glInterestIncome,
+      glDiscount,
+    };
+
+    console.log("Payload:", payload);
+
     try {
-        await axios.put(`${BASE_URL}/receipts/confirm`, payload);
+      await axios.put(`${BASE_URL}/receipts/confirm`, payload);
 
-        message.success("Payment confirmed successfully");
+      message.success("Payment confirmed successfully");
 
-        loadReceipts(); // refresh table
+      loadReceipts(); // refresh table
     } catch (error) {
       console.error(error);
       message.error("Failed to confirm payment");
@@ -800,7 +848,7 @@ const [mappings, setMappings] = useState<any[]>([]);
           size="small"
           onClick={(e) => {
             e.stopPropagation(); // prevent row click modal
-            confirmPayment(record.id,record.receiptNo);
+            confirmPayment(record.id, record.receiptNo);
           }}
         >
           Confirm Payment

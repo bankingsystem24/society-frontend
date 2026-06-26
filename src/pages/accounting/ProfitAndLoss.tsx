@@ -122,9 +122,9 @@ const ProfitAndLoss: React.FC = () => {
             value={data?.totalIncome || 0}
             precision={2}
             prefix="₹"
-            valueStyle={{
+            styles={{ content : {
               fontSize: "18px",
-              fontWeight: 600,
+              fontWeight: 600,}
             }}
           />
         </Col>
@@ -135,9 +135,9 @@ const ProfitAndLoss: React.FC = () => {
             value={data?.totalExpense || 0}
             precision={2}
             prefix="₹"
-            valueStyle={{
+            styles={{ content:{
               fontSize: "18px",
-              fontWeight: 600,
+              fontWeight: 600,}
             }}
           />
         </Col>
@@ -148,9 +148,9 @@ const ProfitAndLoss: React.FC = () => {
             value={Math.abs(data?.surplus || 0)}
             precision={2}
             prefix="₹"
-            valueStyle={{
+            styles={{ content: {
               fontSize: "18px",
-              fontWeight: 600,
+              fontWeight: 600,}
             }}
           />
         </Col>

@@ -9,6 +9,7 @@ import {
   Space,
   Form,
   Modal,
+  Input,
 } from "antd";
 import axios from "axios";
 
@@ -24,6 +25,7 @@ interface SinkingFund {
   createdBy: number;
   status: string;
   memberName: string;
+  transactionId : String;
 }
 
 
@@ -42,6 +44,7 @@ const ViewSinkingFund: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
+  const [transactionId, setTransactionId] = useState<string>("");
 
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
@@ -71,9 +74,7 @@ const ViewSinkingFund: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `${BASE_URL}/sinking-fund?societyId=${societyId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/sinking-fund?societyId=${societyId}`,);
 
       setData(res.data || []);
       setFilteredData(res.data || []);
@@ -118,7 +119,7 @@ const ViewSinkingFund: React.FC = () => {
     setFilteredData(filtered);
   };
 
-      const loadGlMapping = async () => {
+  const loadGlMapping = async () => {
     try {
       const res = await axios.get(
         `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
@@ -172,6 +173,7 @@ const ViewSinkingFund: React.FC = () => {
         sinkingFundIds,
         paymentMode,
         financialYearId,
+        transactionId,
         glReceivable,
         glCreditAccount,
         glCashInHand,
@@ -367,6 +369,25 @@ const ViewSinkingFund: React.FC = () => {
                 ]}
               />
             </Form.Item>
+          {paymentMode !== "CASH" && (
+            <Form.Item
+              label="Transaction Id"
+              required
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter Transaction Id",
+                },
+              ]}
+            >
+              <Input
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                placeholder="Enter transaction id"
+              />
+            </Form.Item>
+          )}
+
           </Form>
         </Modal>
       </Card>

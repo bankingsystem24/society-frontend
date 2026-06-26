@@ -4,20 +4,27 @@ import {
   DashboardOutlined,
   BankOutlined,
   UserOutlined,
-  FileTextOutlined,
   TeamOutlined,
   HomeOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
-import "../../App.css";
 
 const SuperAdminSidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   return (
-    <div style={{ height: "100vh" }}>
-      <div style={{ color: "white", padding: 16, fontWeight: "bold" }}>
+    <>
+      <div
+        style={{
+          height: 64,
+          color: "#fff",
+          textAlign: "center",
+          lineHeight: "64px",
+          fontSize: 16,
+          fontWeight: "bold",
+        }}
+      >
         Super Admin Panel
       </div>
 
@@ -80,7 +87,7 @@ const SuperAdminSidebar: React.FC = () => {
           },
         ]}
       />
-    </div>
+    </>
   );
 };
 
