@@ -82,72 +82,7 @@ const CreateFlat: React.FC = () => {
         }}
       >
         <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Flat No"
-              name="flatNo"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter flat no" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item
-              label="Floor No"
-              name="floorNo"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter floor no" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Area (Sq Ft)"
-              name="areaSqFt"
-            >
-              <Input type="number" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item
-              label="Bedrooms"
-              name="bedrooms"
-            >
-              <Input type="number" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Maintenance Amount"
-              name="maintenanceAmount"
-            >
-              <Input type="number" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item
-              label="Status"
-              name="status"
-            >
-              <Select onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}>
-                <Select.Option value={true}>Active</Select.Option>
-                <Select.Option value={false}>Inactive</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item
               label="Wing"
               name="wingId"
@@ -163,7 +98,68 @@ const CreateFlat: React.FC = () => {
             </Form.Item>
           </Col>
 
-          <Col span={12}>
+          <Col span={8}>
+            <Form.Item
+              label="Flat No"
+              name="flatNo"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter flat no" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+
+          <Col span={8}>
+            <Form.Item
+              label="Floor No"
+              name="floorNo"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter floor no" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              label="Area (Sq Ft)"
+              name="areaSqFt"
+            >
+              <Input type="number" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+
+          <Col span={8}>
+            <Form.Item
+              label="Bedrooms"
+              name="bedrooms"
+            >
+              <Input type="number" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              label="Maintenance Amount"
+              name="maintenanceAmount"
+            >
+              <Input type="number" onPressEnter={focusNext} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              label="Status"
+              name="status"
+            >
+              <Select onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}>
+                <Select.Option value={true}>Active</Select.Option>
+                <Select.Option value={false}>Inactive</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item
               label="Owner"
               name="ownerId"

@@ -142,6 +142,7 @@ const ViewContribution: React.FC = () => {
         glBankAccount
 
       }
+
       const res = await axios.put(`${BASE_URL}/contribution/pay`,payload );
       message.success(res.data);
       setSelectedRowKeys([]);

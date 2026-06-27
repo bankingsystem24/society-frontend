@@ -187,6 +187,7 @@ const ViewSinkingFund: React.FC = () => {
       message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
+      fetchData();
     } catch {
       message.error("Payment failed");
     }

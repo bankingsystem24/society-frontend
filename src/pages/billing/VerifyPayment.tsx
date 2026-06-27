@@ -181,10 +181,7 @@ export default function VerifyPayemnt() {
         financialYearId: Number(financialYearId),
       };
 
-      const res = await axios.post(
-        `${BASE_URL}/receipts/viewReceipts`,
-        payload,
-      );
+      const res = await axios.post(`${BASE_URL}/receipts/viewReceipts`,payload,);
 
       if (!financialYear) {
         setReceipts(res.data);
@@ -762,15 +759,13 @@ export default function VerifyPayemnt() {
     const payload = {
       receiptId,
       paymentTable,
-      glReceivable: mapping.glReceivable,
-      glCreditAccount: mapping.glCreditAccount,
+      glReceivable: mapping.glReceivable ? mapping.glReceivable : mapping.gl_receivable,
+      glCreditAccount: mapping.glCreditAccount ? mapping.glCreditAccount : mapping.gl_credit_account,
       glCashInHand,
       glBankAccount,
       glInterestIncome,
       glDiscount,
     };
-
-    console.log("Payload:", payload);
 
     try {
       await axios.put(`${BASE_URL}/receipts/confirm`, payload);
@@ -778,6 +773,7 @@ export default function VerifyPayemnt() {
       message.success("Payment confirmed successfully");
 
       loadReceipts(); // refresh table
+
     } catch (error) {
       console.error(error);
       message.error("Failed to confirm payment");

@@ -67,6 +67,10 @@ const SuperAdminCreateSociety: React.FC = () => {
     try {
       setLoading(true);
       const createSociety = await apiPost("/societies", payload);
+      const newSocietyId = createSociety.id;
+      if(newSocietyId){
+        const defaultGl = await apiPost("/gl/master/defaultgl",newSocietyId);
+      }
       message.success("Society created successfully");
       form.resetFields();
       navigate("/superadmin-view-societies");

@@ -40,9 +40,7 @@ const BillGenerate: React.FC = () => {
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`
-      );
+      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`);
 
       const mapping = res.data.find(
         (item: any) =>
@@ -53,9 +51,7 @@ const BillGenerate: React.FC = () => {
       if (!mapping) {
         setMaintenanceMappingExists(false);
 
-        message.error(
-          "Monthly Maintenance GL Mapping not configured"
-        );
+        message.error("Monthly Maintenance GL Mapping not configured");
         return;
       }
 
@@ -124,8 +120,7 @@ const BillGenerate: React.FC = () => {
         validMonthsEndYear.includes(selectedMonth));
 
     if (!isValid) {
-      message.error(
-        `Bill generation is allowed only for Financial Year ${financialYear}`
+      message.error(`Bill generation is allowed only for Financial Year ${financialYear}`
       );
       return;
     }

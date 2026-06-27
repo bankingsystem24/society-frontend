@@ -186,8 +186,6 @@ export default function ViewBills() {
         glDiscount,
       }
 
-      console.log("Payload:",payload);
-      
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
 
       message.success(res.data);
