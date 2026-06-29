@@ -69,9 +69,8 @@ export default function App() {
 
       {/* <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} /> */}
       <Route path="/contributions" element={<PendingContributions />} />
-      <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
       <Route path="/view-receipts" element={<ViewReceipts />} />
-      <Route path="/financial-year" element={<FinancialYear/>} />
+      <Route path="/financial-year" element={<FinancialYear />} />
       <Route path="/set-society" element={<SetSociety/>} />
       <Route path="/view-journal" element={<JournalView />} />
       <Route path="/view-ledger" element={<LedgerView />} />
@@ -79,7 +78,33 @@ export default function App() {
       <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
       <Route path="/verify-payment" element={<VerifyPayemnt />} />
       <Route path="/gl-mapping" element={<GlMappingEntry />} />
-
+      <Route path="/users" element={<Users />} />
+      <Route path="/billing-policy" element={<BillingPolicy />} />
+      <Route path="/discount-policy" element={<DiscountPolicy />} />
+      <Route path="/wings" element={<Wings />} />
+      <Route path="/create-wing" element={<CreateWings />} />
+      <Route path="/edit-wing/:id" element={<EditWing />} />
+      <Route path="/flats" element={<Flats />} />
+      <Route path="/create-flat" element={<CreateFlat />}/>
+      <Route path="/edit-flat/:id" element={<EditFlat />} />
+      <Route path="/members" element={<Members />} />
+      <Route path="/create-member" element={<CreateMember />} />
+      <Route path="/edit-member/:id" element={<EditMember />} />
+      <Route path="/gl-master" element={<GlMaster />} />
+      <Route path="/gl-balances" element={<GlOpeningBalance />} />
+      <Route path="/add-expenses" element={<Expenses />} />
+      <Route path="/vendors" element={<Vendors />} />
+      <Route path="/bill-generate" element={<BillGenerate />}/>
+      <Route path="/view-bills" element={<ViewBills />} />
+      <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
+      <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
+      <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
+      <Route path="/view-contribution" element={<ViewContribution />}/>
+      <Route path="/generate-contribution" element={<ContributionPage />} />
+      <Route path="/admindashboard" element={<AdminDashboard />} />
+      <Route path="/create-user" element={<CreateUser />} />
+      <Route path="/edit-user/:id" element={<EditUser />} />
+      {/* <Route path="/pending-bills" element={<PendingBills />} /> */}
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
@@ -98,48 +123,8 @@ export default function App() {
       </Route>
 
       {/* Layout Pages */}
-      <Route element={<Layout />}>
-        <Route path="/admindashboard" element={<AdminDashboard />} />
-
-        <Route path="/billing-policy" element={<BillingPolicy />} />
-        <Route path="/discount-policy" element={<DiscountPolicy />} />
-
-        <Route path="/wings" element={<Wings />} />
-        <Route path="/create-wing" element={<CreateWings />} />
-        <Route path="/edit-wing/:id" element={<EditWing />} />
-
-        <Route path="/flats" element={<Flats />} />
-        <Route path="/create-flat" element={<CreateFlat />}/>
-        <Route path="/edit-flat/:id" element={<EditFlat />} />
-
-        <Route path="/members" element={<Members />} />
-        <Route path="/create-member" element={<CreateMember />} />
-        <Route path="/edit-member/:id" element={<EditMember />} />
-
-        <Route path="/users" element={<Users />} />
-        <Route path="/create-user" element={<CreateUser />} />
-        <Route path="/edit-user/:id" element={<EditUser />} />
-
-        <Route path="/gl-balances" element={<GlOpeningBalance />} />
-        <Route path="/gl-master" element={<GlMaster />} />
-
-        <Route path="/bill-generate" element={<BillGenerate />}/>
-        <Route path="/view-bills" element={<ViewBills />} />
-        <Route path="/pending-bills" element={<PendingBills />} />
-        <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
-        <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
-        <Route path="/view-contribution" element={<ViewContribution />}/>
-
-        <Route path="/generate-contribution" element={<ContributionPage />} />
-
-
-        
-
-        <Route path="/add-expenses" element={<Expenses />} />
-        <Route path="/vendors" element={<Vendors />} />
-
-
-      </Route>
+      {/* <Route element={<Layout />}>
+      </Route> */}
 
     </Routes>
   );
