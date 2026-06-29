@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Typography } from "antd";
+import { Card, Row, Col, Statistic, Typography, Layout } from "antd";
 import {
   CalendarOutlined,
   HomeOutlined,
@@ -8,12 +8,22 @@ import {
 import { apiGet } from "../../api/axios";
 import axios from "axios";
 import "../../App.css";
+import Header from "../../components/layout/Header";
+import MemberHeader from "../../components/layout/MemberHeader";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 const { Title } = Typography;
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const memberId = Number(sessionStorage.getItem("memberId"));
 const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+const { Content } = Layout;
+const role = sessionStorage.getItem("role");
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState({
@@ -106,6 +116,27 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content >
     <>
       <div
         style={{
@@ -275,6 +306,9 @@ const AdminDashboard: React.FC = () => {
         </Row>
       </div>
     </>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

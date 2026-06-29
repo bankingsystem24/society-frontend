@@ -8,11 +8,23 @@ import {
   message,
   Row,
   Col,
+  Layout
 } from "antd";
 
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+
+const {Content } = Layout;
+const role = sessionStorage.getItem("role");
 
 const CreateUser: React.FC = () => {
   const [form] = Form.useForm();
@@ -87,6 +99,27 @@ const CreateUser: React.FC = () => {
   };
 
   return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content >
     <Card title="Create User">
       <Form
         layout="vertical"
@@ -199,6 +232,9 @@ const CreateUser: React.FC = () => {
         </Button>
       </Form>
     </Card>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

@@ -1,9 +1,20 @@
-import { Button, Card, Form, Input, Modal, Select, Table, message } from "antd";
+import { Button, Card, Form, Input, Modal, Select, Table, message, Layout } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
+
+const { Content } = Layout;
+const role = sessionStorage.getItem("role");
 
 interface Flat {
   id: number;
@@ -266,6 +277,27 @@ export default function ViewBills() {
   const grandTotal = bills.reduce((s, b) => s + (b.totalAmount || 0), 0);
 
   return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content >
     <Card title="View Bills">
       {/* ================= FILTER SECTION ================= */}
       <Form form={form} layout="vertical">
@@ -483,5 +515,8 @@ export default function ViewBills() {
         </Form>
       </Modal>
     </Card>
+    </Content>
+    </Layout>
+    </Layout>
   );
 }

@@ -6,6 +6,9 @@ import {
   UserOutlined,
   FileTextOutlined,
   HomeOutlined,
+  ApartmentOutlined,
+  TeamOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../App.css";
@@ -32,21 +35,141 @@ const AuditorSidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key: "/auditorusers",
-            label: "Users",
-          },
-          {
             key: "/auditorsocieties",
             label: "Society List",
-          },
-          {
-            key: "/financial-year",
-            label: "Financial Year",
           },
           {
             key: "/set-society",
             label: "Set Society",
           },
+          {
+            key: "/financial-year",
+            label: "Set Financial Year",
+          },
+          {
+            key: "/users",
+            icon: <UserOutlined />,
+            label: "Users",
+          },
+          {
+            key: "/gl-mapping",
+            label: "GL Mapping",
+          },
+
+          {
+            key: "Policies",
+            label: "Policies",
+            children: [
+              {
+                key: "/billing-policy",
+                label: "Billing Policy",
+              },
+              {
+                key: "/discount-policy",
+                label: "Discount Policy",
+              },
+            ],
+          },
+          {
+            key: "/wings",
+            icon: <ApartmentOutlined />,
+            label: "Wings",
+          },
+          {
+            key: "/flats",
+            icon: <HomeOutlined />,
+            label: "Flats",
+          },
+          {
+            key: "/members",
+            icon: <TeamOutlined />,
+            label: "Members",
+          },
+
+          {
+            key: "general-ledger",
+            icon: <DollarOutlined />,
+            label: "General Ledger",
+            children: [
+              {
+                key: "/gl-master",
+                label: "Master",
+              },
+              {
+                key: "/gl-balances",
+                label: "Balances",
+              },
+            ],
+          },
+
+          {
+            key: "/add-expenses",
+            label: "Expenses",
+          },
+          {
+            key: "/vendors",
+            label: "Vendors",
+          },
+          {
+            key: "Bills",
+            label: "Bills",
+            children: [
+              {
+                key: "/bill-generate",
+                label: "Generate",
+              },
+              {
+                key: "/view-bills",
+                label: "View",
+              },
+              {
+                key: "/member-paying-maintenance",
+                label: "Pay Online",
+              },
+            ],
+          },
+          {
+            key: "Sinking Fund",
+            label: "Sinking Fund",
+            children: [
+              {
+                key: "/generate-sinking-fund",
+                label: "Generate",
+              },
+              {
+                key: "/view-sinking-fund",
+                label: "View",
+              },
+              {
+                key: "/sinking-funds",
+                label: "Pay Online",
+              },
+            ],
+          },
+          {
+            key: "Contributions",
+            label: "Contributions",
+            children: [
+              {
+                key: "/generate-contribution",
+                label: "Add",
+              },
+              {
+                key: "/view-contribution",
+                label: "View",
+              },
+              {
+                key: "/contributions",
+                label: "Pay Online",
+              },
+            ],
+          },
+          {
+            key: "/verify-payment",
+            label: "Verify Payment",
+            icon: <HomeOutlined />,
+          },
+
           {
             key: "/view-receipts",
             label: "Receipts",

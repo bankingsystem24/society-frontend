@@ -10,10 +10,21 @@ import {
   Form,
   Modal,
   Input,
+  Layout
 } from "antd";
 import axios from "axios";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
+const { Content } = Layout;
+const role = sessionStorage.getItem("role");
 
 interface SinkingFund {
   id: number;
@@ -237,6 +248,27 @@ const ViewSinkingFund: React.FC = () => {
   const statusOptions = [...new Set(data.map((item) => item.status))];
 
   return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content >
     <div style={{ padding: 16 }}>
       <Card title="View Sinking Fund">
         {/* FILTER SECTION */}
@@ -393,6 +425,9 @@ const ViewSinkingFund: React.FC = () => {
         </Modal>
       </Card>
     </div>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

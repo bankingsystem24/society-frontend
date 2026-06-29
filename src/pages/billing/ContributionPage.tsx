@@ -15,14 +15,25 @@ import {
   Col,
   Row,
   message,
+  Layout,
 } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 const { Title, Text } = Typography;
 type ContributionType = "COMPULSORY" | "VOLUNTARY";
 type CompulsoryMode = "FLAT" | "AREA";
+const { Content } = Layout;
+const role = sessionStorage.getItem("role");
 
 type Contribution = {
   id: number;
@@ -62,11 +73,10 @@ const ContributionPage: React.FC = () => {
   const [selectedGlCreditAccount, setSelectedGlCreditAccount] = useState<
     number | null
   >(null);
+  const [voluntaryContributions, setVoluntaryContributions] = useState([]);
 
   useEffect(() => {
-    if (type === "COMPULSORY") {
-      fetchContributions();
-    }
+    fetchContributions();
     fetchGlAccounts();
   }, []);
 
@@ -86,12 +96,11 @@ const ContributionPage: React.FC = () => {
   }, [contributions, type]);
 
   const total = useMemo(() => {
-    if (!Array.isArray(contributions)) return 0;
-
-    return contributions.reduce((sum, item) => {
-      return sum + Number(item.amount || 0);
-    }, 0);
-  }, [contributions]);
+    return filteredContributions.reduce(
+      (sum, item) => sum + Number(item.amount || 0),
+      0,
+    );
+  }, [filteredContributions]);
 
   const fetchGlAccounts = async () => {
     try {
@@ -119,9 +128,8 @@ const ContributionPage: React.FC = () => {
   const fetchContributions = async () => {
     try {
       setLoading(true);
-
       const res = await axios.get(
-        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
+        `${BASE_URL}/contribution/${societyId}/${financialYearId}/type/${type}`,
       );
       setContributions(res.data);
     } catch (err) {
@@ -173,6 +181,28 @@ const ContributionPage: React.FC = () => {
   };
 
   return (
+
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content >
     <div style={{ padding: 10 }}>
       {/* FORM SECTION */}
       {/* <Card title="Create Contribution" style={{ marginBottom: 20 }}> */}
@@ -180,8 +210,10 @@ const ContributionPage: React.FC = () => {
         {/* ROW 1 - TYPE ONLY */}
         <Row gutter={[16, 16]}>
           <Col span={24}>
-            <Card size="small" variant="outlined">
-              <Form.Item label="Contribution Type" style={{ marginBottom: 0 }}>
+            <Form.Item style={{ marginBottom: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontWeight: 500 }}>Contribution Type:</span>
+
                 <Radio.Group
                   value={type}
                   onChange={(e) => setType(e.target.value)}
@@ -189,8 +221,8 @@ const ContributionPage: React.FC = () => {
                   <Radio value="COMPULSORY">Compulsory</Radio>
                   <Radio value="VOLUNTARY">Voluntary</Radio>
                 </Radio.Group>
-              </Form.Item>
-            </Card>
+              </div>
+            </Form.Item>
           </Col>
         </Row>
 
@@ -387,6 +419,9 @@ const ContributionPage: React.FC = () => {
         </Card>
       </div>
     </div>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

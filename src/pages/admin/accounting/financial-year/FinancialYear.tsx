@@ -62,7 +62,7 @@ const FinancialYear: React.FC = () => {
         res = await axios.get(`${BASE_URL}/accounting-year/${societyId}`);
         setData(res.data);
       } else if (role === "AUDITOR") {
-        const auditorRes = await axios.get(`${BASE_URL}/accounting-year`);
+        const auditorRes = await axios.get(`${BASE_URL}/accounting-year/${societyId}`);
         const societiesRes = await axios.get(`${BASE_URL}/societies`);
         const societyIds = societiesRes.data
           .filter((society: any) => society.auditor?.id === userId)
@@ -200,6 +200,18 @@ const FinancialYear: React.FC = () => {
       render: (active: boolean) =>
         active ? <Tag color="green">ACTIVE</Tag> : <Tag>INACTIVE</Tag>,
     },
+    {
+      title: "Action",
+      render: (_: any, record: FinancialYear) => (
+        <Space>
+          {!record.active && (
+            <Button type="primary" onClick={() => handleActivate(record.id)}>
+              Set Active
+            </Button>
+          )}
+        </Space>
+      ),
+    },
   ];
 
   const tableColumns = role === "AUDITOR" ? auditorColumns : columns;
@@ -257,7 +269,7 @@ const FinancialYear: React.FC = () => {
                 : "Financial Year Management"}
             </Title>
 
-            {role === "ADMIN" && (
+            {(role === "ADMIN" || role=="AUDITOR") && (
               <Button
                 type="primary"
                 onClick={() => setOpen(true)}
@@ -280,7 +292,7 @@ const FinancialYear: React.FC = () => {
               scroll={{ x: 800 }}
             />
 
-            {role === "ADMIN" && (
+            {(role === "ADMIN" || role == "AUDITOR") && (
               <Modal
                 title="Create Financial Year"
                 open={open}

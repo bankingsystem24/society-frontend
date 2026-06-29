@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Row, Col, message, Select, Card } from "antd";
+import { Form, Input, Button, Row, Col, message, Select, Card, Layout } from "antd";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/layout/Header";
+import AuditorHeader from "../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../components/layout/AuditorSidebar";
+import MemberHeader from "../../components/layout/MemberHeader";
+import MemberSidebar from "../../components/layout/MemberSidebar";
+import Sidebar from "../../components/layout/Sidebar";
+import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 interface MemberFormValues {
   name: string;
@@ -15,6 +23,8 @@ interface MemberFormValues {
   flatId?: number;
 }
 
+const { Content } = Layout;
+const role = sessionStorage.getItem("role");
 
 const CreateMember: React.FC = () => {
   const [form] = Form.useForm<MemberFormValues>();
@@ -82,6 +92,27 @@ const CreateMember: React.FC = () => {
   };
 
   return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+      width={role === "MEMBER" ? 200 : 250}
+      breakpoint="lg"
+      collapsedWidth="0"
+      style={{
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    </Layout.Sider>
+
+    {/* MAIN AREA */}
+    <Layout style={{ minWidth: 0 }}>
+
+      {/* HEADER (NO EXTRA DIV) */}
+      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      <Content >
     <Card title="Create Member" style={{ marginBottom: 20 }}>
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -179,6 +210,9 @@ const CreateMember: React.FC = () => {
         </Button>
       </Form>
     </Card>
+    </Content>
+    </Layout>
+    </Layout>
   );
 };
 

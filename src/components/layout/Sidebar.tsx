@@ -84,7 +84,6 @@ const Sidebar: React.FC = () => {
       key: "/gl-mapping",
       label: "GL Mapping",
     },
-
     {
       key: "Policies",
       label: "Policies",
@@ -202,12 +201,12 @@ const Sidebar: React.FC = () => {
         },
       ],
     },
-
     {
       key: "/verify-payment",
       label: "Verify Payment",
       icon: <HomeOutlined />,
     },
+
 
     {
       key: "/view-receipts",
