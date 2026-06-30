@@ -13,7 +13,7 @@ import {
   Row,
   Col,
   Grid,
-  Layout
+  Layout,
 } from "antd";
 
 import axios from "axios";
@@ -28,7 +28,6 @@ import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
-
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -230,123 +229,141 @@ const GlOpeningBalance: React.FC = () => {
   ];
 
   return (
-
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <div
-      style={{
-        padding: 16,
-        maxWidth: 1200,
-        margin: "0 auto",
-      }}
-    >
-      <Button
-        type="primary"
-        onClick={() => openModal()}
-        block={screens.xs}
-        style={{ marginBottom: 16 }}
-      >
-        Add Opening Balance
-      </Button>
-
-      <Table
-        dataSource={data}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        scroll={{ x: 800 }}
-        size="small"
-        pagination={{
-          pageSize: 8,
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
         }}
-      />
-
-      <Modal
-        title={editing ? "Edit Opening Balance" : "Add Opening Balance"}
-        open={open}
-        width={screens.xs ? "95%" : 700}
-        style={{ top: 20 }}
-        onCancel={() => {
-          form.resetFields();
-          setEditing(null);
-          setOpen(false);
-        }}
-        onOk={() => form.submit()}
-        destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={handleSave}>
-          <Form.Item name="financialYearId" hidden rules={[{ required: true }]}>
-            <InputNumber />
-          </Form.Item>
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-          <Form.Item label="Financial Year">
-            <Input value={financialYear || ""} disabled />
-          </Form.Item>
-
-          <Form.Item
-            name="glCode"
-            label="GL Account"
-            rules={[
-              {
-                required: true,
-                message: "Please select GL Account",
-              },
-            ]}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <div
+            style={{
+              padding: 16,
+              maxWidth: 1200,
+              margin: "0 auto",
+            }}
           >
-            <Select
-              showSearch
-              placeholder="Select GL Account"
-              optionFilterProp="children"
+            <Button
+              type="primary"
+              onClick={() => openModal()}
+              block={screens.xs}
+              style={{ marginBottom: 16 }}
             >
-              {glList.map((gl) => (
-                <Select.Option key={gl.glCode} value={gl.glCode}>
-                  {gl.glCode} - {gl.accountName}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+              Add Opening Balance
+            </Button>
 
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item name="openingDebit" label="Opening Debit">
-                <InputNumber
-                  style={{ width: "100%" }}
-                  controls={false}
-                  min={0}
-                />
-              </Form.Item>
-            </Col>
+            <Table
+              dataSource={data}
+              columns={columns}
+              rowKey="id"
+              loading={loading}
+              scroll={{ x: 800 }}
+              size="small"
+              pagination={{
+                pageSize: 12,
+              }}
+            />
 
-            <Col xs={24} md={12}>
-              <Form.Item name="openingCredit" label="Opening Credit">
-                <InputNumber
-                  style={{ width: "100%" }}
-                  controls={false}
-                  min={0}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          {/* <Form.Item
+            <Modal
+              title={editing ? "Edit Opening Balance" : "Add Opening Balance"}
+              open={open}
+              width={screens.xs ? "95%" : 700}
+              style={{ top: 20 }}
+              onCancel={() => {
+                form.resetFields();
+                setEditing(null);
+                setOpen(false);
+              }}
+              onOk={() => form.submit()}
+              destroyOnHidden
+            >
+              <Form form={form} layout="vertical" onFinish={handleSave}>
+                <Form.Item
+                  name="financialYearId"
+                  hidden
+                  rules={[{ required: true }]}
+                >
+                  <InputNumber />
+                </Form.Item>
+
+                <Form.Item label="Financial Year">
+                  <Input value={financialYear || ""} disabled />
+                </Form.Item>
+
+                <Form.Item
+                  name="glCode"
+                  label="GL Account"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select GL Account",
+                    },
+                  ]}
+                >
+                  <Select
+                    showSearch
+                    placeholder="Select GL Account"
+                    optionFilterProp="children"
+                  >
+                    {glList.map((gl) => (
+                      <Select.Option key={gl.glCode} value={gl.glCode}>
+                        {gl.glCode} - {gl.accountName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                <Row gutter={16}>
+                  <Col xs={24} md={12}>
+                    <Form.Item name="openingDebit" label="Opening Debit">
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        controls={false}
+                        min={0}
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={24} md={12}>
+                    <Form.Item name="openingCredit" label="Opening Credit">
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        controls={false}
+                        min={0}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                {/* <Form.Item
             name="contraGlCode"
             label="Contra GL Account"
             rules={[
@@ -368,11 +385,11 @@ const GlOpeningBalance: React.FC = () => {
               ))}
             </Select>
           </Form.Item> */}
-        </Form>
-      </Modal>
-    </div>
-    </Content>
-    </Layout>
+              </Form>
+            </Modal>
+          </div>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

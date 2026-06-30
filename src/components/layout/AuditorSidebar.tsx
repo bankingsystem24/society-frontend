@@ -52,6 +52,31 @@ const AuditorSidebar: React.FC = () => {
             label: "Users",
           },
           {
+            key: "/wings",
+            icon: <ApartmentOutlined />,
+            label: "Wings",
+          },
+          {
+            key: "/flats",
+            icon: <HomeOutlined />,
+            label: "Flats",
+          },
+          {
+            key: "general-ledger",
+            icon: <DollarOutlined />,
+            label: "General Ledger",
+            children: [
+              {
+                key: "/gl-master",
+                label: "Master",
+              },
+              {
+                key: "/gl-balances",
+                label: "Balances",
+              },
+            ],
+          },
+          {
             key: "/gl-mapping",
             label: "GL Mapping",
           },
@@ -71,40 +96,12 @@ const AuditorSidebar: React.FC = () => {
             ],
           },
           {
-            key: "/wings",
-            icon: <ApartmentOutlined />,
-            label: "Wings",
-          },
-          {
-            key: "/flats",
-            icon: <HomeOutlined />,
-            label: "Flats",
-          },
-          {
-            key: "/members",
-            icon: <TeamOutlined />,
-            label: "Members",
-          },
-
-          {
-            key: "general-ledger",
-            icon: <DollarOutlined />,
-            label: "General Ledger",
-            children: [
-              {
-                key: "/gl-master",
-                label: "Master",
-              },
-              {
-                key: "/gl-balances",
-                label: "Balances",
-              },
-            ],
-          },
-
-          {
             key: "/add-expenses",
             label: "Expenses",
+          },
+          {
+            key: "/income",
+            label: "Income",
           },
           {
             key: "/vendors",

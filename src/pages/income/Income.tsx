@@ -14,9 +14,10 @@ import {
   Layout,
   Popconfirm,
 } from "antd";
-
+import { DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
+
 import Header from "../../components/layout/Header";
 import AuditorHeader from "../../components/layout/AuditorHeader";
 import AuditorSidebar from "../../components/layout/AuditorSidebar";
@@ -25,151 +26,148 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
-import { DeleteOutlined } from "@ant-design/icons";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
-const role = sessionStorage.getItem("role");
 
-interface Expense {
+const role = sessionStorage.getItem("role");
+const cashInHand = sessionStorage.getItem("cashInHand");
+const bankAccount = sessionStorage.getItem("bankAccount");
+
+interface Income {
   id: number;
-  expenseDate: string;
-  expenseHead: string;
-  expenseGlCode: number;
-  vendor: string;
+  voucherDate: string;
+  incomeGlCode: number;
+  receivedFrom: string;
   amount: number;
   paymentMode: string;
   narration: string;
 }
 
-interface VendorOption {
-  label: string;
-  value: number;
-}
-
-const Expenses: React.FC = () => {
+const Income: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   const [form] = Form.useForm();
-  const [data, setData] = useState<Expense[]>([]);
+
   const [loading, setLoading] = useState(false);
-  const [vendors, setVendors] = useState<VendorOption[]>([]);
+  const [data, setData] = useState<Income[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchVendors();
+    fetchIncome();
+    fetchGlMaster();
   }, []);
-
-  const fetchVendors = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}/vendors/${societyId}`);
-
-      setVendors(
-        res.data.map((v: any) => ({
-          label: v.vendorName,
-          value: v.id,
-        })),
-      );
-    } catch (err) {
-      console.error("Failed to load vendors", err);
-    }
-  };
 
   const fetchGlMaster = async () => {
     try {
       const res = await axios.get(
-        `${BASE_URL}/gl/master?societyId=${societyId}`,
+        `${BASE_URL}/gl/master?societyId=${societyId}`
       );
 
-      console.log("res.data:",res.data);
-      setGlList((res.data || []).filter((gl: any) => gl.groupName === "EXPENSES" && gl.parentGlCode != null),);
+      setGlList((res.data || []).filter((gl: any) =>
+           (gl.groupName === "INCOME" ||
+            gl.groupName === "OTHER INCOME") && gl.parentGlCode !=null
+        )
+      );
     } catch {
-      message.error("Failed to load GL Accounts");
+      message.error("Failed to load Income Accounts");
     }
   };
 
-  useEffect(() => {
-    fetchExpenses();
-    fetchGlMaster();
-  }, []);
-
-  const fetchExpenses = async () => {
+  const fetchIncome = async () => {
     try {
       setLoading(true);
+
       const res = await axios.get(
-        `${BASE_URL}/expenses/${societyId}/${financialYearId}`,
+        `${BASE_URL}/income/${societyId}/${financialYearId}`
       );
+
       setData(res.data);
-    } catch (err) {
-      message.error("Failed to load expenses");
+    } catch {
+      message.error("Failed to load income vouchers");
     } finally {
       setLoading(false);
     }
   };
 
   const onFinish = async (values: any) => {
+    const GlCashInHand=Number(sessionStorage.getItem("GlCashInHand"));
+    const GlBankAccount=Number(sessionStorage.getItem("GlBankAccount"));
+
+
     try {
       const payload = {
-        societyId: Number(societyId),
-        voucherDate: values.expenseDate.format("YYYY-MM-DD"),
-        expenseGlCode: values.expenseGlCode,
+        societyId,
+        financialYearId,
+        voucherDate: values.voucherDate.format("YYYY-MM-DD"),
+        incomeGlCode: values.incomeGlCode,
+        receivedFrom: values.receivedFrom,
         amount: values.amount,
         paymentMode: values.paymentMode,
         narration: values.narration,
-        vendorId: values.vendorId || null,
-        financialYearId: financialYearId,
+        glCashInHand : GlCashInHand,
+        glBankAccount : GlBankAccount
       };
-      await axios.post(`${BASE_URL}/expenses`, payload);
-      message.success("Expense added successfully");
+
+      console.log("Payload:",payload);
+
+      await axios.post(`${BASE_URL}/income`, payload);
+
+      message.success("Income saved successfully");
+
       form.resetFields();
-      fetchExpenses();
-    } catch (err) {
-      message.error("Failed to save expense");
+
+      fetchIncome();
+    } catch {
+      message.error("Failed to save income");
     }
   };
-  const deleteExpense = async (id: number) => {
-    try {
-      await axios.delete(`${BASE_URL}/expenses/${id}`);
 
-      message.success("Expense deleted successfully");
-      fetchExpenses();
-    } catch (error) {
-      message.error("Failed to delete expense");
+  const deleteIncome = async (id: number) => {
+    try {
+      await axios.delete(`${BASE_URL}/income/${id}`);
+
+      message.success("Income deleted successfully");
+
+      fetchIncome();
+    } catch {
+      message.error("Failed to delete income");
     }
   };
 
   const columns = [
     {
       title: "Date",
-      dataIndex: "expenseDate",
+      dataIndex: "voucherDate",
       render: (d: string) => dayjs(d).format("DD-MMM-YYYY"),
     },
     {
       title: "GL Code",
-      dataIndex: "expenseGlCode",
+      dataIndex: "incomeGlCode",
     },
     {
-      title: "GL Name",
-      render: (_: any, record: any) => {
-        const gl = glList.find((g) => g.glCode === record.expenseGlCode);
+      title: "Income Head",
+      render: (_: any, record: Income) => {
+        const gl = glList.find(
+          (g) => g.glCode === record.incomeGlCode
+        );
 
         return gl?.accountName || "-";
       },
     },
     {
-      title: "Vendor",
-      render: (_: any, record: any) => {
-        const v = vendors.find((x: any) => x.value === record.vendorId);
-        return v?.label || "-";
-      },
+      title: "Received From",
+      dataIndex: "receivedFrom",
     },
     {
       title: "Amount",
       dataIndex: "amount",
       align: "right" as const,
       render: (v: number) =>
-        v.toLocaleString("en-IN", { minimumFractionDigits: 2 }),
+        v.toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+        }),
     },
     {
       title: "Mode",
@@ -181,18 +179,21 @@ const Expenses: React.FC = () => {
     },
     {
       title: "Action",
-      key: "action",
-      width: 100,
+      width: 110,
       align: "center" as const,
-      render: (_: any, record: Expense) => (
+      render: (_: any, record: Income) => (
         <Popconfirm
-          title="Delete Expense"
-          description="Are you sure you want to delete this expense?"
+          title="Delete Income"
+          description="Are you sure?"
           okText="Yes"
           cancelText="No"
-          onConfirm={() => deleteExpense(record.id)}
+          onConfirm={() => deleteIncome(record.id)}
         >
-          <Button type="primary" danger size="small" icon={<DeleteOutlined />}>
+          <Button
+            danger
+            size="small"
+            icon={<DeleteOutlined />}
+          >
             Delete
           </Button>
         </Popconfirm>
@@ -200,7 +201,7 @@ const Expenses: React.FC = () => {
     },
   ];
 
-  return (
+    return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
         width={role === "MEMBER" ? 200 : 250}
@@ -224,9 +225,7 @@ const Expenses: React.FC = () => {
         )}
       </Layout.Sider>
 
-      {/* MAIN AREA */}
       <Layout style={{ minWidth: 0 }}>
-        {/* HEADER (NO EXTRA DIV) */}
         {role === "ADMIN" ? (
           <Header />
         ) : role === "MEMBER" ? (
@@ -236,17 +235,26 @@ const Expenses: React.FC = () => {
         ) : (
           <AuditorHeader />
         )}
+
         <Content>
           <div style={{ padding: 16 }}>
-            {/* ENTRY FORM */}
-            <Card title="Add Expenses" style={{ marginBottom: 16 }}>
-              <Form form={form} layout="vertical" onFinish={onFinish}>
+            <Card title="Add Income" style={{ marginBottom: 16 }}>
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+              >
                 <Row gutter={16} style={{ marginTop: -10 }}>
                   <Col xs={24} md={8}>
                     <Form.Item
-                      name="expenseDate"
+                      name="voucherDate"
                       label="Date"
-                      rules={[{ required: true }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select date",
+                        },
+                      ]}
                     >
                       <DatePicker style={{ width: "100%" }} />
                     </Form.Item>
@@ -254,13 +262,18 @@ const Expenses: React.FC = () => {
 
                   <Col xs={24} md={8}>
                     <Form.Item
-                      name="expenseGlCode"
-                      label="Expense Account"
-                      rules={[{ required: true }]}
+                      name="incomeGlCode"
+                      label="Income Account"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select income account",
+                        },
+                      ]}
                     >
                       <Select
                         showSearch
-                        placeholder="Select Expense Account"
+                        placeholder="Select Income Account"
                         optionFilterProp="label"
                       >
                         {glList.map((gl) => (
@@ -277,8 +290,17 @@ const Expenses: React.FC = () => {
                   </Col>
 
                   <Col xs={24} md={8}>
-                    <Form.Item name="vendorId" label="Vendor">
-                      <Select options={vendors} placeholder="Select Vendor" />
+                    <Form.Item
+                      name="receivedFrom"
+                      label="Received From"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter received from",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Received From" />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -288,45 +310,76 @@ const Expenses: React.FC = () => {
                     <Form.Item
                       name="amount"
                       label="Amount"
-                      rules={[{ required: true }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter amount",
+                        },
+                      ]}
                     >
-                      <InputNumber style={{ width: "100%" }} controls={false} />
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        controls={false}
+                        min={0}
+                      />
                     </Form.Item>
                   </Col>
 
                   <Col xs={24} md={8}>
-                    <Form.Item name="paymentMode" label="Payment Mode">
-                      <Select>
-                        <Select.Option value="CASH">Cash</Select.Option>
-                        <Select.Option value="BANK">Bank</Select.Option>
-                        <Select.Option value="UPI">UPI</Select.Option>
+                    <Form.Item
+                      name="paymentMode"
+                      label="Payment Mode"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select payment mode",
+                        },
+                      ]}
+                    >
+                      <Select placeholder="Payment Mode">
+                        <Select.Option value="CASH">
+                          Cash
+                        </Select.Option>
+                        <Select.Option value="BANK">
+                          Bank
+                        </Select.Option>
+                        <Select.Option value="UPI">
+                          UPI
+                        </Select.Option>
                       </Select>
                     </Form.Item>
                   </Col>
 
                   <Col xs={24} md={8}>
-                    <Form.Item name="narration" label="Narration">
-                      <Input />
+                    <Form.Item
+                      name="narration"
+                      label="Narration"
+                    >
+                      <Input placeholder="Narration" />
                     </Form.Item>
                   </Col>
                 </Row>
 
-                <Button type="primary" htmlType="submit">
-                  Save Expense
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                >
+                  Save Income
                 </Button>
               </Form>
             </Card>
 
-            {/* EXPENSE LIST */}
-            <Card title="Expense List">
+            <Card title="Income List">
               <Table
-                dataSource={data}
-                columns={columns}
                 rowKey="id"
+                columns={columns}
+                dataSource={data}
                 loading={loading}
-                scroll={{ x: 1000 }}
                 size="small"
-                pagination={{ pageSize: 8 }}
+                scroll={{ x: 1000 }}
+                pagination={{
+                  pageSize: 8,
+                }}
               />
             </Card>
           </div>
@@ -336,4 +389,4 @@ const Expenses: React.FC = () => {
   );
 };
 
-export default Expenses;
+export default Income;

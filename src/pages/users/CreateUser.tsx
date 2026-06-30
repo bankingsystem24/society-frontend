@@ -8,7 +8,7 @@ import {
   message,
   Row,
   Col,
-  Layout
+  Layout,
 } from "antd";
 
 import { apiGet, apiPost } from "../../api/axios";
@@ -23,7 +23,7 @@ import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
-const {Content } = Layout;
+const { Content } = Layout;
 const role = sessionStorage.getItem("role");
 
 const CreateUser: React.FC = () => {
@@ -39,9 +39,7 @@ const CreateUser: React.FC = () => {
     try {
       const societyId = sessionStorage.getItem("societyId");
 
-      const res = await apiGet(
-        `/members?societyId=${societyId}`
-      );
+      const res = await apiGet(`/members?societyId=${societyId}`);
 
       setMembers(res || []);
     } catch (error) {
@@ -49,27 +47,27 @@ const CreateUser: React.FC = () => {
     }
   };
 
-    const handleSelectEnter = (e: any) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSelectEnter = (e: any) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const form = e.target.form;
-    const elements = Array.from(form.elements) as HTMLElement[];
+      const form = e.target.form;
+      const elements = Array.from(form.elements) as HTMLElement[];
 
-    const index = elements.indexOf(e.target);
-    const next = elements[index + 1];
+      const index = elements.indexOf(e.target);
+      const next = elements[index + 1];
 
-    if (next) next.focus();
-  }
-};
+      if (next) next.focus();
+    }
+  };
 
   const onFinish = async (values: any) => {
     try {
       const societyId = sessionStorage.getItem("societyId");
 
       const payload = {
-        name:values.name,
+        name: values.name,
         username: values.username,
         password: values.password,
         email: values.email,
@@ -89,151 +87,169 @@ const CreateUser: React.FC = () => {
       message.success("User created successfully");
       form.resetFields();
       navigate("/users");
-
     } catch (error: any) {
-      message.error(
-        error?.response?.data?.message ||
-        "Failed to create user"
-      );
+      message.error(error?.response?.data?.message || "Failed to create user");
     }
+  };
+  const handleMemberChange = (value: number | undefined) => {
+    if (!value) {
+      form.setFieldsValue({
+        role: null,
+        name: null,
+      });
+      return;
+    }
+
+    const member = members.find((m) => m.id === value);
+
+    form.setFieldsValue({
+      role: "MEMBER",
+      name: member?.name,
+    });
   };
 
   return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <Card title="Create User">
-      <Form
-        layout="vertical"
-        form={form}
-        onFinish={onFinish}
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
       >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Username"
-              name="username"
-              rules={[{ required: true }]}
-            >
-              <Input onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Name"
-              name="name"
-              rules={[{ required: true }]}
-            >
-              <Input onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card title="Create User">
+            <Form layout="vertical" form={form} onFinish={onFinish}>
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Username"
+                    name="username"
+                    rules={[{ required: true }]}
+                  >
+                    <Input onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item label="Member" name="memberId">
+                    <Select
+                      placeholder="Select Member"
+                      allowClear
+                      options={members.map((m) => ({
+                        label: m.name,
+                        value: m.id,
+                      }))}
+                      onChange={handleMemberChange}
+                      onKeyDown={handleSelectEnter}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Role"
+                    name="role"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      placeholder="Select Role"
+                      options={[
+                        { label: "Admin", value: "ADMIN" },
+                        { label: "Security", value: "SECURITY" },
+                        { label: "Treasurer", value: "TREASURER" },
+                        { label: "Secretary", value: "SECRETARY" },
+                        { label: "Member", value: "MEMBER" },
+                        { label: "Manager", value: "MANAGER" },
+                        { label: "Auditor", value: "AUDITOR" },
+                      ]}
+                      onKeyDown={handleSelectEnter}
+                    />
+                  </Form.Item>
+                </Col>
+                </Row>
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Name"
+                    name="name"
+                    rules={[{ required: true }]}
+                  >
+                    <Input onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
 
-          <Col span={12}>
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true },
-                { type: "email" },
-              ]}
-            >
-              <Input onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-        </Row>
+                <Col span={8}>
+                  <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[{ required: true }, { type: "email" }]}
+                  >
+                    <Input onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Mobile"
+                    name="mobile"
+                    rules={[{ required: true }]}
+                  >
+                    <Input onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Mobile"
-              name="mobile"
-              rules={[{ required: true }]}
-            >
-              <Input onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Password"
+                    name="password"
+                    rules={[{ required: true }]}
+                  >
+                    <Input.Password />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-          <Col span={12}>
-            <Form.Item
-              label="Role"
-              name="role"
-              rules={[{ required: true }]}
-            >
-              <Select
-                placeholder="Select Role"
-                options={[
-                  { label: "Admin", value: "ADMIN" },
-                  { label: "Security", value: "SECURITY" },
-                  { label: "Treasurer", value: "TREASURER" },
-                  { label: "Secretary", value: "SECRETARY" },
-                  { label: "Member", value: "MEMBER" },
-                  { label: "Manager", value: "MANAGER" },
-                  { label: "Auditor", value:"AUDITOR"},
-                ]}
-                onKeyDown={handleSelectEnter}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Member"
-              name="memberId"
-              rules={[]}
-            >
-              <Select
-                placeholder="Select Member"
-                options={members.map((m) => ({
-                  label: m.name,
-                  value: m.id,
-                }))}
-                onKeyDown={handleSelectEnter}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true }]}
-            >
-              <Input.Password />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Button type="primary" htmlType="submit">
-          Save User
-        </Button>
-        <Button type="default" style={{ marginLeft: 8 }} onClick={() => navigate("/users")}>
-          Cancel
-        </Button>
-      </Form>
-    </Card>
-    </Content>
-    </Layout>
+              <Button type="primary" htmlType="submit">
+                Save User
+              </Button>
+              <Button
+                type="default"
+                style={{ marginLeft: 8 }}
+                onClick={() => navigate("/users")}
+              >
+                Cancel
+              </Button>
+            </Form>
+          </Card>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

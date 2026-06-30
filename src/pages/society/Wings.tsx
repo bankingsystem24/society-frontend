@@ -11,11 +11,7 @@ import {
 } from "antd";
 
 import { apiDelete, apiGet } from "../../api/axios";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
 import AuditorHeader from "../../components/layout/AuditorHeader";
@@ -63,9 +59,7 @@ const Wings: React.FC = () => {
 
       message.success("Wing deleted successfully");
 
-      setData((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
+      setData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error(error);
       message.error("Failed to delete wing");
@@ -95,124 +89,136 @@ const Wings: React.FC = () => {
       key: "total_flats",
       align: "center" as const,
     },
-{
-  title: "Action",
-  key: "action",
-  width: 180,
+    {
+      title: "Action",
+      key: "action",
+      width: 180,
 
-  render: (_: any, record: any) => (
-    <Space wrap>
-      <Button
-        type="primary"
-        size="small"
-        icon={<EditOutlined />}
-        onClick={() => navigate(`/edit-wing/${record.id}`)}
-      >
-        Edit
-      </Button>
+      render: (_: any, record: any) => (
+        <Space wrap>
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/edit-wing/${record.id}`)}
+          >
+            Edit
+          </Button>
 
-      <Popconfirm
-        title="Delete Wing"
-        description="Are you sure you want to delete this wing?"
-        okText="Yes"
-        cancelText="No"
-        onConfirm={() => deleteWing(record.id)}
-      >
-        <Button
-          danger
-          size="small"
-          icon={<DeleteOutlined />}
-        >
-          Delete
-        </Button>
-      </Popconfirm>
-    </Space>
-  ),
-},
+          <Popconfirm
+            title="Delete Wing"
+            description="Are you sure you want to delete this wing?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => deleteWing(record.id)}
+          >
+            <Button danger size="small" icon={<DeleteOutlined />}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
-return (
-  <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content>
-
-  <Card
-    variant="borderless"
-    style={{
-      borderRadius: 12,
-      width: "100%",
-      minHeight: "calc(100vh - 140px)",
-    }}
-    styles={{ body : {
-      padding: window.innerWidth < 768 ? 12 : 24,},
-    }}
-  >
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 20,
-        flexWrap: "wrap",
-        gap: 12,
-      }}
-    >
-      <div>
-        <Title level={4} style={{ margin: 0 }}>
-          Wings Management
-        </Title>
-
-        <Text type="secondary">
-          Manage society wings, floors and flats
-        </Text>
-      </div>
-
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => navigate("/create-wing")}
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
       >
-        Create Wing
-      </Button>
-    </div>
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-    <Table
-      columns={columns}
-      dataSource={data}
-      rowKey="id"
-      loading={loading}
-      bordered
-      size="small"
-      scroll={{ x: 900 }}
-      pagination={{
-        pageSize: 8,
-        showSizeChanger: true,
-        responsive: true,
-      }}
-    />
-  </Card>
-  </Content>
-  </Layout>
-  </Layout>
-);
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card
+            variant="borderless"
+            style={{
+              borderRadius: 12,
+              width: "100%",
+              minHeight: "calc(100vh - 140px)",
+            }}
+            styles={{
+              body: {
+                padding: window.innerWidth < 768 ? 12 : 24,
+              },
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 20,
+                flexWrap: "wrap",
+                gap: 12,
+              }}
+            >
+              <div>
+                <Title level={4} style={{ margin: 0 }}>
+                  Wings Management
+                </Title>
+
+                <Text type="secondary">
+                  Manage society wings, floors and flats
+                </Text>
+              </div>
+
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => navigate("/create-wing")}
+              >
+                Create Wing
+              </Button>
+            </div>
+
+            <Table
+              columns={columns}
+              dataSource={data}
+              rowKey="id"
+              loading={loading}
+              bordered
+              size="small"
+              scroll={{ x: 900 }}
+              pagination={{
+                pageSize: 8,
+                showSizeChanger: true,
+                responsive: true,
+              }}
+            />
+          </Card>
+        </Content>
+      </Layout>
+    </Layout>
+  );
 };
 
 export default Wings;

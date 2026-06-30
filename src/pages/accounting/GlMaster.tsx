@@ -11,7 +11,7 @@ import {
   Space,
   Popconfirm,
   message,
-  Layout
+  Layout,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import Header from "../../components/layout/Header";
@@ -22,6 +22,7 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import "../../App.css";
 
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
@@ -66,7 +67,6 @@ const GlMaster: React.FC = () => {
         : res.data?.data || [];
 
       setData(responseData);
-
     } catch (err) {
       console.error(err);
       message.error("Failed to load GL Master");
@@ -191,125 +191,148 @@ const GlMaster: React.FC = () => {
   ];
 
   return (
-
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content style={{ marginTop: "10px", padding:10}}>
-    <div
-      style={{
-        height: "calc(100vh - 180px)", // adjust 120px for your header/navbar
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 16,
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
         }}
       >
-        <h2>GL Master</h2>
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-          Add GL
-        </Button>
-      </div>
-
-      <Table
-        rowKey="glCode"
-        loading={loading}
-        columns={columns}
-        dataSource={data}
-        bordered
-        size="small"
-        scroll={{ y: "calc(100vh - 240px)" }}
-        pagination={{
-          pageSize: 8,
-        }}
-      />
-
-      <Modal
-        title={editing ? "Edit GL" : "Add GL"}
-        open={open}
-        onOk={handleSubmit}
-        onCancel={() => setOpen(false)}
-        destroyOnHidden
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label="GL Code"
-            name="glCode"
-            rules={[
-              {
-                required: true,
-                message: "GL Code Required",
-              },
-            ]}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content style={{ marginTop: "10px", padding: 10 }}>
+          <div
+            style={{
+              height: "calc(100vh - 180px)", // adjust 120px for your header/navbar
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
-            <Input type="number" disabled={!!editing} />
-          </Form.Item>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 16,
+              }}
+            >
+              <h2>GL Master</h2>
 
-          <Form.Item
-            label="Account Name"
-            name="accountName"
-            rules={[
-              {
-                required: true,
-                message: "Account Name Required",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+              >
+                Add GL
+              </Button>
+            </div>
 
-          <Form.Item
-            label="Group Name"
-            name="groupName"
-            rules={[
-              {
-                required: true,
-                message: "Group Name Required",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
+            <Table
+              className="compact-table"
+              rowKey="glCode"
+              loading={loading}
+              columns={columns}
+              dataSource={data}
+              bordered
+              size="small"
+              scroll={{ y: "calc(100vh - 240px)" }}
+              pagination={{
+                pageSize: 10,
+              }}
+            />
 
-          <Form.Item label="Parent GL Code" name="parentGlCode">
-            <Input type="number" />
-          </Form.Item>
+            <Modal
+              title={editing ? "Edit GL" : "Add GL"}
+              open={open}
+              onOk={handleSubmit}
+              onCancel={() => setOpen(false)}
+              destroyOnHidden
+            >
+              <Form form={form} layout="vertical">
+                <Form.Item
+                  label="GL Code"
+                  name="glCode"
+                  rules={[
+                    {
+                      required: true,
+                      message: "GL Code Required",
+                    },
+                  ]}
+                >
+                  <Input type="number" disabled={!!editing} />
+                </Form.Item>
 
-          <Form.Item label="Society Id" name="societyId" hidden>
-            <Input />
-          </Form.Item>
+                <Form.Item
+                  label="Account Name"
+                  name="accountName"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Account Name Required",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
 
-          <Form.Item label="Active" name="isActive" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-    </Content>
-    </Layout>
+                <Form.Item
+                  label="Group Name"
+                  name="groupName"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Group Name Required",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+
+                <Form.Item label="Parent GL Code" name="parentGlCode">
+                  <Input type="number" />
+                </Form.Item>
+
+                <Form.Item label="Society Id" name="societyId" hidden>
+                  <Input />
+                </Form.Item>
+
+                <Form.Item
+                  label="Active"
+                  name="isActive"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

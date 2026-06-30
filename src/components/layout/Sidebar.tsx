@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
       setOpenKeys(["general-ledger"]);
     } else if (
       ["/bill-generate", "/view-bills", "/member-paying-maintenance"].includes(
-        path
+        path,
       )
     ) {
       setOpenKeys(["Bills"]);
@@ -141,6 +141,10 @@ const Sidebar: React.FC = () => {
       label: "Expenses",
     },
     {
+      key: "/income",
+      label: "Income",
+    },
+    {
       key: "/vendors",
       label: "Vendors",
     },
@@ -206,14 +210,11 @@ const Sidebar: React.FC = () => {
       label: "Verify Payment",
       icon: <HomeOutlined />,
     },
-
-
     {
       key: "/view-receipts",
       label: "Receipts",
       icon: <HomeOutlined />,
     },
-
     {
       key: "Reports",
       icon: <UserOutlined />,
@@ -280,7 +281,7 @@ const Sidebar: React.FC = () => {
         size={260}
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        styles ={{ body : {padding: 0 } }}
+        styles={{ body: { padding: 0 } }}
       >
         {menuComponent}
       </Drawer>

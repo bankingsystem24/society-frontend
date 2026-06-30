@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Typography } from "antd";
+import { Card, Row, Col, Statistic, Typography, message } from "antd";
 import {
   CalendarOutlined,
   HomeOutlined,
@@ -21,7 +21,6 @@ const AuditorDashboard: React.FC = () => {
 
   useEffect(() => {
     loadStats();
-
   }, []);
 
   const loadFinancialYear = async () => {
@@ -31,6 +30,8 @@ const AuditorDashboard: React.FC = () => {
       setFinancialYear(res.fyCode || "-");
       sessionStorage.setItem("financialYear",res.fyCode);
       sessionStorage.setItem("financialYearId",res.id); 
+      window.dispatchEvent(new Event("financialYearChanged"));
+
 
     } catch (error) {
       console.error("Error loading financial year", error);
@@ -38,6 +39,32 @@ const AuditorDashboard: React.FC = () => {
     }
   };
 
+  const fetchGlMapping = async () => {
+    const societyId = Number(sessionStorage.getItem("societyId"));
+      try {
+        const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
+        console.log("res:",res);
+
+        const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",);
+
+        if (!mapping) {
+          message.error("Cash in Hand Mapping not configured");
+          return;
+        }
+        sessionStorage.setItem("GlCashInHand", mapping.gl_receivable);
+        const mapping1 = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "bank account",);
+        if (!mapping1) {
+          message.error("Cash in Hand Mapping not configured");
+          return;
+        }
+        sessionStorage.setItem("GlBankAccount", mapping1.gl_receivable);
+
+      } catch (err) {
+        console.error(err);
+        message.error("Unable to load GL Mapping");
+      }
+    };
+    
   const loadStats = async () => {
     try {
       const usersRes = await apiGet("/users");
@@ -56,10 +83,11 @@ const AuditorDashboard: React.FC = () => {
       const firstSociety = filteredSocieties[0];
 
       if (firstSociety) {
-        sessionStorage.setItem("societyId", firstSociety.id);
+        sessionStorage.setItem("societyId", String(firstSociety.id));
         sessionStorage.setItem("societyName", String(firstSociety.societyName));
           window.dispatchEvent(new Event("societyChanged"));
           await loadFinancialYear();
+          await fetchGlMapping();
        }
 
     } catch (error) {

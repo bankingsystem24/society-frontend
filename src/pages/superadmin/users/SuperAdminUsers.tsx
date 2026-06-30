@@ -14,7 +14,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 
-
+const role = sessionStorage.getItem("role");
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -39,6 +39,9 @@ const SuperAdminUsers: React.FC = () => {
     try {
       setLoading(true);
         const res = await apiGet("/users");
+
+        console.log("Users:",res);
+
         const filtered = (res || [])
           .sort((a: any, b: any) => {
             const societyCompare = (a.societyName || "").localeCompare(

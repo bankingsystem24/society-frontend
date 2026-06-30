@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Table, Card, Typography, Spin, message, Row, Col, Tag, Layout } from "antd";
+import {
+  Table,
+  Card,
+  Typography,
+  Spin,
+  message,
+  Row,
+  Col,
+  Tag,
+  Layout,
+} from "antd";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
 import Header from "../../components/layout/Header";
@@ -10,6 +20,7 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import "../../App.css";
 
 const { Title } = Typography;
 
@@ -52,12 +63,12 @@ const TrialBalance: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`,);
+
+      console.log("Res:", res.data);
 
       const filteredData = (res.data || []).filter(
-        (item:any) =>
+        (item: any) =>
           (item.openingBalance ?? 0) !== 0 ||
           (item.closingBalance ?? 0) !== 0 ||
           (item.credit ?? 0) !== 0 ||
@@ -65,7 +76,6 @@ const TrialBalance: React.FC = () => {
       );
 
       setData(filteredData);
-
     } catch (error) {
       message.error("Failed to load Trial Balance");
     } finally {
@@ -87,14 +97,24 @@ const TrialBalance: React.FC = () => {
       width: 150,
     },
     {
-      title: "Opening",
-      key: "opening",
-      width: 80,
+      title: "Opening Dr",
+      key: "openingDebit",
+      width: 100,
       align: "right",
       render: (_, record) =>
-        `${(record.openingBalance || 0).toFixed(2)} ${
-          record.openingType || ""
-        }`,
+        record.openingType === "DR"
+          ? (record.openingBalance || 0).toFixed(2)
+          : "",
+    },
+    {
+      title: "Opening Cr",
+      key: "openingCredit",
+      width: 100,
+      align: "right",
+      render: (_, record) =>
+        record.openingType === "CR"
+          ? (record.openingBalance || 0).toFixed(2)
+          : "",
     },
     {
       title: "Debit",
@@ -113,14 +133,24 @@ const TrialBalance: React.FC = () => {
       render: (value: number) => (value || 0).toFixed(2),
     },
     {
-      title: "Closing",
-      key: "closing",
-      width: 80,
+      title: "Closing Dr",
+      key: "closingDebit",
+      width: 100,
       align: "right",
       render: (_, record) =>
-        `${(record.closingBalance || 0).toFixed(2)} ${
-          record.closingType || ""
-        }`,
+        record.closingType === "DR"
+          ? (record.closingBalance || 0).toFixed(2)
+          : "",
+    },
+    {
+      title: "Closing Cr",
+      key: "closingCredit",
+      width: 100,
+      align: "right",
+      render: (_, record) =>
+        record.closingType === "CR"
+          ? (record.closingBalance || 0).toFixed(2)
+          : "",
     },
     {
       title: "A/c Type",
@@ -163,117 +193,133 @@ const TrialBalance: React.FC = () => {
   const isBalanced = Math.abs(difference) < 0.01;
 
   return (
-  <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card style={{ borderRadius: 12 }}>
+            <Title level={3}>Trial Balance</Title>
 
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content>
+            {loading ? (
+              <Spin />
+            ) : (
+              <>
+                <Table
+                  className="compact-table"
+                  dataSource={data}
+                  columns={columns}
+                  rowKey="glCode"
+                  pagination={{ pageSize: 12 }}
+                  bordered
+                  size="small"
+                  scroll={{ x: 800 }}
+                  summary={() => (
+                    <Table.Summary fixed>
+                      <Table.Summary.Row>
+                        <Table.Summary.Cell index={0} colSpan={3}>
+                          <strong>Total</strong>
+                        </Table.Summary.Cell>
 
+                        <Table.Summary.Cell index={3} align="right">
+                          <strong>{totalDebit.toFixed(2)}</strong>
+                        </Table.Summary.Cell>
 
-    <Card style={{ borderRadius: 12 }}>
-      <Title level={3}>Trial Balance</Title>
+                        <Table.Summary.Cell index={4} align="right">
+                          <strong>{totalCredit.toFixed(2)}</strong>
+                        </Table.Summary.Cell>
 
-      {loading ? (
-        <Spin />
-      ) : (
-        <>
-          <Table
-            dataSource={data}
-            columns={columns}
-            rowKey="glCode"
-            pagination={{pageSize: 8,}}
-            bordered
-            size="small"
-            scroll={{ x: 800 }}
-            summary={() => (
-              <Table.Summary fixed>
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0} colSpan={3}>
-                    <strong>Total</strong>
-                  </Table.Summary.Cell>
+                        <Table.Summary.Cell index={5} colSpan={2} />
+                      </Table.Summary.Row>
+                    </Table.Summary>
+                  )}
+                />
 
-                  <Table.Summary.Cell index={3} align="right">
-                    <strong>{totalDebit.toFixed(2)}</strong>
-                  </Table.Summary.Cell>
+                <Row gutter={16} justify="end" style={{ marginTop: 20 }}>
+                  <Col>
+                    <Card size="small">
+                      <b>Total Debit</b>
+                      <div>{totalDebit.toFixed(2)}</div>
+                    </Card>
+                  </Col>
 
-                  <Table.Summary.Cell index={4} align="right">
-                    <strong>{totalCredit.toFixed(2)}</strong>
-                  </Table.Summary.Cell>
+                  <Col>
+                    <Card size="small">
+                      <b>Total Credit</b>
+                      <div>{totalCredit.toFixed(2)}</div>
+                    </Card>
+                  </Col>
 
-                  <Table.Summary.Cell index={5} colSpan={2} />
-                </Table.Summary.Row>
-              </Table.Summary>
+                  <Col>
+                    <Card
+                      size="small"
+                      style={{
+                        border: isBalanced
+                          ? "1px solid green"
+                          : "1px solid red",
+                      }}
+                    >
+                      <b>Difference</b>
+                      <div
+                        style={{
+                          color: isBalanced ? "green" : "red",
+                        }}
+                      >
+                        {difference.toFixed(2)}
+                      </div>
+                    </Card>
+                  </Col>
+
+                  <Col>
+                    <Card size="small">
+                      <b>Status</b>
+                      <div
+                        style={{
+                          color: isBalanced ? "green" : "red",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {isBalanced ? "BALANCED" : "NOT BALANCED"}
+                      </div>
+                    </Card>
+                  </Col>
+                </Row>
+              </>
             )}
-          />
-
-          <Row gutter={16} justify="end" style={{ marginTop: 20 }}>
-            <Col>
-              <Card size="small">
-                <b>Total Debit</b>
-                <div>{totalDebit.toFixed(2)}</div>
-              </Card>
-            </Col>
-
-            <Col>
-              <Card size="small">
-                <b>Total Credit</b>
-                <div>{totalCredit.toFixed(2)}</div>
-              </Card>
-            </Col>
-
-            <Col>
-              <Card
-                size="small"
-                style={{
-                  border: isBalanced ? "1px solid green" : "1px solid red",
-                }}
-              >
-                <b>Difference</b>
-                <div
-                  style={{
-                    color: isBalanced ? "green" : "red",
-                  }}
-                >
-                  {difference.toFixed(2)}
-                </div>
-              </Card>
-            </Col>
-
-            <Col>
-              <Card size="small">
-                <b>Status</b>
-                <div
-                  style={{
-                    color: isBalanced ? "green" : "red",
-                    fontWeight: 600,
-                  }}
-                >
-                  {isBalanced ? "BALANCED" : "NOT BALANCED"}
-                </div>
-              </Card>
-            </Col>
-          </Row>
-        </>
-      )}
-    </Card>
-    </Content>
-    </Layout>
+          </Card>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

@@ -4,7 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
-
+ 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -42,6 +42,7 @@ const Login: React.FC = () => {
       }
 
       sessionStorage.setItem("token", res.data.token);
+
       if (res.data.societyId !== null && res.data.societyId !== undefined) {
         sessionStorage.setItem("societyId", String(res.data.societyId));
       } else {
@@ -75,27 +76,22 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
-
+ 
   const fetchGlMapping = async () => {
     const societyId = Number(sessionStorage.getItem("societyId"));
-      try {
-        const res = await axios.get(
-          `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
-        );
 
-        const mapping = res.data.find(
-          (item: any) =>
-            item.description?.trim().toLowerCase() === "cash in hand",
-        );
+      try {
+        const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
+        console.log("res:",res);
+
+        const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",);
+
         if (!mapping) {
           message.error("Cash in Hand Mapping not configured");
           return;
         }
         sessionStorage.setItem("GlCashInHand", mapping.gl_receivable);
-        const mapping1 = res.data.find(
-          (item: any) =>
-            item.description?.trim().toLowerCase() === "bank account",
-        );
+        const mapping1 = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "bank account",);
         if (!mapping1) {
           message.error("Cash in Hand Mapping not configured");
           return;

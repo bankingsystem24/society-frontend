@@ -1,4 +1,14 @@
-import { Button, Card, Col,  Form, Input, message, Row, Select, Layout } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  message,
+  Row,
+  Select,
+  Layout,
+} from "antd";
 import React, { useEffect } from "react";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
@@ -44,7 +54,7 @@ const CreateWings: React.FC = () => {
     }
   };
 
-    const handleSelectEnter = (e: any) => {
+  const handleSelectEnter = (e: any) => {
     if (e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
@@ -83,132 +93,141 @@ const CreateWings: React.FC = () => {
     }
   };
 
-return (
+  return (
     <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-<Content >
-    <Card title="Create Wing" style={{ marginBottom: 20 }}>
-
-    <Form
-      form={form}
-      layout="vertical"
-      onFinish={onFinish}
-      initialValues={{
-        active: true,
-      }}
-    >
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            label="Wing Name"
-            name="wingName"
-            rules={[{ required: true, message: "Enter wing name" }]}
-          >
-            <Input
-              placeholder="Enter wing name"
-              onPressEnter={focusNext}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={12}>
-          <Form.Item
-            label="Description"
-            name="description"
-          >
-            <Input
-              placeholder="Enter description"
-              onPressEnter={focusNext}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            label="Total Floors"
-            name="total_floors"
-            rules={[{ required: true, message: "Enter total floors" }]}
-          >
-            <Input
-              type="number"
-              placeholder="Enter total floors"
-              onPressEnter={focusNext}
-            />
-          </Form.Item>
-        </Col>
-
-        <Col span={12}>
-          <Form.Item
-            label="Total Flats"
-            name="total_flats"
-            rules={[{ required: true, message: "Enter total flats" }]}
-          >
-            <Input
-              type="number"
-              placeholder="Enter total flats"
-              onPressEnter={focusNext}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            label="Status"
-            name="active"
-            rules={[{ required: true, message: "Select status" }]}
-          >
-            <Select
-              placeholder="Select status"
-              onKeyDown={handleSelectEnter}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card title="Create Wing" style={{ marginBottom: 20 }}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onFinish}
+              initialValues={{
+                active: true,
+              }}
             >
-              <Select.Option value={true}>Active</Select.Option>
-              <Select.Option value={false}>Inactive</Select.Option>
-            </Select>
-          </Form.Item>
-        </Col>
-      </Row>
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Wing Name"
+                    name="wingName"
+                    rules={[{ required: true, message: "Enter wing name" }]}
+                  >
+                    <Input
+                      placeholder="Enter wing name"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
 
-      <Button type="primary" htmlType="submit">
-        Save Wing
-      </Button>
-      <Button
-          type="default"
-          size="medium"
-          style={{ marginLeft: 8 }}
-          onClick={() => navigate("/wings")}
-        >
-          Cancel
-        </Button>
-    </Form>
-  </Card>
-  </Content>
-  </Layout>
-  </Layout>
-);
+                <Col span={8}>
+                  <Form.Item label="Description" name="description">
+                    <Input
+                      placeholder="Enter description"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Total Floors"
+                    name="total_floors"
+                    rules={[{ required: true, message: "Enter total floors" }]}
+                  >
+                    <Input
+                      type="number"
+                      placeholder="Enter total floors"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
 
+                <Col span={8}>
+                  <Form.Item
+                    label="Total Flats"
+                    name="total_flats"
+                    rules={[{ required: true, message: "Enter total flats" }]}
+                  >
+                    <Input
+                      type="number"
+                      placeholder="Enter total flats"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Status"
+                    name="active"
+                    rules={[{ required: true, message: "Select status" }]}
+                  >
+                    <Select
+                      placeholder="Select status"
+                      onKeyDown={handleSelectEnter}
+                    >
+                      <Select.Option value={true}>Active</Select.Option>
+                      <Select.Option value={false}>Inactive</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Button type="primary" htmlType="submit">
+                Save Wing
+              </Button>
+              <Button
+                type="default"
+                size="medium"
+                style={{ marginLeft: 8 }}
+                onClick={() => navigate("/wings")}
+              >
+                Cancel
+              </Button>
+            </Form>
+          </Card>
+        </Content>
+      </Layout>
+    </Layout>
+  );
 };
 
 export default CreateWings;
