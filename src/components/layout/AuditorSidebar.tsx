@@ -96,13 +96,24 @@ const AuditorSidebar: React.FC = () => {
             ],
           },
           {
-            key: "/add-expenses",
-            label: "Expenses",
+            key: "Entries",
+            label: "Entries",
+            children: [
+              {
+                key: "/add-expenses",
+                label: "Expenses",
+              },
+              {
+                key: "/income",
+                label: "Income",
+              },
+              { 
+                key: "/transfer",
+                label: "Transfer",
+              },
+            ],
           },
-          {
-            key: "/income",
-            label: "Income",
-          },
+        
           {
             key: "/vendors",
             label: "Vendors",

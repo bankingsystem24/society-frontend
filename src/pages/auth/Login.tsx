@@ -82,8 +82,6 @@ const Login: React.FC = () => {
 
       try {
         const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
-        console.log("res:",res);
-
         const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",);
 
         if (!mapping) {

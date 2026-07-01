@@ -55,6 +55,7 @@ import MemberPayingMaintenance from "./pages/members/MemberPayingMaintenance";
 import VerifyPayemnt from "./pages/billing/VerifyPayment";
 import GlMappingEntry from "./pages/accounting/GlMappingEntry";
 import Income from "./pages/income/Income";
+import Transfer from "./pages/transfer/Transfer";
 
 export default function App() {
   return (
@@ -95,6 +96,7 @@ export default function App() {
       <Route path="/gl-balances" element={<GlOpeningBalance />} />
       <Route path="/add-expenses" element={<Expenses />} />
       <Route path="/income" element={<Income />} />
+      <Route path="/transfer" element={<Transfer />} />
       <Route path="/vendors" element={<Vendors />} />
       <Route path="/bill-generate" element={<BillGenerate />}/>
       <Route path="/view-bills" element={<ViewBills />} />

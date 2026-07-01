@@ -81,8 +81,6 @@ const Expenses: React.FC = () => {
       const res = await axios.get(
         `${BASE_URL}/gl/master?societyId=${societyId}`,
       );
-
-      console.log("res.data:",res.data);
       setGlList((res.data || []).filter((gl: any) => gl.groupName === "EXPENSES" && gl.parentGlCode != null),);
     } catch {
       message.error("Failed to load GL Accounts");
