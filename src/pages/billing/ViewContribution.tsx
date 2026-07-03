@@ -47,7 +47,7 @@ interface Contribution {
   flatNo: string;
   glReceivable:number;
   glCreditAccount:number;
-}
+} 
 
 const ViewContribution: React.FC = () => {
   const [data, setData] = useState<Contribution[]>([]);
@@ -86,6 +86,8 @@ const ViewContribution: React.FC = () => {
       const res = await axios.get(`${BASE_URL}/contribution/${societyId}/${financialYearId}`,);
       setData(res.data || []);
       setFilteredData(res.data || []);
+      console.log("Contributions loaded:", res.data);
+
     } catch {
       message.error("Failed to load contributions");
     } finally {
@@ -166,6 +168,11 @@ const ViewContribution: React.FC = () => {
   };
 
   const columns = [
+    {
+      title: "Member Name",
+      dataIndex: "memberName",
+      key: "memberName",
+    },
     {
       title: "Flat No",
       dataIndex: "flatNo",

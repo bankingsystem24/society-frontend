@@ -27,7 +27,7 @@ const AuditorSidebar: React.FC = () => {
         theme="dark"
         mode="inline"
         selectedKeys={[location.pathname]}
-        onClick={({ key }) => navigate(key)}
+        onClick={({ key }) => { navigate(key)}}
         items={[
           {
             key: "/auditordashboard",
@@ -45,6 +45,11 @@ const AuditorSidebar: React.FC = () => {
           {
             key: "/financial-year",
             label: "Set Financial Year",
+          },
+          {
+            key: "/members",
+            icon: <TeamOutlined />,
+            label: "Members",
           },
           {
             key: "/users",
@@ -74,12 +79,13 @@ const AuditorSidebar: React.FC = () => {
                 key: "/gl-balances",
                 label: "Balances",
               },
+              {
+                key: "/gl-mapping",
+                label: "GL Mapping",
+              },
             ],
           },
-          {
-            key: "/gl-mapping",
-            label: "GL Mapping",
-          },
+
 
           {
             key: "Policies",
@@ -93,6 +99,10 @@ const AuditorSidebar: React.FC = () => {
                 key: "/discount-policy",
                 label: "Discount Policy",
               },
+              {
+                key: "/penalty-policy",
+                label: "Penalty Policy",
+              }
             ],
           },
           {
@@ -109,6 +119,7 @@ const AuditorSidebar: React.FC = () => {
               },
               { 
                 key: "/transfer",
+
                 label: "Transfer",
               },
             ],

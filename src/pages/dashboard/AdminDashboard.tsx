@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; 
 import { Card, Row, Col, Statistic, Typography, Layout } from "antd";
 import {
   CalendarOutlined,
@@ -23,9 +23,11 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const memberId = Number(sessionStorage.getItem("memberId"));
 const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 const { Content } = Layout;
-const role = sessionStorage.getItem("role");
+
 
 const AdminDashboard: React.FC = () => {
+const role = sessionStorage.getItem("role");
+
   const [stats, setStats] = useState({
     wings: 0,
     flats: 0,
@@ -77,9 +79,7 @@ const AdminDashboard: React.FC = () => {
   const loadFinancialYear = async () => {
     try {
       const societyId = sessionStorage.getItem("societyId");
-
       const res = await apiGet(`/accounting-year/${societyId}/active`);
-
       setFinancialYear(res.fyCode || "-");
     } catch (error) {
       console.error("Error loading financial year", error);

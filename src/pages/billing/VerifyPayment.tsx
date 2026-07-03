@@ -60,7 +60,7 @@ interface ReceiptBill {
   receiptType: String;
   name: String;
 }
-
+ 
 export default function VerifyPayemnt() {
   const [form] = Form.useForm();
   const [flats, setFlats] = useState<Flat[]>([]);
@@ -732,9 +732,7 @@ export default function VerifyPayemnt() {
       paymentTable = "contribution";
 
       try {
-        const { data: contribution } = await axios.get(
-          `${BASE_URL}/contribution/${societyId}/${financialYearId}/${receiptId}`,
-        );
+        const { data: contribution } = await axios.get(`${BASE_URL}/contribution/${societyId}/${financialYearId}/${receiptId}`,);
         if (contribution.length > 0) {
           mapping = {
             glReceivable: contribution[0].glReceivable,
@@ -769,10 +767,8 @@ export default function VerifyPayemnt() {
 
     try {
       await axios.put(`${BASE_URL}/receipts/confirm`, payload);
-
       message.success("Payment confirmed successfully");
-
-      loadReceipts(); // refresh table
+      loadReceipts(); 
 
     } catch (error) {
       console.error(error);

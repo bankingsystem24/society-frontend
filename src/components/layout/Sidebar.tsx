@@ -81,8 +81,43 @@ const Sidebar: React.FC = () => {
       label: "Set Financial Year",
     },
     {
-      key: "/gl-mapping",
-      label: "GL Mapping",
+      key: "/members",
+      icon: <TeamOutlined />,
+      label: "Members",
+    },
+    {
+      key: "/users",
+      icon: <UserOutlined />,
+      label: "Users",
+    },
+    {
+      key: "/wings",
+      icon: <ApartmentOutlined />,
+      label: "Wings",
+    },
+    {
+      key: "/flats",
+      icon: <HomeOutlined />,
+      label: "Flats",
+    },
+    {
+      key: "general-ledger",
+      icon: <DollarOutlined />,
+      label: "General Ledger",
+      children: [
+        {
+          key: "/gl-master",
+          label: "Master",
+        },
+        {
+          key: "/gl-balances",
+          label: "Balances",
+        },
+        {
+          key: "/gl-mapping",
+          label: "GL Mapping",
+        },
+      ],
     },
     {
       key: "Policies",
@@ -98,57 +133,28 @@ const Sidebar: React.FC = () => {
         },
       ],
     },
-
     {
-      key: "/wings",
-      icon: <ApartmentOutlined />,
-      label: "Wings",
-    },
-    {
-      key: "/flats",
-      icon: <HomeOutlined />,
-      label: "Flats",
-    },
-    {
-      key: "/members",
-      icon: <TeamOutlined />,
-      label: "Members",
-    },
-    {
-      key: "/users",
-      icon: <UserOutlined />,
-      label: "Users",
-    },
-
-    {
-      key: "general-ledger",
-      icon: <DollarOutlined />,
-      label: "General Ledger",
+      key: "Entries",
+      label: "Entries",
       children: [
         {
-          key: "/gl-master",
-          label: "Master",
+          key: "/add-expenses",
+          label: "Expenses",
         },
         {
-          key: "/gl-balances",
-          label: "Balances",
+          key: "/income",
+          label: "Income",
+        },
+        {
+          key: "/transfer",
+          label: "Transfer",
         },
       ],
-    },
-
-    {
-      key: "/add-expenses",
-      label: "Expenses",
-    },
-    {
-      key: "/income",
-      label: "Income",
     },
     {
       key: "/vendors",
       label: "Vendors",
     },
-
     {
       key: "Bills",
       label: "Bills",
@@ -186,7 +192,6 @@ const Sidebar: React.FC = () => {
         },
       ],
     },
-
     {
       key: "Contributions",
       label: "Contributions",

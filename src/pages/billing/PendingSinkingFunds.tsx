@@ -38,7 +38,7 @@ type SinkingFund = {
 };
 
 type Flat = {
-  id: number;
+  id: number; 
   flatNo: string;
 };
 
@@ -84,6 +84,8 @@ const PendingSinkingFunds: React.FC = () => {
   
 
   const loadFlats = async () => {
+    if (memberId && societyId) {
+
     try {
       const res = await axios.get(`${BASE_URL}/members/flats`, {
         params: { societyId, memberId },
@@ -98,8 +100,9 @@ const PendingSinkingFunds: React.FC = () => {
         fetchSinkingFunds(firstFlatId);
       }
     } catch (err) {
-      message.error("Failed to load flats");
+      console.log(Error);
     }
+  }
   };
 
 
@@ -349,7 +352,7 @@ const PendingSinkingFunds: React.FC = () => {
             overflowY: "auto",
           }}
         >
-          <Title level={3}>Pending Sinking Funds</Title>
+          <Title level={3}>Pending Sinking Funds (Member Paying Online)</Title>
 
           {/* Flat Selector */}
           <div style={{ marginBottom: 12 }}>

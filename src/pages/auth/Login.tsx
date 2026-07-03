@@ -59,7 +59,7 @@ const Login: React.FC = () => {
       sessionStorage.setItem("upi", res.data.upi);
 
       fetchGlMapping();
-
+ 
       if (res.data.role === "SUPER_ADMIN") {
         navigate("/superadmindashboard");
       } else if (res.data.role === "ADMIN") {

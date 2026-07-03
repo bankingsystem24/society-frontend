@@ -56,6 +56,7 @@ import VerifyPayemnt from "./pages/billing/VerifyPayment";
 import GlMappingEntry from "./pages/accounting/GlMappingEntry";
 import Income from "./pages/income/Income";
 import Transfer from "./pages/transfer/Transfer";
+import PenaltyPolicy from "./pages/billing/PenaltyPolicy";
 
 export default function App() {
   return (
@@ -109,6 +110,7 @@ export default function App() {
       <Route path="/create-user" element={<CreateUser />} />
       <Route path="/edit-user/:id" element={<EditUser />} />
       {/* <Route path="/pending-bills" element={<PendingBills />} /> */}
+      <Route path="/penalty-policy" element={<PenaltyPolicy />} />
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
@@ -118,7 +120,7 @@ export default function App() {
         <Route path="/superadmin-create-society" element={<SuperAdminCreateSociety />} />
         <Route path="/superadmin-view-societies" element={<SuperAdminSocieties />} />
         <Route path="/superadmin-edit-society/:id" element={<SuperAdminEditSociety />} />
-      </Route>``
+      </Route>
       <Route element={<AuditorLayout />}>
         <Route path="/auditordashboard" element={<AuditorDashboard />} />
         <Route path="/auditorusers" element={<AuditorUsers />} />

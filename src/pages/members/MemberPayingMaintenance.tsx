@@ -67,7 +67,8 @@ const MemberPayingMaintenance: React.FC = () => {
   const role = sessionStorage.getItem("role");
   const upi = sessionStorage.getItem("upi");
 
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
@@ -77,19 +78,24 @@ const MemberPayingMaintenance: React.FC = () => {
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
 
-
   useEffect(() => {
     loadFlats();
     loadGlMapping();
   }, []);
 
-  useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
+  useEffect(() => {}, [
+    glCashInHand,
+    glBankAccount,
+    glInterestIncome,
+    glDiscount,
+    glReceivable,
+    glCreditAccount,
+  ]);
 
   const loadFlats = async () => {
+    if (memberId && societyId) {
     try {
-      const res = await axios.get(`${BASE_URL}/members/flats`, {
-        params: { societyId, memberId },
-      });
+      const res = await axios.get(`${BASE_URL}/members/flats`, { params: { societyId, memberId },});
 
       const flatsData = res.data || [];
 
@@ -106,13 +112,12 @@ const MemberPayingMaintenance: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
+  }
   };
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
 
       const mapping = res.data.find(
         (item: any) =>
@@ -153,7 +158,6 @@ const MemberPayingMaintenance: React.FC = () => {
       message.error("Unable to load GL Mapping");
     }
   };
-
 
   const fetchBills = async (flatId: number | null) => {
     if (!flatId) {
@@ -245,15 +249,13 @@ const MemberPayingMaintenance: React.FC = () => {
         paymentMode: "UPI",
         transactionId,
         financialYearId,
-        userId, 
+        userId,
         glReceivable,
         glCreditAccount,
         glCashInHand,
         glBankAccount,
         glInterestIncome,
         glDiscount,
-
-
       });
 
       message.success("Payment submitted. Awaiting verification.");
@@ -399,30 +401,44 @@ const MemberPayingMaintenance: React.FC = () => {
   ];
 
   return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-<Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
 
         <Content style={{ padding: 24, background: "#f0f5ff" }}>
-          <Title level={3}>Pending Bills</Title>
+          <Title level={3}>Pending Bills (Member Paying Online)</Title>
 
           {/* ================= FLAT FILTER ================= */}
           <div style={{ marginBottom: 12 }}>
@@ -459,7 +475,7 @@ const MemberPayingMaintenance: React.FC = () => {
               {" | "}Total: <b>₹ {totalAmount}</b>
             </div>
           </div>
-          <div style={{ marginBottom:10}}>
+          <div style={{ marginBottom: 10 }}>
             <Button
               type="primary"
               disabled={selectedRowKeys.length === 0}
@@ -490,8 +506,8 @@ const MemberPayingMaintenance: React.FC = () => {
                 selectedRowKeys,
                 onChange: setSelectedRowKeys,
                 getCheckboxProps: (record: Billing) => ({
-                    disabled: record.status !== "PENDING",
-                    }),
+                  disabled: record.status !== "PENDING",
+                }),
               }}
               pagination={{ pageSize: 8 }}
               bordered

@@ -98,6 +98,7 @@ const PendingContributions: React.FC = () => {
   // ✅ SAFE NORMALIZER
 
   const loadFlats = async () => {
+    if( memberId && societyId) {
     try {
       const flatRes = await axios.get(`${BASE_URL}/members/flats`, {
         params: {
@@ -118,6 +119,7 @@ const PendingContributions: React.FC = () => {
       console.error(err);
       message.error("Failed to load flats");
     }
+  }
   };
 
   const openQr = (amount: number) => {
@@ -313,8 +315,10 @@ const PendingContributions: React.FC = () => {
   };
 
   const columns = [
+    { title: "Member Name", dataIndex: "memberName" },
     { title: "Flat No", dataIndex: "flatNo" },
     { title: "Name", dataIndex: "name" },
+    { title: "Description", dataIndex: "description" },
     { title: "Type", dataIndex: "type" },
     { title: "Due Date", dataIndex: "dueDate" },
     {
