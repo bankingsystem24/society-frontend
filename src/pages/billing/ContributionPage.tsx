@@ -66,13 +66,9 @@ const ContributionPage: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const [glAccounts, setGlAccounts] = useState<any[]>([]);
-  const [selectedGlReceivable, setSelectedGlReceivable] = useState<
-    number | null
-  >(null);
+  const [selectedGlReceivable, setSelectedGlReceivable] = useState<number | null  >(null);
   const [creditAccounts, setCreditAccounts] = useState<any[]>([]);
-  const [selectedGlCreditAccount, setSelectedGlCreditAccount] = useState<
-    number | null
-  >(null);
+  const [selectedGlCreditAccount, setSelectedGlCreditAccount] = useState<number | null  >(null);
   const [voluntaryContributions, setVoluntaryContributions] = useState([]);
 
   useEffect(() => {
@@ -115,7 +111,7 @@ const ContributionPage: React.FC = () => {
       );
       setGlAccounts(filteredgl);
       const filteredglcredit = glres.data.filter((x: any) =>
-        x.groupName?.toLowerCase().includes("reserves"),
+        x.groupName?.toLowerCase().includes("equity"),
       );
       setCreditAccounts(filteredglcredit);
     } catch (err) {

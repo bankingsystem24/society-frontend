@@ -10,6 +10,8 @@ import {
   Layout,
   Row,
   Col,
+  Popconfirm,
+  Space,
 } from "antd";
 import axios from "axios";
 import MemberHeader from "../../components/layout/MemberHeader";
@@ -20,9 +22,6 @@ import AuditorHeader from "../../components/layout/AuditorHeader";
 import AuditorSidebar from "../../components/layout/AuditorSidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
-
-
-
 
 const { Option } = Select;
 const { Content } = Layout;
@@ -57,7 +56,9 @@ const GlMappingEntry: React.FC = () => {
 
   const societyId = Number(sessionStorage.getItem("societyId"));
   const role = sessionStorage.getItem("role");
-const [mappings, setMappings] = useState<GlMapping[]>([]);
+  const [mappings, setMappings] = useState<GlMapping[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isBank,setIsBank] = useState<Boolean>(false);
 
   useEffect(() => {
     loadGLAccounts();
@@ -65,7 +66,6 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
   }, []);
 
   const loadGLAccounts = async () => {
-    
     try {
       const res = await axios.get(
         `${BASE_URL}/gl/master?societyId=${societyId}`,
@@ -98,14 +98,27 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
 
   const onFinish = async (values: GlMappingForm) => {
     try {
-      await axios.post(`${BASE_URL}/gl/master/mapping`, {
-        ...values,
-        societyId,
-      });
+      if (editingId) {
+        await axios.put(`${BASE_URL}/gl/master/mapping/${editingId}`, {
+          ...values,
+          societyId,
+        });
+        if(isBank){
+          sessionStorage.setItem("GlBankAccount", values.gl_receivable.toString());
+        }
+        message.success("GL Mapping Updated");
 
-      message.success("GL Mapping Saved");
+      } else {
+        await axios.post(`${BASE_URL}/gl/master/mapping`, {
+          ...values,
+          societyId,
+        });
+
+        message.success("GL Mapping Saved");
+      }
 
       form.resetFields();
+      setEditingId(null);
       loadGlMapping();
     } catch (err) {
       message.error("Error saving mapping");
@@ -118,7 +131,6 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
     );
     return acc?.accountName || "";
   };
-
   const columns = [
     {
       title: "Description",
@@ -132,31 +144,103 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
     {
       title: "Credit Account",
       dataIndex: "gl_credit_account",
-      render: (value: number) => `${value} - ${getAccountName(value)}`,
+      render: (value: number | null) =>
+        value ? `${value} - ${getAccountName(value)}` : "-",
+    },
+    {
+      title: "Action",
+      render: (_: any, record: GlMapping) => (
+        <>
+        <Space size="middle">
+          <Button  type="primary" size="small" onClick={() => handleEdit(record)}>
+            Edit
+          </Button>
+
+          {/* <Popconfirm
+            title="Delete Mapping"
+            description="Are you sure you want to delete this mapping?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Button  danger size="small" >
+              Delete
+            </Button>
+          </Popconfirm> */}
+          </Space>
+        </>
+      ),
     },
   ];
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`${BASE_URL}/gl/master/mapping/${id}`);
 
+      message.success("GL Mapping deleted");
+
+      // If the deleted record was being edited, reset the form
+      if (editingId === id) {
+        form.resetFields();
+        setEditingId(null);
+      }
+
+      loadGlMapping();
+    } catch (err) {
+      message.error("Unable to delete GL Mapping");
+    }
+  };
+
+  const handleEdit = (record: GlMapping) => {
+    setEditingId(record.id);
+    if(record.description.toLowerCase().includes("bank account")){
+      setIsBank(true);
+    } else
+    {
+      setIsBank(false);
+    }
+
+    form.setFieldsValue({
+      description: record.description,
+      gl_receivable: record.gl_receivable,
+      gl_credit_account: record.gl_credit_account,
+    });
+  };
   return (
-  <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
 
         <Content
           style={{
@@ -189,7 +273,7 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
                         },
                       ]}
                     >
-                      <Input />
+                      <Input disabled/>
                     </Form.Item>
                   </Col>
 
@@ -248,8 +332,20 @@ const [mappings, setMappings] = useState<GlMapping[]>([]);
                   <Col xs={24}>
                     <Form.Item>
                       <Button type="primary" htmlType="submit">
-                        Save
+                        {editingId ? "Update" : "Save"}
                       </Button>
+
+                      {editingId && (
+                        <Button
+                          style={{ marginLeft: 10 }}
+                          onClick={() => {
+                            form.resetFields();
+                            setEditingId(null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      )}
                     </Form.Item>
                   </Col>
                 </Row>

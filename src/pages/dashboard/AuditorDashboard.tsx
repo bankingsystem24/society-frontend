@@ -31,8 +31,6 @@ const AuditorDashboard: React.FC = () => {
       sessionStorage.setItem("financialYear",res.fyCode);
       sessionStorage.setItem("financialYearId",res.id); 
       window.dispatchEvent(new Event("financialYearChanged"));
-
-
     } catch (error) {
       console.error("Error loading financial year", error);
       setFinancialYear("-");
@@ -43,16 +41,21 @@ const AuditorDashboard: React.FC = () => {
     const societyId = Number(sessionStorage.getItem("societyId"));
       try {
         const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
-        const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",);
-
+        const mapping = res.data.find(
+          (item: any) =>
+            item.description &&
+            item.description.replace(/\s+/g, " ").trim().toLowerCase() === "cash in hand"
+        );
         if (!mapping) {
           message.error("Cash in Hand Mapping not configured");
           return;
         }
+      
         sessionStorage.setItem("GlCashInHand", mapping.gl_receivable);
+
         const mapping1 = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "bank account",);
         if (!mapping1) {
-          message.error("Cash in Hand Mapping not configured");
+          message.error("Bank Account not configured");
           return;
         }
         sessionStorage.setItem("GlBankAccount", mapping1.gl_receivable);
@@ -75,11 +78,9 @@ const AuditorDashboard: React.FC = () => {
         societyIds.includes(user.societyId),
       );
 
-      setStats({ users: filteredUsers.length | 0,
-                societies: filteredSocieties.length | 0, });
+      setStats({ users: filteredUsers.length | 0, societies: filteredSocieties.length | 0, });
 
       const firstSociety = filteredSocieties[0];
-
       if (firstSociety) {
         sessionStorage.setItem("societyId", String(firstSociety.id));
         sessionStorage.setItem("societyName", String(firstSociety.societyName));

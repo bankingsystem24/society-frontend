@@ -81,7 +81,8 @@ export default function ViewBills() {
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
@@ -95,7 +96,7 @@ export default function ViewBills() {
   const [paymentInterest, setPaymentInterest] = useState(0);
   const [paymentDiscount, setPaymentDiscount] = useState(0);
 
-  const paymentTotal =  paymentMaintenance +  paymentInterest +  paymentDiscount;
+  const paymentTotal = paymentMaintenance + paymentInterest + paymentDiscount;
 
   useEffect(() => {
     loadFlats();
@@ -200,28 +201,30 @@ export default function ViewBills() {
     try {
       const billIds = selectedRowKeys.map(Number);
 
-const payload = {
-  billIds,
-  paymentMode,
-  financialYearId,
-  transactionId,
+      const payload = {
+        billIds,
+        paymentMode,
+        financialYearId,
+        transactionId,
 
-  maintenanceAmount: paymentMaintenance,
-  interestAmount: paymentInterest,
-  discountAmount: paymentDiscount,
-  totalAmount: paymentTotal,
+        maintenanceAmount: paymentMaintenance,
+        interestAmount: paymentInterest,
+        discountAmount: paymentDiscount,
+        totalAmount: paymentTotal,
 
-  glReceivable,
-  glCreditAccount,
-  glCashInHand,
-  glBankAccount,
-  glInterestIncome,
-  glDiscount,
-};
+        glReceivable,
+        glCreditAccount,
+        glCashInHand,
+        glBankAccount,
+        glInterestIncome,
+        glDiscount,
+      };
+
+      console.log("Payment payload:", payload);
 
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
 
-      message.success(res.data);
+      // message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
       loadBills();
@@ -295,7 +298,6 @@ const payload = {
   const totalPenalty = bills.reduce((s, b) => s + (b.penaltyAmount || 0), 0);
   const totalInterest = bills.reduce((s, b) => s + (b.interestAmount || 0), 0);
   const totalDiscount = bills.reduce((s, b) => s + (b.discountAmount || 0), 0);
-
 
   const grandTotal = bills.reduce((s, b) => s + (b.totalAmount || 0), 0);
 
@@ -552,32 +554,38 @@ const payload = {
                   />
                 </Form.Item>
                 <Form.Item label="Maintenance">
-  <Input
-    type="number"
-    value={paymentMaintenance}
-    onChange={(e) => setPaymentMaintenance(Number(e.target.value) || 0)}
-  />
-</Form.Item>
+                  <Input
+                    type="number"
+                    value={paymentMaintenance}
+                    onChange={(e) =>
+                      setPaymentMaintenance(Number(e.target.value) || 0)
+                    }
+                  />
+                </Form.Item>
 
-<Form.Item label="Interest">
-  <Input
-    type="number"
-    value={paymentInterest}
-    onChange={(e) => setPaymentInterest(Number(e.target.value) || 0)}
-  />
-</Form.Item>
+                <Form.Item label="Interest">
+                  <Input
+                    type="number"
+                    value={paymentInterest}
+                    onChange={(e) =>
+                      setPaymentInterest(Number(e.target.value) || 0)
+                    }
+                  />
+                </Form.Item>
 
-<Form.Item label="Discount">
-  <Input
-    type="number"
-    value={paymentDiscount}
-    onChange={(e) => setPaymentDiscount(Number(e.target.value) || 0)}
-  />
-</Form.Item>
+                <Form.Item label="Discount">
+                  <Input
+                    type="number"
+                    value={paymentDiscount}
+                    onChange={(e) =>
+                      setPaymentDiscount(Number(e.target.value) || 0)
+                    }
+                  />
+                </Form.Item>
 
-<Form.Item label="Total">
-  <Input value={paymentTotal.toFixed(2)} readOnly />
-</Form.Item>
+                <Form.Item label="Total">
+                  <Input value={paymentTotal.toFixed(2)} readOnly />
+                </Form.Item>
 
                 {paymentMode !== "CASH" && (
                   <Form.Item

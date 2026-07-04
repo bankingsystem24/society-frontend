@@ -52,7 +52,6 @@ const Login: React.FC = () => {
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("memberToken", res.data.token);
       sessionStorage.setItem("memberName", res.data.memberName);
-      sessionStorage.setItem("societyId", String(res.data.societyId));
       sessionStorage.setItem("societyName", res.data.societyName);
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("userId", String(res.data.auditorId));
@@ -79,10 +78,14 @@ const Login: React.FC = () => {
  
   const fetchGlMapping = async () => {
     const societyId = Number(sessionStorage.getItem("societyId"));
+    if (societyId) {
 
       try {
         const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
         const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",);
+
+        console.log("Response:",res.data);
+        console.log("Cash in Hand Mapping:", mapping);
 
         if (!mapping) {
           message.error("Cash in Hand Mapping not configured");
@@ -91,7 +94,7 @@ const Login: React.FC = () => {
         sessionStorage.setItem("GlCashInHand", mapping.gl_receivable);
         const mapping1 = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "bank account",);
         if (!mapping1) {
-          message.error("Cash in Hand Mapping not configured");
+          message.error("Bank Account not configured");
           return;
         }
         sessionStorage.setItem("GlBankAccount", mapping1.gl_receivable);
@@ -100,6 +103,7 @@ const Login: React.FC = () => {
         console.error(err);
         message.error("Unable to load GL Mapping");
       }
+    }
     };
   
 

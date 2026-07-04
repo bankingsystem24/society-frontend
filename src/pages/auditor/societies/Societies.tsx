@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Table, Card, Button, Space, message, Popconfirm, Layout } from "antd";
 import { useNavigate } from "react-router-dom";
-import { apiGet, apiDelete } from "../../api/axios";
-import Header from "../../components/layout/Header";
-import AuditorHeader from "../../components/layout/AuditorHeader";
-import AuditorSidebar from "../../components/layout/AuditorSidebar";
-import MemberHeader from "../../components/layout/MemberHeader";
-import MemberSidebar from "../../components/layout/MemberSidebar";
-import Sidebar from "../../components/layout/Sidebar";
-import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
-import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import { apiGet, apiDelete } from "../../../api/axios";
+import Header from "../../../components/layout/Header";
+import AuditorHeader from "../../../components/layout/AuditorHeader";
+import AuditorSidebar from "../../../components/layout/AuditorSidebar";
+import MemberHeader from "../../../components/layout/MemberHeader";
+import MemberSidebar from "../../../components/layout/MemberSidebar";
+import Sidebar from "../../../components/layout/Sidebar";
+import SuperAdminHeader from "../../../components/layout/SuperAdminHeader";
+import SuperAdminSidebar from "../../../components/layout/SuperAdminSidebar";
 
 const Societies: React.FC = () => {
   const [societies, setSocieties] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const role = sessionStorage.getItem("role");
   const { Content } = Layout;
-
   const navigate = useNavigate();
 
   // LOAD DATA
@@ -25,7 +24,12 @@ const Societies: React.FC = () => {
       setLoading(true);
 
       const res = await apiGet("/societies");
-      setSocieties(res || []);
+      const auditorId = Number(sessionStorage.getItem("auditorId"));
+
+      const filtered = (res || []).filter(
+        (society: any) => society?.auditor?.id === auditorId,
+      );
+      setSocieties(filtered);
     } catch (error) {
       console.error("Error loading societies:", error);
       message.error("Failed to load societies");
@@ -55,6 +59,7 @@ const Societies: React.FC = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      hidden: true,
       sorter: (a: any, b: any) => a.id - b.id,
     },
     {
@@ -74,10 +79,9 @@ const Societies: React.FC = () => {
       key: "city",
     },
     {
-      title: "Country",
-      dataIndex: "country",
-      key: "country",
-      hidden: true,
+      title: "UPI",
+      dataIndex: "upi1",
+      key: "upi1",
     },
     {
       title: "Mobile",
@@ -108,7 +112,7 @@ const Societies: React.FC = () => {
         <Space>
           <Button
             type="primary"
-            onClick={() => navigate(`/superadmin-edit-society/${record.id}`)}
+            onClick={() => navigate(`/edit-society/${record.id}`)}
           >
             Edit
           </Button>
@@ -166,12 +170,14 @@ const Societies: React.FC = () => {
           <Card
             title="Societies List"
             extra={
-              <Button
-                type="primary"
-                onClick={() => navigate("/superadmin-create-society")}
-              >
-                + Add Society
-              </Button>
+              role === "SUPER_ADMIN" ? (
+                <Button
+                  type="primary"
+                  onClick={() => navigate("/superadmin-create-society")}
+                >
+                  + Add Society
+                </Button>
+              ) : null
             }
           >
             <Table

@@ -130,7 +130,7 @@ const SuperAdminSocieties: React.FC = () => {
         <Space>
           <Button
             type="primary"
-            onClick={() => navigate(`/superadmin-edit-society/${record.id}`)}
+            onClick={() => navigate(`/superadmin-edit-societies/${record.id}`)}
           >
             Edit
           </Button>

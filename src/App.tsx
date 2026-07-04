@@ -34,7 +34,6 @@ import AuditorUsers from "./pages/auditor/users/AuditorUsers";
 import SuperAdminCreateSociety from "./pages/superadmin/societies/SuperAdminCreateSociety";
 import SuperAdminSocieties from "./pages/superadmin/societies/SuperAdminSocieties";
 import SuperAdminEditSociety from "./pages/superadmin/societies/SuperAdminEditSociety";
-import AuditorSocieties from "./pages/auditor/societies/AuditorSocieties";
 import Expenses from "./pages/expenses/Expenses";
 import BillingPolicy from "./pages/billing/BillingPolicy";
 import GlOpeningBalance from "./pages/accounting/GlOpeningBalance";
@@ -57,6 +56,9 @@ import GlMappingEntry from "./pages/accounting/GlMappingEntry";
 import Income from "./pages/income/Income";
 import Transfer from "./pages/transfer/Transfer";
 import PenaltyPolicy from "./pages/billing/PenaltyPolicy";
+import Societies from "./pages/auditor/societies/Societies";
+import EditSociety from "./pages/society/EditSociety";
+import Payments from "./pages/reports/Payments";
 
 export default function App() {
   return (
@@ -111,6 +113,10 @@ export default function App() {
       <Route path="/edit-user/:id" element={<EditUser />} />
       {/* <Route path="/pending-bills" element={<PendingBills />} /> */}
       <Route path="/penalty-policy" element={<PenaltyPolicy />} />
+      <Route path="/societies" element={<Societies />} /> 
+      <Route path="/edit-society/:id" element={<EditSociety />} />
+      <Route path="/payments" element={<Payments />} />
+
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
@@ -119,12 +125,12 @@ export default function App() {
         <Route path="/superadmin-edit-user/:id" element={<SuperAdminEditUser />} />
         <Route path="/superadmin-create-society" element={<SuperAdminCreateSociety />} />
         <Route path="/superadmin-view-societies" element={<SuperAdminSocieties />} />
-        <Route path="/superadmin-edit-society/:id" element={<SuperAdminEditSociety />} />
+        <Route path="/superadmin-edit-societies/:id" element={<SuperAdminEditSociety />} />
+
       </Route>
       <Route element={<AuditorLayout />}>
         <Route path="/auditordashboard" element={<AuditorDashboard />} />
         <Route path="/auditorusers" element={<AuditorUsers />} />
-        <Route path="/auditorsocieties" element={<AuditorSocieties />} />
 
       </Route>
 

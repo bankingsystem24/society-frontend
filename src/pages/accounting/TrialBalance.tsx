@@ -49,6 +49,7 @@ const TrialBalance: React.FC = () => {
   const role = sessionStorage.getItem("role");
 
   const societyId = Number(sessionStorage.getItem("societyId"));
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     if (!societyId) {
@@ -63,7 +64,8 @@ const TrialBalance: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${BASE_URL}/gl/reports/trial-balance?societyId=${societyId}`,);
+      const res = await axios.get(`${BASE_URL}/gl/reports/trial-balance`, {
+        params: {societyId, financialYearId, },});
 
       const filteredData = (res.data || []).filter(
         (item: any) =>

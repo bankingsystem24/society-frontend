@@ -35,7 +35,7 @@ const AuditorSidebar: React.FC = () => {
             label: "Dashboard",
           },
           {
-            key: "/auditorsocieties",
+            key: "/societies",
             label: "Society List",
           },
           {
@@ -216,6 +216,11 @@ const AuditorSidebar: React.FC = () => {
               {
                 key: "/profit-and-loss",
                 label: "Profit & Loss",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/payments",
+                label: "Payments",
                 icon: <HomeOutlined />,
               },
             ],

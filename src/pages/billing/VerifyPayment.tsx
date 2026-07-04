@@ -120,13 +120,9 @@ export default function VerifyPayemnt() {
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
 
-      const mapping = res.data.find(
-        (item: any) =>
-          item.description?.trim().toLowerCase() === "monthly maintenance",
+      const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "monthly maintenance",
       );
       setMappings(res.data);
 
@@ -141,21 +137,17 @@ export default function VerifyPayemnt() {
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
 
-      const CashInHand = res.data.find(
-        (item: any) =>
-          item.description?.trim().toLowerCase() === "cash in hand",
+      console.log("Response:",res.data);
+
+      const CashInHand = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",
       )?.gl_receivable;
       setGlCashInHand(Number(CashInHand));
 
-      const BankAccount = res.data.find(
-        (item: any) =>
-          item.description?.trim().toLowerCase() === "bank account",
+      const BankAccount = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "bank account",
       )?.gl_receivable;
       setGlBankAccount(Number(BankAccount));
 
-      const InterestIncome = res.data.find(
-        (item: any) =>
-          item.description?.trim().toLowerCase() === "interest income",
+      const InterestIncome = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "interest income",
       )?.gl_receivable;
       setGlInterestIncome(Number(InterestIncome));
 
@@ -764,6 +756,7 @@ export default function VerifyPayemnt() {
       glInterestIncome,
       glDiscount,
     };
+    console.log("Confirm Payment Payload:", payload);
 
     try {
       await axios.put(`${BASE_URL}/receipts/confirm`, payload);

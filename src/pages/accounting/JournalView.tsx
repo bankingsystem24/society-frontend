@@ -44,7 +44,7 @@ const JournalView: React.FC = () => {
 
   const societyId = sessionStorage.getItem("societyId");
   const role = sessionStorage.getItem("role");
-
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     fetchJournal();
@@ -54,7 +54,8 @@ const JournalView: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${BASE_URL}/journal/${societyId}`);
+      const response = await axios.get(`${BASE_URL}/journal/`,
+        { params: { societyId, financialYearId }, } );
 
       setData(response.data);
     } catch (error) {
