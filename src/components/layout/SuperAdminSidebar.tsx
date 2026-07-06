@@ -83,6 +83,11 @@ const SuperAdminSidebar: React.FC = () => {
                 label: "Profit & Loss",
                 icon: <HomeOutlined />,
               },
+              {
+                key: "/payments",
+                label: "Payments",
+                icon: <HomeOutlined />,
+              },
             ],
           },
         ]}

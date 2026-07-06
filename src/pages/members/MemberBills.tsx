@@ -154,14 +154,8 @@ const MemberBills: React.FC = () => {
       };
 
       const billsRes = await axios.post(`${BASE_URL}/members/bills`, payload);
-      const sinkingRes = await axios.post(
-        `${BASE_URL}/members/sinking-funds`,
-        payload
-      );
-      const contributionRes = await axios.post(
-        `${BASE_URL}/members/contributions `,
-        payload
-      );
+      const sinkingRes = await axios.post(`${BASE_URL}/members/sinking-funds`,payload);
+      const contributionRes = await axios.post(`${BASE_URL}/members/contributions `,payload);
 
       /* ================= MAINTENANCE ================= */
       const bills = (billsRes.data || [])
