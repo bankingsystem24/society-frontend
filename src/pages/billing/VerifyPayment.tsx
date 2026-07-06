@@ -745,7 +745,7 @@ export default function VerifyPayemnt() {
       message.error("GL Mapping not found");
       return;
     }
-
+ 
     const payload = {
       receiptId,
       paymentTable,

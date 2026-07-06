@@ -150,6 +150,8 @@ const ContributionPage: React.FC = () => {
       glReceivable: selectedGlReceivable,
       glCreditAccount: selectedGlCreditAccount,
     };
+
+    console.log("Payload:",payload);
     try {
       if (type === "COMPULSORY") {
         await axios.post(

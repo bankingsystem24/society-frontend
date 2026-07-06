@@ -276,7 +276,7 @@ const Expenses: React.FC = () => {
 
                   <Col xs={24} md={8}>
                     <Form.Item name="vendorId" label="Vendor">
-                      <Select options={vendors} placeholder="Select Vendor" />
+                      <Select options={vendors} placeholder="Select Vendor" allowClear/>
                     </Form.Item>
                   </Col>
                 </Row>

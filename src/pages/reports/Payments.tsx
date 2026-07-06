@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Row,
   Col,
@@ -20,82 +20,90 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import axios from "axios";
 
 const { Option } = Select;
 const { Search } = Input;
 const role = sessionStorage.getItem("role");
 const { Content } = Layout;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 interface FlatPayment {
   key: number;
   flatNo: string;
-  owner: string;
-  bill: number;
-  received: number;
-  pending: number;
-  lastPayment: string;
-  dueDate: string;
-  status: "Paid" | "Pending" | "Partial";
+  description: string;
+  totalAmount: number;
+  status: "PAID" | "PENDING";
+  memberName: string;
 }
-
-const data: FlatPayment[] = [
-  {
-    key: 1,
-    flatNo: "A101",
-    owner: "Deepak",
-    bill: 2500,
-    received: 2500,
-    pending: 0,
-    lastPayment: "02-Jul-2026",
-    dueDate: "05-Jul-2026",
-    status: "Paid",
-  },
-  {
-    key: 2,
-    flatNo: "A102",
-    owner: "Rahul",
-    bill: 2500,
-    received: 1000,
-    pending: 1500,
-    lastPayment: "01-Jul-2026",
-    dueDate: "05-Jul-2026",
-    status: "Partial",
-  },
-  {
-    key: 3,
-    flatNo: "A103",
-    owner: "Amit",
-    bill: 2500,
-    received: 0,
-    pending: 2500,
-    lastPayment: "-",
-    dueDate: "05-Jul-2026",
-    status: "Pending",
-  },
-];
 
 export default function FlatPaymentDashboard() {
   const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
+  const role = sessionStorage.getItem("role");
+  const [loading, setLoading] = useState(false);
+  const [payments, setPayments] = useState<FlatPayment[]>([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        societyId: Number(sessionStorage.getItem("societyId")),
+        financialYearId: Number(sessionStorage.getItem("financialYearId")),
+      };
+
+      const response = await axios.get(`${BASE_URL}/reports/payments`, {
+        params: payload,
+      });
+      console.log("Response:", response.data);
+      const paymentData = response.data.map((item: any, index: number) => ({
+        key: index + 1,
+        flatNo: item.flatNo,
+        description: item.description,
+        totalAmount: item.totalAmount,
+        status: item.status,
+        memberName: item.memberName,
+      }));
+
+      setPayments(paymentData);
+    } catch (error) {
+      console.error("Error fetching payment data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredData = useMemo(() => {
-    return data.filter((item) => {
-      const statusMatch = status === "All" || item.status === status;
+    return payments.filter((item) => {
+      const statusMatch =
+        status === "All" || item.status === status.toUpperCase();
+
+      const searchText = search.toLowerCase();
 
       const searchMatch =
-        item.flatNo.toLowerCase().includes(search.toLowerCase()) ||
-        item.owner.toLowerCase().includes(search.toLowerCase());
+        item.flatNo.toLowerCase().includes(searchText) ||
+        item.description.toLowerCase().includes(searchText) ||
+        item.memberName.toLowerCase().includes(searchText);
 
       return statusMatch && searchMatch;
     });
-  }, [status, search]);
+  }, [payments, status, search]);
 
   const summary = {
     totalFlats: filteredData.length,
-    bills: filteredData.reduce((a, b) => a + b.bill, 0),
-    received: filteredData.reduce((a, b) => a + b.received, 0),
-    pending: filteredData.reduce((a, b) => a + b.pending, 0),
-    pendingFlats: filteredData.filter((x) => x.pending > 0).length,
+    bills: filteredData.reduce((a, b) => a + b.totalAmount, 0),
+    received: filteredData
+      .filter((x) => x.status === "PAID")
+      .reduce((a, b) => a + b.totalAmount, 0),
+    pending: filteredData
+      .filter((x) => x.status === "PENDING")
+      .reduce((a, b) => a + b.totalAmount, 0),
+    pendingFlats: filteredData.filter((x) => x.status === "PENDING").length,
   };
 
   const collection =
@@ -105,45 +113,28 @@ export default function FlatPaymentDashboard() {
 
   const columns: ColumnsType<FlatPayment> = [
     {
-      title: "Flat",
+      title: "Member",
+      dataIndex: "memberName",
+    },
+    {
+      title: "Flat No",
       dataIndex: "flatNo",
     },
     {
-      title: "Owner",
-      dataIndex: "owner",
+      title: "Description",
+      dataIndex: "description",
     },
     {
-      title: "Bill",
-      dataIndex: "bill",
-      render: (v) => `₹${v.toLocaleString()}`,
-    },
-    {
-      title: "Received",
-      dataIndex: "received",
-      render: (v) => `₹${v.toLocaleString()}`,
-    },
-    {
-      title: "Pending",
-      dataIndex: "pending",
-      render: (v) => `₹${v.toLocaleString()}`,
-    },
-    {
-      title: "Due Date",
-      dataIndex: "dueDate",
-    },
-    {
-      title: "Last Payment",
-      dataIndex: "lastPayment",
+      title: "Amount",
+      dataIndex: "totalAmount",
+      render: (value: number) => `₹${value.toLocaleString()}`,
     },
     {
       title: "Status",
       dataIndex: "status",
-      render: (status) => {
-        const color =
-          status === "Paid" ? "green" : status === "Pending" ? "red" : "orange";
-
-        return <Tag color={color}>{status}</Tag>;
-      },
+      render: (status: string) => (
+        <Tag color={status === "PAID" ? "green" : "red"}>{status}</Tag>
+      ),
     },
   ];
 
@@ -184,57 +175,62 @@ export default function FlatPaymentDashboard() {
           <AuditorHeader />
         )}
         <Content>
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Space orientation="vertical" size="small" style={{ width: "100%", marginTop:10 }}>
             {/* Summary Cards */}
 
-            <Row gutter={16}>
-              <Col span={4}>
-                <Card>
-                  <Statistic title="Total Flats" value={summary.totalFlats} />
+            <Row gutter={[16, 16]}>
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Card size="small">
+                  <Statistic 
+                  title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Total Flats </span>}
+                  value={summary.totalFlats} 
+                  styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}/>
                 </Card>
               </Col>
 
-              <Col span={4}>
-                <Card>
-                  <Statistic title="Bills" value={summary.bills} prefix="₹" />
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Card size="small">
+                  <Statistic 
+                  title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Bills</span>}
+                  value={summary.bills} prefix="₹" styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}/>
                 </Card>
               </Col>
 
-              <Col span={4}>
-                <Card>
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Card size="small">
                   <Statistic
-                    title="Received"
+                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Received</span>}
                     value={summary.received}
-                    prefix="₹"
+                    prefix="₹" styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}
                   />
                 </Card>
               </Col>
 
-              <Col span={4}>
-                <Card>
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Card size="small">
                   <Statistic
-                    title="Outstanding"
+                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Outstanding</span>}
                     value={summary.pending}
-                    prefix="₹"
+                    prefix="₹" styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}
                   />
                 </Card>
               </Col>
 
-              <Col span={4}>
-                <Card>
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Card size="small">
                   <Statistic
-                    title="Pending Flats"
-                    value={summary.pendingFlats}
+                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Pending Flats</span>}
+                    value={summary.pendingFlats} styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}
                   />
                 </Card>
               </Col>
 
-              <Col span={4}>
-                <Card>
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Card size="small">
                   <Statistic
-                    title="Collection %"
+                    title={<span style={{ fontSize: "13px", display: "block", textAlign:"center"}}>Collection %</span>}
                     value={collection}
-                    suffix="%"
+                    suffix="%" styles={{ content: {fontSize: 20, fontWeight: 600, textAlign:"center"},}}
                   />
                 </Card>
               </Col>
@@ -243,35 +239,20 @@ export default function FlatPaymentDashboard() {
             {/* Filters */}
 
             <Card>
-              <Row gutter={16}>
-                <Col span={5}>
-                  <Select defaultValue="July" style={{ width: "100%" }}>
-                    <Option value="July">July</Option>
-                    <Option value="August">August</Option>
-                  </Select>
-                </Col>
-
-                <Col span={5}>
-                  <Select defaultValue="2026" style={{ width: "100%" }}>
-                    <Option value="2026">2026</Option>
-                    <Option value="2025">2025</Option>
-                  </Select>
-                </Col>
-
-                <Col span={5}>
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12} md={12} lg={6}>
                   <Select
                     value={status}
                     onChange={setStatus}
                     style={{ width: "100%" }}
                   >
-                    <Option value="All">All Status</Option>
-                    <Option value="Paid">Paid</Option>
-                    <Option value="Partial">Partial</Option>
-                    <Option value="Pending">Pending</Option>
+                    <Option value="All">All</Option>
+                    <Option value="PAID">Paid</Option>
+                    <Option value="PENDING">Pending</Option>
                   </Select>
                 </Col>
 
-                <Col span={9}>
+                <Col xs={24} sm={24} md={24} lg={6}>
                   <Search
                     placeholder="Search Flat / Owner"
                     onSearch={setSearch}
@@ -286,9 +267,12 @@ export default function FlatPaymentDashboard() {
 
             <Card>
               <Table
+                loading={loading}
                 columns={columns}
                 dataSource={filteredData}
+                rowKey="key"
                 pagination={{ pageSize: 10 }}
+                scroll={{ x: 700 }}
               />
             </Card>
           </Space>
