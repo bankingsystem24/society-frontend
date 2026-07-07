@@ -96,6 +96,8 @@ const CreateUser: React.FC = () => {
       form.setFieldsValue({
         role: null,
         name: null,
+        email: null,
+        mobile: null,
       });
       return;
     }
@@ -105,6 +107,8 @@ const CreateUser: React.FC = () => {
     form.setFieldsValue({
       role: "MEMBER",
       name: member?.name,
+      email: member?.email,
+      mobile:  member?.mobile,
     });
   };
 
@@ -148,51 +152,56 @@ const CreateUser: React.FC = () => {
           <Card title="Create User">
             <Form layout="vertical" form={form} onFinish={onFinish}>
               <Row gutter={16}>
-                <Col span={8}>
-                  <Form.Item
-                    label="Username"
-                    name="username"
-                    rules={[{ required: true }]}
-                  >
-                    <Input onPressEnter={focusNext} />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label="Member" name="memberId">
-                    <Select
-                      placeholder="Select Member"
-                      allowClear
-                      options={members.map((m) => ({
-                        label: m.name,
-                        value: m.id,
-                      }))}
-                      onChange={handleMemberChange}
-                      onKeyDown={handleSelectEnter}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item
-                    label="Role"
-                    name="role"
-                    rules={[{ required: true }]}
-                  >
-                    <Select
-                      placeholder="Select Role"
-                      options={[
-                        { label: "Admin", value: "ADMIN" },
-                        { label: "Security", value: "SECURITY" },
-                        { label: "Treasurer", value: "TREASURER" },
-                        { label: "Secretary", value: "SECRETARY" },
-                        { label: "Member", value: "MEMBER" },
-                        { label: "Manager", value: "MANAGER" },
-                        { label: "Auditor", value: "AUDITOR" },
-                      ]}
-                      onKeyDown={handleSelectEnter}
-                    />
-                  </Form.Item>
-                </Col>
-                </Row>
+  {/* Member First */}
+  <Col span={8}>
+    <Form.Item label="Member" name="memberId">
+      <Select
+        placeholder="Select Member"
+        allowClear
+        options={members.map((m) => ({
+          label: m.name,
+          value: m.id,
+        }))}
+        onChange={handleMemberChange}
+        onKeyDown={handleSelectEnter}
+      />
+    </Form.Item>
+  </Col>
+
+  {/* Username Second */}
+  <Col span={8}>
+    <Form.Item
+      label="Username"
+      name="username"
+      rules={[{ required: true }]}
+    >
+      <Input onPressEnter={focusNext} />
+    </Form.Item>
+  </Col>
+
+  {/* Role Third */}
+  <Col span={8}>
+    <Form.Item
+      label="Role"
+      name="role"
+      rules={[{ required: true }]}
+    >
+      <Select
+        placeholder="Select Role"
+        options={[
+          { label: "Admin", value: "ADMIN" },
+          { label: "Security", value: "SECURITY" },
+          { label: "Treasurer", value: "TREASURER" },
+          { label: "Secretary", value: "SECRETARY" },
+          { label: "Member", value: "MEMBER" },
+          { label: "Manager", value: "MANAGER" },
+          { label: "Auditor", value: "AUDITOR" },
+        ]}
+        onKeyDown={handleSelectEnter}
+      />
+    </Form.Item>
+  </Col>
+</Row>
               <Row gutter={16}>
                 <Col span={8}>
                   <Form.Item
