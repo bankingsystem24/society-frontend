@@ -36,6 +36,7 @@ interface JournalData {
   accountHead: string;
   debitAmount: number;
   creditAmount: number;
+  memberId:number;
 }
 
 const JournalView: React.FC = () => {
@@ -53,10 +54,8 @@ const JournalView: React.FC = () => {
   const fetchJournal = async () => {
     try {
       setLoading(true);
-
-      const response = await axios.get(`${BASE_URL}/journal/`,
-        { params: { societyId, financialYearId }, } );
-
+      const response = await axios.get(`${BASE_URL}/journal`,{ params: { societyId, financialYearId }, } );
+      console.log("Response:",response.data);
       setData(response.data);
     } catch (error) {
       console.error(error);

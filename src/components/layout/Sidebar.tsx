@@ -241,6 +241,11 @@ const Sidebar: React.FC = () => {
           key: "/profit-and-loss",
           label: "Profit & Loss",
         },
+        {
+          key: "/payments",
+          label: "Payments",
+          icon: <HomeOutlined />,
+        },
       ],
     },
   ];

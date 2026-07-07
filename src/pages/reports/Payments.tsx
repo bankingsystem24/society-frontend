@@ -35,6 +35,7 @@ interface FlatPayment {
   totalAmount: number;
   status: "PAID" | "PENDING";
   memberName: string;
+  memberId:number;
 }
 
 export default function FlatPaymentDashboard() {
@@ -43,6 +44,7 @@ export default function FlatPaymentDashboard() {
   const role = sessionStorage.getItem("role");
   const [loading, setLoading] = useState(false);
   const [payments, setPayments] = useState<FlatPayment[]>([]);
+  const memberId = Number(sessionStorage.getItem("memberId"));
 
   useEffect(() => {
     fetchData();
@@ -57,17 +59,23 @@ export default function FlatPaymentDashboard() {
         financialYearId: Number(sessionStorage.getItem("financialYearId")),
       };
 
-      const response = await axios.get(`${BASE_URL}/reports/payments`, {
-        params: payload,
-      });
+      const response = await axios.get(`${BASE_URL}/reports/payments`, {params: payload,});
+
       console.log("Response:", response.data);
-      const paymentData = response.data.map((item: any, index: number) => ({
+
+      const filteredData = (role === "MEMBER") ? response.data.filter((item: any) => item.memberId === memberId) : response.data;
+      
+      console.log("Filtered:", filteredData);
+
+      
+      const paymentData = filteredData.map((item: any, index: number) => ({
         key: index + 1,
         flatNo: item.flatNo,
         description: item.description,
         totalAmount: item.totalAmount,
         status: item.status,
         memberName: item.memberName,
+        memberId : item.memberId,
       }));
 
       setPayments(paymentData);

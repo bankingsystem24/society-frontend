@@ -74,7 +74,7 @@ const MemberSidebar: React.FC = () => {
             label: "Pending Contri.",
           },
           {
-            key: "/member-receipts",
+            key: "/view-receipts",
             icon: <DollarOutlined />,
             label: "Receipts",
           },
@@ -101,6 +101,11 @@ const MemberSidebar: React.FC = () => {
               {
                 key: "/profit-and-loss",
                 label: "Profit & Loss",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/payments",
+                label: "Payments",
                 icon: <HomeOutlined />,
               },
             ],
