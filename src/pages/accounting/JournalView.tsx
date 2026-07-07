@@ -42,10 +42,10 @@ interface JournalData {
 const JournalView: React.FC = () => {
   const [data, setData] = useState<JournalData[]>([]);
   const [loading, setLoading] = useState(false);
-
   const societyId = sessionStorage.getItem("societyId");
   const role = sessionStorage.getItem("role");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+  const memberId = Number(sessionStorage.getItem("memberId"));
 
   useEffect(() => {
     fetchJournal();
@@ -55,8 +55,14 @@ const JournalView: React.FC = () => {
     try {
       setLoading(true);
       const response = await axios.get(`${BASE_URL}/journal`,{ params: { societyId, financialYearId }, } );
-      console.log("Response:",response.data);
-      setData(response.data);
+      let filtered;
+      if (memberId){
+        filtered = response.data.filter((item:any) => item.memberId == memberId);
+      }else
+      {
+        filtered = response.data;
+      }
+      setData(filtered);
     } catch (error) {
       console.error(error);
       message.error("Failed to load journal data");
