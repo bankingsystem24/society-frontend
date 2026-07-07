@@ -94,19 +94,21 @@ const AuditorDashboard: React.FC = () => {
     }
   };
 
-  const cardStyle: React.CSSProperties = {
-    borderRadius: 12,
-    boxShadow: "0 4px 12px rgba(22, 119, 255, 0.15)",
-    border: "1px solid #d6e4ff",
-  };
 
+const cardStyle: React.CSSProperties = {
+  borderRadius: 12,
+  border: "1px solid #d6e4ff",
+  boxShadow: "0 4px 12px rgba(22,119,255,0.15)",
+  height: 90,
+};
   return (
     <div style={{ padding: 24, background: "#f0f5ff", minHeight: "100vh" }}>
-      <Title level={4} style={{ color: "#1677ff", marginBottom: 24 }}>
-        Auditor Dashboard
+      <Title level={4} style={{color: "#1677ff",marginBottom: 16,}}
+>   Auditor Dashboard
       </Title>
+      
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={4} lg={4} xl={4}>
+        <Col xs={12} sm={12} md={6} lg={6} xl={6}>
           <Card style={cardStyle}>
             <Statistic
               title={<span style={{ color: "#1677ff" }}>Users</span>}
@@ -116,7 +118,7 @@ const AuditorDashboard: React.FC = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={4} lg={4} xl={4}>
+        <Col xs={12} sm={12} md={6} lg={6} xl={6}>
           <Card style={cardStyle}>
             <Statistic
               title={<span style={{ color: "#1677ff" }}>Societies</span>}
