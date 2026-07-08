@@ -20,6 +20,7 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import FinancialYear from "../admin/accounting/financial-year/FinancialYear";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
@@ -51,8 +52,9 @@ const LedgerView: React.FC = () => {
   const [glList, setGlList] = useState<GLItem[]>([]);
   const [glCode, setGlCode] = useState<number | null>(null);
 
-  const societyId = sessionStorage.getItem("societyId");
+  const societyId = Number(sessionStorage.getItem("societyId"));
   const role = sessionStorage.getItem("role");
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   // ---------------- FETCH GL LIST ----------------
   useEffect(() => {
@@ -63,10 +65,10 @@ const LedgerView: React.FC = () => {
     try {
       const res = await axios.get(`${BASE_URL}/gl/master?societyId=${societyId}`);
 
-      const list = res.data || [];
+      const filteredres = res.data.filter((item:any)=> item.parentGlCode != null);
+      const list = filteredres || [];
       setGlList(list);
 
-      // set default GL dynamically
       if (list.length > 0) {
         setGlCode(list[0].glCode);
       }
@@ -87,9 +89,7 @@ const LedgerView: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        `${BASE_URL}/ledger/${societyId}/${glCode}`
-      );
+      const response = await axios.get(`${BASE_URL}/ledger/${societyId}/${glCode}/${financialYearId}`);
 
       setData(response.data || []);
 

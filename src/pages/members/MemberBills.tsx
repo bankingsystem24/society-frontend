@@ -13,6 +13,7 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 interface Receipt {
   id: number;
   receiptNo: string;
+  receiptDate:string;
   createdAt?: string;
   flatNo: string;
   memberName: string;
@@ -147,7 +148,7 @@ const loadReceiptDetails = async (receiptId: number) => {
 
       <tr>
       <td><b>Flat No</b></td>
-      <td>${receipt.flatId}</td>
+      <td>${receipt.flatNo}</td>
       </tr>
 
       <tr>
