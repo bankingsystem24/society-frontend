@@ -84,9 +84,6 @@ const Login: React.FC = () => {
         const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
         const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",);
 
-        console.log("Response:",res.data);
-        console.log("Cash in Hand Mapping:", mapping);
-
         if (!mapping) {
           message.error("Cash in Hand Mapping not configured");
           return;

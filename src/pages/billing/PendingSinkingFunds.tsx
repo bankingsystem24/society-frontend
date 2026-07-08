@@ -100,7 +100,6 @@ const PendingSinkingFunds: React.FC = () => {
         fetchSinkingFunds(firstFlatId);
       }
     } catch (err) {
-      console.log(Error);
     }
   }
   };

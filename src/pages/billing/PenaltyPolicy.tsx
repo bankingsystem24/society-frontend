@@ -30,7 +30,6 @@ const PenaltyPolicy: React.FC = () => {
   const [form] = Form.useForm();
   const penaltyType = Form.useWatch("penaltyType", form);
   const onFinish = (values: any) => {
-    console.log(values);
   };
 
   return (

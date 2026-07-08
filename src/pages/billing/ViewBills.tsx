@@ -175,7 +175,6 @@ export default function ViewBills() {
         financialYearId: financialYearId,
       });
       setBills(res.data);
-      console.log("Bills loaded:", res.data);
     } catch {
       message.error("Failed to load bills");
     } finally {
@@ -219,8 +218,6 @@ export default function ViewBills() {
         glInterestIncome,
         glDiscount,
       };
-
-      console.log("Payment payload:", payload);
 
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
 

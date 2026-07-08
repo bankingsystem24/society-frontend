@@ -86,7 +86,6 @@ const ViewContribution: React.FC = () => {
       const res = await axios.get(`${BASE_URL}/contribution/${societyId}/${financialYearId}`,);
       setData(res.data || []);
       setFilteredData(res.data || []);
-      console.log("Contributions loaded:", res.data);
 
     } catch {
       message.error("Failed to load contributions");
