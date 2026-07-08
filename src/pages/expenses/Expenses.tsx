@@ -50,7 +50,8 @@ interface VendorOption {
 const Expenses: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
+  const GlCashInHand = Number(sessionStorage.getItem("GlCashInHand"));
+  const GlBankAccount = Number(sessionStorage.getItem("GlBankAccount"));
   const [form] = Form.useForm();
   const [data, setData] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(false);
@@ -117,7 +118,10 @@ const Expenses: React.FC = () => {
         narration: values.narration,
         vendorId: values.vendorId || null,
         financialYearId: financialYearId,
+        glCashInHand : GlCashInHand,
+        glBankAccount : GlBankAccount
       };
+
       await axios.post(`${BASE_URL}/expenses`, payload);
       message.success("Expense added successfully");
       form.resetFields();

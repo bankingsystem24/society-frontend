@@ -137,7 +137,6 @@ export default function VerifyPayemnt() {
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
 
-      console.log("Response:",res.data);
 
       const CashInHand = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",
       )?.gl_receivable;
@@ -756,7 +755,6 @@ export default function VerifyPayemnt() {
       glInterestIncome,
       glDiscount,
     };
-    console.log("Confirm Payment Payload:", payload);
 
     try {
       await axios.put(`${BASE_URL}/receipts/confirm`, payload);

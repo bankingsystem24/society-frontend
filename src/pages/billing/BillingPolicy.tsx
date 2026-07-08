@@ -63,7 +63,6 @@ const BillingPolicy: React.FC = () => {
           interestType: data.interestType,
         });
       }
-      console.log("Billing policy loaded:", data);
     } catch (error) {
       console.error("No billing policy found");
       setPolicyId(null);

@@ -60,14 +60,7 @@ export default function FlatPaymentDashboard() {
       };
 
       const response = await axios.get(`${BASE_URL}/reports/payments`, {params: payload,});
-
-      console.log("Response:", response.data);
-
-      const filteredData = (role === "MEMBER") ? response.data.filter((item: any) => item.memberId === memberId) : response.data;
-      
-      console.log("Filtered:", filteredData);
-
-      
+      const filteredData = (role === "MEMBER") ? response.data.filter((item: any) => item.memberId === memberId) : response.data;  
       const paymentData = filteredData.map((item: any, index: number) => ({
         key: index + 1,
         flatNo: item.flatNo,

@@ -153,7 +153,6 @@ export default function ViewReceipts() {
         discountAmount: selected?.discountAmount ?? 0,
       }));
 
-      console.log("data",data);
       setReceiptBills(data);
       setSelectedReceipt(selected);
       const receiptType = data?.[0]?.receiptType;
