@@ -61,6 +61,8 @@ import EditSociety from "./pages/society/EditSociety";
 import Payments from "./pages/reports/Payments";
 
 import ChangePassword from "./pages/auth/ChangePassword";
+import TrialBalanceSnapshotEntry from "./pages/accounting/TrialBalanceSnapshotEntry";
+import TrialBalanceSnapshotView from "./pages/accounting/TrialBalanceSnapshotView";
  
 export default function App() {
   return (
@@ -84,6 +86,9 @@ export default function App() {
       <Route path="/view-journal" element={<JournalView />} />
       <Route path="/view-ledger" element={<LedgerView />} />
       <Route path="/trial-balance" element={<TrialBalance />} />
+      <Route path="/trial-balance-snapshot" element={<TrialBalanceSnapshotEntry />} />
+      <Route path="/trial-balance-snapshot-view" element={<TrialBalanceSnapshotView />} />
+
       <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
       <Route path="/verify-payment" element={<VerifyPayemnt />} />
       <Route path="/gl-mapping" element={<GlMappingEntry />} />

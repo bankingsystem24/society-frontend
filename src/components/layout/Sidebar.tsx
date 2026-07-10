@@ -246,7 +246,25 @@ const Sidebar: React.FC = () => {
           label: "Payments",
           icon: <HomeOutlined />,
         },
+
       ],
+    },
+    {
+      key: "Snapshot",
+      icon: <UserOutlined />,
+      label: "Snapshots",
+      children: [
+        {
+          key: "/trial-balance-snapshot",
+          label: "TrialBalance Entry",
+          icon: <HomeOutlined />,
+        },
+        {
+          key: "/trial-balance-snapshot-view",
+          label: "View TrialBalance",
+          icon: <HomeOutlined />,
+        },
+      ]
     },
   ];
 
