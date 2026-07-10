@@ -25,7 +25,7 @@ import MemberHeader from "../../components/layout/MemberHeader";
 import MemberSidebar from "../../components/layout/MemberSidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
-
+ 
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
 
@@ -80,8 +80,8 @@ const GlOpeningBalance: React.FC = () => {
       const res = await axios.get(
         `${BASE_URL}/gl/opening-balance?societyId=${societyId}&financialYearId=${financialYearId}`,
       );
-
-      setData(res.data || []);
+      const sortedData = res.data.sort((a: any, b: any) => a.glCode - b.glCode);
+      setData(sortedData || []);
     } catch {
       message.error("Failed to load opening balances");
     } finally {
@@ -154,10 +154,7 @@ const GlOpeningBalance: React.FC = () => {
 
         message.success("Updated successfully");
       } else {
-        await axios.post(
-          `${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,
-          payload,
-        );
+        await axios.post(`${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,payload,);
 
         message.success("Created successfully");
       }
@@ -172,7 +169,7 @@ const GlOpeningBalance: React.FC = () => {
       message.error("Save failed");
     }
   };
-
+ 
   // ================= DELETE =================
   const handleDelete = async (id: number) => {
     try {
@@ -196,6 +193,11 @@ const GlOpeningBalance: React.FC = () => {
 
         return `${record.glCode} - ${gl?.accountName || ""}`;
       },
+    },
+    {
+      title: "Opening Credit",
+      dataIndex: "openingCredit",
+      key: "openingCredit",
     },
     {
       title: "Opening Debit",
@@ -344,6 +346,15 @@ const GlOpeningBalance: React.FC = () => {
 
                 <Row gutter={16}>
                   <Col xs={24} md={12}>
+                    <Form.Item name="openingCredit" label="Opening Credit">
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        controls={false}
+                        min={0}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
                     <Form.Item name="openingDebit" label="Opening Debit">
                       <InputNumber
                         style={{ width: "100%" }}
@@ -353,15 +364,7 @@ const GlOpeningBalance: React.FC = () => {
                     </Form.Item>
                   </Col>
 
-                  <Col xs={24} md={12}>
-                    <Form.Item name="openingCredit" label="Opening Credit">
-                      <InputNumber
-                        style={{ width: "100%" }}
-                        controls={false}
-                        min={0}
-                      />
-                    </Form.Item>
-                  </Col>
+
                 </Row>
                 {/* <Form.Item
             name="contraGlCode"

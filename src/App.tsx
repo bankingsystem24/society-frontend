@@ -61,7 +61,7 @@ import EditSociety from "./pages/society/EditSociety";
 import Payments from "./pages/reports/Payments";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ChangePassword from "./pages/auth/ChangePassword";
-
+ 
 export default function App() {
   return (
     <Routes>
