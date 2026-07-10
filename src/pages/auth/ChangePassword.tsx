@@ -17,34 +17,42 @@ const ChangePassword: React.FC = () => {
     try {
       setLoading(true);
 
-      const token = sessionStorage.getItem("token");
 
-      console.log("Token from Change Password:", token);
+ console.log("Request Body:", {
+  //userName: values.username,
+  oldPassword: values.currentPassword,
+  newPassword: values.newPassword,
+});
 
-      const response = await axios.post(
-        `${BASE_URL}/auth/changePassword`,
-        {
-          userName: values.username,
-          oldPassword: values.currentPassword,
-          newPassword: values.newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  // Retrieve JWT token stored after successful login
+  const token = sessionStorage.getItem("token");
+console.log("Token:", token); 
+
+     const response = await axios.post(
+  `${BASE_URL}/auth/changePassword`,
+  {
+    userName: values.username,
+    oldPassword: values.currentPassword,
+    newPassword: values.newPassword,
+  },
+  {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }
+);
 
       console.log("Response:", response.data);
       message.success("Password changed successfully");
     } catch (error: any) {
-      console.log("Error:", error);
-      console.log("Response:", error.response);
-
+      console.log("Status:", error.response?.status);
+      console.log("Response Data:", error.response?.data);
+      console.log("Headers:", error.response?.headers);
+      console.log("Full Error:", error);
       message.error(
-        error.response?.data || "Unable to change password"
-      );
+    error.response?.data || "Unable to change password"
+  );
+
     } finally {
       setLoading(false);
     }
@@ -91,18 +99,19 @@ const ChangePassword: React.FC = () => {
         }}
       >
         <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[
-              {
-                required: true,
-                message: "Please enter username",
-              },
-            ]}
-          >
-            <Input placeholder="Enter username" />
-          </Form.Item>
+        <Form.Item
+          label="Username"
+          name="username"
+          rules={[
+         {
+          required: true,
+          message: "Please enter username",
+        },
+        ]}
+>
+  <Input placeholder="Enter username" />
+  </Form.Item>
+
 
           <Form.Item
             label="Current Password"
@@ -116,7 +125,7 @@ const ChangePassword: React.FC = () => {
           >
             <Input.Password placeholder="Enter current password" />
           </Form.Item>
-
+        
           <Form.Item
             label="New Password"
             name="newPassword"
