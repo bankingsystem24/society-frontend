@@ -59,7 +59,7 @@ import PenaltyPolicy from "./pages/billing/PenaltyPolicy";
 import Societies from "./pages/auditor/societies/Societies";
 import EditSociety from "./pages/society/EditSociety";
 import Payments from "./pages/reports/Payments";
-import ForgotPassword from "./pages/auth/ForgotPassword";
+
 import ChangePassword from "./pages/auth/ChangePassword";
  
 export default function App() {
@@ -68,7 +68,7 @@ export default function App() {
 
       {/* Login Page */}
       <Route path="/" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+      
       <Route path="/change-password" element={<ChangePassword />} />
       <Route path="/member-login" element={<MemberLogin />} />
       <Route path="/member-dashboard" element={<MemberDashboard />} />

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Card, Form, Input, Button, message } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import buildingImage from "../../assets/building.jpg";
+import { Link, useNavigate } from "react-router-dom";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
  
-const Login: React.FC = () => {
+  const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +25,13 @@ const Login: React.FC = () => {
       );
       message.success("Login successful");
       sessionStorage.setItem("userName", res.data.name);
+      console.log("Login Response:", res.data);
+      console.log("Token:", res.data.token);
+//Store JWT token in sessionStorage so it can be used for authenticated API calls
+sessionStorage.setItem("token", res.data.token);
 
+console.log("Stored Token:", sessionStorage.getItem("token"));
+// Save logged-in user's details for use throughout the application
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("memberId", String(res.data.memberId));
 
@@ -114,31 +121,116 @@ const Login: React.FC = () => {
         background: "#f0f2f5",
       }}
     >
-      <Card title="Society Management Login" style={{ width: 350 }}>
-        <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please enter username" }]}
-          >
-            <Input placeholder="Enter username" />
-          </Form.Item>
+      {/* Blue Border Container */}
+     <div
+  style={{
+    display: "flex",
+    border: "2px solid #1677ff",
+    borderRadius: "15px",
+    overflow: "hidden",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+    background: "#fff",
+  }}
+>
+        {/* Left Image */}
+        <Card
+          style={{
+            width: 380,
+            height: 430,
+            padding: 0,
+            border: "none",
+            borderRadius: 0,
+            boxShadow: "none",
+          }}
+          bodyStyle={{
+            padding: 0,
+            height: "100%",
+          }}
+        >
+          <img
+            src={buildingImage}
+            alt="Society Building"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </Card>
 
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please enter password" }]}
-          >
-            <Input.Password placeholder="Enter password" />
-          </Form.Item>
+       {/* Login Card */}
+<Card
+  title={
+    <div
+      style={{
+        textAlign: "center",
+        color: "#1677ff",
+        fontSize: "24px",
+        fontWeight: 700,
+      }}
+    >
+      Society Management
+    </div>
+  }
+  style={{
+    width: 380,
+    height: 430,
+    border: "none",
+    borderRadius: 0,
+    boxShadow: "none",
+  }}
+>
+  <Form layout="vertical" onFinish={onFinish}>
+    <Form.Item
+      label="Username"
+      name="username"
+      rules={[
+        {
+          required: true,
+          message: "Please enter username",
+        },
+      ]}
+    >
+      <Input placeholder="Enter username" />
+    </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
-              Login
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+    <Form.Item
+      label="Password"
+      name="password"
+      rules={[
+        {
+          required: true,
+          message: "Please enter password",
+        },
+      ]}
+    >
+      <Input.Password placeholder="Enter password" />
+    </Form.Item>
+
+    <Form.Item style={{ marginBottom: 12 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Link to="/change-password">Change Password</Link>
+      </div>
+    </Form.Item>
+
+    <Form.Item>
+      <Button
+        type="primary"
+        htmlType="submit"
+        loading={loading}
+        block
+      >
+        Login
+      </Button>
+    </Form.Item>
+  </Form>
+</Card>
+      </div>
     </div>
   );
 };
