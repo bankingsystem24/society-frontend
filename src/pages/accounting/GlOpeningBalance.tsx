@@ -57,6 +57,8 @@ const GlOpeningBalance: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const financialYear = sessionStorage.getItem("financialYear");
+  const userId = Number(sessionStorage.getItem("userId"));
+  
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
 
@@ -77,9 +79,7 @@ const GlOpeningBalance: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `${BASE_URL}/gl/opening-balance?societyId=${societyId}&financialYearId=${financialYearId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/gl/opening-balance?societyId=${societyId}&financialYearId=${financialYearId}`,);
       const sortedData = res.data.sort((a: any, b: any) => a.glCode - b.glCode);
       setData(sortedData || []);
     } catch {
@@ -144,6 +144,7 @@ const GlOpeningBalance: React.FC = () => {
         openingDebit: Number(values.openingDebit || 0),
         openingCredit: Number(values.openingCredit || 0),
         openingBalance: null,
+        createdBy : userId
       };
 
       if (editing?.id) {
@@ -153,8 +154,7 @@ const GlOpeningBalance: React.FC = () => {
         );
 
         message.success("Updated successfully");
-      } else {
-        await axios.post(`${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,payload,);
+      } else { await axios.post(`${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,payload,);
 
         message.success("Created successfully");
       }
