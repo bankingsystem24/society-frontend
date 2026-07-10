@@ -18,15 +18,11 @@ const ChangePassword: React.FC = () => {
       setLoading(true);
 
 
- console.log("Request Body:", {
-  //userName: values.username,
-  oldPassword: values.currentPassword,
-  newPassword: values.newPassword,
-});
+ 
 
   // Retrieve JWT token stored after successful login
   const token = sessionStorage.getItem("token");
-console.log("Token:", token); 
+
 
      const response = await axios.post(
   `${BASE_URL}/auth/changePassword`,
@@ -42,13 +38,10 @@ console.log("Token:", token);
   }
 );
 
-      console.log("Response:", response.data);
+      
       message.success("Password changed successfully");
     } catch (error: any) {
-      console.log("Status:", error.response?.status);
-      console.log("Response Data:", error.response?.data);
-      console.log("Headers:", error.response?.headers);
-      console.log("Full Error:", error);
+     
       message.error(
     error.response?.data || "Unable to change password"
   );
@@ -58,26 +51,40 @@ console.log("Token:", token);
     }
   };
 
-  return (
+return (
+  <div
+    style={{
+      height: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      background: "#f0f2f5",
+    }}
+  >
+    {/* Blue Border Container */}
     <div
       style={{
-        height: "100vh",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#f0f2f5",
-        padding: "20px",
+        border: "2px solid #1677ff",
+        borderRadius: "15px",
+        overflow: "hidden",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+        background: "#fff",
       }}
     >
+      {/* Left Image */}
       <Card
         style={{
-          width: 350,
-          height: 500,
-          padding: 0,
-          overflow: "hidden",
-          borderRadius: "12px 0 0 12px",
+          width: 380,
+          height: 430,
+          border: "none",
+          borderRadius: 0,
+          boxShadow: "none",
         }}
-        bodyStyle={{ padding: 0, height: "100%" }}
+        bodyStyle={{
+          padding: 0,
+          height: "100%",
+        }}
       >
         <img
           src={buildingImage}
@@ -90,32 +97,56 @@ console.log("Token:", token);
         />
       </Card>
 
+      {/* Change Password Card */}
       <Card
-        title="Change Password"
+        title={
+          <div
+            style={{
+              textAlign: "center",
+              color: "#1677ff",
+              fontSize: "24px",
+              fontWeight: 700,
+              marginBottom:5,
+            }}
+          >
+            Change Password
+          </div>
+        }
         style={{
-          width: 350,
-          height: 500,
-          borderRadius: "0 12px 12px 0",
+          width: 380,
+          height: 430,
+          border: "none",
+          borderRadius: 0,
+          boxShadow: "none",
         }}
       >
-        <Form layout="vertical" onFinish={onFinish}>
-        <Form.Item
-          label="Username"
-          name="username"
-          rules={[
-         {
-          required: true,
-          message: "Please enter username",
-        },
-        ]}
->
-  <Input placeholder="Enter username" />
-  </Form.Item>
-
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          
+        >
+          <Form.Item
+            label="Username"
+            name="username"
+            style={{ marginBottom: 5 }}
+            rules={[
+              {
+                required: true,
+                message: "Please enter username",
+              },
+            ]}
+          >
+            <Input
+              placeholder="Enter username"
+              size="large"
+              style={{ borderRadius: "8px" }}
+            />
+          </Form.Item>
 
           <Form.Item
             label="Current Password"
             name="currentPassword"
+            style={{ marginBottom: 5 }}
             rules={[
               {
                 required: true,
@@ -123,12 +154,17 @@ console.log("Token:", token);
               },
             ]}
           >
-            <Input.Password placeholder="Enter current password" />
+            <Input.Password
+              placeholder="Enter current password"
+              size="large"
+              style={{ borderRadius: "8px" }}
+            />
           </Form.Item>
-        
+
           <Form.Item
             label="New Password"
             name="newPassword"
+            style={{ marginBottom: 5}}
             rules={[
               {
                 required: true,
@@ -136,12 +172,17 @@ console.log("Token:", token);
               },
             ]}
           >
-            <Input.Password placeholder="Enter new password" />
+            <Input.Password
+              placeholder="Enter new password"
+              size="large"
+              style={{ borderRadius: "8px" }}
+            />
           </Form.Item>
 
           <Form.Item
             label="Confirm Password"
             name="confirmPassword"
+            style={{ marginBottom: 5 }}
             dependencies={["newPassword"]}
             rules={[
               {
@@ -160,15 +201,25 @@ console.log("Token:", token);
               }),
             ]}
           >
-            <Input.Password placeholder="Confirm new password" />
+            <Input.Password
+              placeholder="Confirm new password"
+              size="large"
+              style={{ borderRadius: "8px" }}
+            />
           </Form.Item>
 
-          <Form.Item style={{ marginBottom: 0 }}>
+          <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
               loading={loading}
               block
+              size="large"
+              style={{
+                height: "45px",
+                borderRadius: "8px",
+                fontWeight: 600,
+              }}
             >
               Change Password
             </Button>
@@ -176,7 +227,8 @@ console.log("Token:", token);
         </Form>
       </Card>
     </div>
-  );
+  </div>
+);
 };
 
 export default ChangePassword;

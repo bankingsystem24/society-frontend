@@ -25,12 +25,11 @@ const BASE_URL = import.meta.env.VITE_API_URL;
       );
       message.success("Login successful");
       sessionStorage.setItem("userName", res.data.name);
-      console.log("Login Response:", res.data);
-      console.log("Token:", res.data.token);
+    
 //Store JWT token in sessionStorage so it can be used for authenticated API calls
 sessionStorage.setItem("token", res.data.token);
 
-console.log("Stored Token:", sessionStorage.getItem("token"));
+
 // Save logged-in user's details for use throughout the application
       sessionStorage.setItem("role", res.data.role);
       sessionStorage.setItem("memberId", String(res.data.memberId));
