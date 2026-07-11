@@ -1,0 +1,216 @@
+/* -------------------------------
+   Report Container
+-------------------------------- */
+
+.pl-report {
+    background: #fff;
+    color: #000;
+    padding: 20px;
+    border: 1px solid #000;
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+    font-family: "Times New Roman", serif;
+}
+
+/* -------------------------------
+   Header
+-------------------------------- */
+
+.report-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.report-header h3,
+.report-header h4 {
+    margin: 0;
+    padding: 0;
+}
+
+.report-header span {
+    font-size: 15px;
+}
+
+/* -------------------------------
+   Profit Loss Table
+-------------------------------- */
+
+.profit-loss-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 14px;
+}
+
+.profit-loss-table th,
+.profit-loss-table td {
+
+    border: 1px solid #000;
+    padding: 6px 8px;
+    vertical-align: middle;
+}
+
+.profit-loss-table thead th {
+
+    background: #efefef;
+    text-align: center;
+    font-weight: bold;
+
+}
+
+.profit-loss-table tbody td {
+
+    height: 32px;
+
+}
+
+.total-row td {
+
+    font-weight: bold;
+    background: #f6f6f6;
+
+}
+
+.net-row td {
+
+    background: #fff9e6;
+    font-size: 16px;
+
+}
+
+/* -------------------------------
+   Signature Section
+-------------------------------- */
+
+.signature-section {
+
+    margin-top: 70px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.signature-box {
+
+    width: 30%;
+    text-align: center;
+    font-weight: bold;
+
+}
+
+/* -------------------------------
+   Print Button
+-------------------------------- */
+
+.no-print {
+
+    margin-bottom: 15px;
+
+}
+
+/* -------------------------------
+   A4 Printing
+-------------------------------- */
+
+@page {
+
+    size: A4 portrait;
+    margin: 10mm;
+
+}
+
+@media print {
+
+    body {
+
+        margin: 0;
+        padding: 0;
+        background: #fff;
+
+    }
+
+    .no-print,
+    .ant-layout-sider,
+    .ant-layout-header,
+    button {
+
+        display: none !important;
+
+    }
+
+    .ant-layout,
+    .ant-layout-content {
+
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+
+    }
+
+    .pl-report {
+
+        border: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+
+    }
+
+    .profit-loss-table {
+
+        font-size: 12px;
+
+    }
+
+    .profit-loss-table th,
+    .profit-loss-table td {
+
+        padding: 4px 6px;
+
+    }
+
+    .signature-section {
+
+        margin-top: 80px;
+
+    }
+
+}
+
+/* -------------------------------
+   Responsive
+-------------------------------- */
+
+@media screen and (max-width: 768px) {
+
+    .pl-report {
+
+        padding: 10px;
+
+    }
+
+    .profit-loss-table {
+
+        font-size: 12px;
+
+    }
+
+    .signature-section {
+
+        flex-direction: column;
+        gap: 40px;
+
+    }
+
+    .signature-box {
+
+        width: 100%;
+
+    }
+
+}

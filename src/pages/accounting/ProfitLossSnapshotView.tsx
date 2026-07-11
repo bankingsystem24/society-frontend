@@ -3,16 +3,12 @@ import {
   Layout,
   Card,
   Typography,
-  Table,
   Row,
   Col,
-  Tag,
   Button,
-  Space,
   message,
   Spin,
 } from "antd";
-import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
 
 import Header from "../../components/layout/Header";
@@ -25,6 +21,7 @@ import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 
 import "../../App.css";
+import "./ProfitLossSnapshotView.css";
 
 const { Title, Text } = Typography;
 const { Content } = Layout;
@@ -35,7 +32,7 @@ interface ProfitLossDetail {
   id: number;
   glCode: number;
   accountName: string;
-  accountType: "INCOME" | "EXPENSE";
+  accountType: string;
   amount: number;
 }
 
@@ -53,86 +50,80 @@ interface ProfitLossSnapshot {
 }
 
 const ProfitLossSnapshotView: React.FC = () => {
+
   const role = sessionStorage.getItem("role");
-  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+
+  const financialYearId = Number(
+    sessionStorage.getItem("financialYearId")
+  );
+
+  const societyName =
+    sessionStorage.getItem("societyName") ?? "";
+
+  const financialYear =
+    sessionStorage.getItem("financialYear") ?? "";
 
   const [loading, setLoading] = useState(false);
 
-  const [snapshot, setSnapshot] = useState<ProfitLossSnapshot | null>(null);
+  const [snapshot, setSnapshot] =
+    useState<ProfitLossSnapshot | null>(null);
 
-  const [rows, setRows] = useState<ProfitLossDetail[]>([]);
+  const [incomeRows, setIncomeRows] =
+    useState<ProfitLossDetail[]>([]);
+
+  const [expenseRows, setExpenseRows] =
+    useState<ProfitLossDetail[]>([]);
 
   useEffect(() => {
     fetchSnapshot();
   }, []);
 
   const fetchSnapshot = async () => {
+
     try {
+
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/profit-loss-snapshot/${financialYearId}`,
+        `${BASE_URL}/profit-loss-snapshot/${financialYearId}`
       );
 
-      setSnapshot(res.data);
-      setRows(res.data.details || []);
+      const data = res.data;
+
+      setSnapshot(data);
+
+      setIncomeRows(
+        (data.details || []).filter(
+          (x: ProfitLossDetail) =>
+            x.accountType === "INCOME"
+        )
+      );
+
+      setExpenseRows(
+        (data.details || []).filter(
+          (x: ProfitLossDetail) =>
+            x.accountType === "EXPENSE"
+        )
+      );
+
     } catch (error) {
+
       console.error(error);
-      message.error("Failed to load Profit & Loss Snapshot.");
+
+      message.error(
+        "Unable to load Profit & Loss Snapshot."
+      );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
   const handlePrint = () => {
-    const printContents = document.getElementById("print-area")?.innerHTML;
-    if (!printContents) return;
-    const originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
     window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload();
   };
-
-  const columns: ColumnsType<ProfitLossDetail> = [
-    {
-      title: "Sr.",
-      width: 70,
-      align: "center",
-      render: (_, __, index) => index + 1,
-    },
-    {
-      title: "GL Code",
-      dataIndex: "glCode",
-      width: 120,
-      align: "center",
-    },
-    {
-      title: "Account Name",
-      dataIndex: "accountName",
-      width: 350,
-    },
-    {
-      title: "Account Type",
-      dataIndex: "accountType",
-      width: 180,
-      align: "center",
-      render: (value) => (
-        <Tag color={value === "INCOME" ? "green" : "red"}>{value}</Tag>
-      ),
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      width: 180,
-      align: "right",
-      render: (value: number) =>
-        `₹ ${Number(value || 0).toLocaleString("en-IN", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`,
-    },
-  ];
 
   if (loading) {
     return (
@@ -140,20 +131,44 @@ const ProfitLossSnapshotView: React.FC = () => {
         <Spin
           size="large"
           style={{
-            margin: "150px auto",
+            margin: "180px auto",
           }}
         />
       </Layout>
     );
   }
 
-  const totalIncome = snapshot?.totalIncome || 0;
-  const totalExpense = snapshot?.totalExpense || 0;
-  const netProfit = snapshot?.netProfitLoss || 0;
+  const totalIncome =
+    snapshot?.totalIncome ?? 0;
 
-  return (
+  const totalExpense =
+    snapshot?.totalExpense ?? 0;
+
+  const netProfit =
+    snapshot?.netProfitLoss ?? 0;
+
+  const maxRows = Math.max(
+    incomeRows.length,
+    expenseRows.length
+  );
+
+  const reportRows = [];
+
+  for (let i = 0; i < maxRows; i++) {
+
+    reportRows.push({
+
+      income: incomeRows[i] ?? null,
+
+      expense: expenseRows[i] ?? null,
+
+    });
+
+  }
+    return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
+        className="no-print"
         width={role === "MEMBER" ? 200 : 250}
         breakpoint="lg"
         collapsedWidth="0"
@@ -176,162 +191,218 @@ const ProfitLossSnapshotView: React.FC = () => {
       </Layout.Sider>
 
       <Layout>
-        {role === "ADMIN" ? (
-          <Header />
-        ) : role === "MEMBER" ? (
-          <MemberHeader />
-        ) : role === "SUPER_ADMIN" ? (
-          <SuperAdminHeader />
-        ) : (
-          <AuditorHeader />
-        )}
+
+        <div className="no-print">
+          {role === "ADMIN" ? (
+            <Header />
+          ) : role === "MEMBER" ? (
+            <MemberHeader />
+          ) : role === "SUPER_ADMIN" ? (
+            <SuperAdminHeader />
+          ) : (
+            <AuditorHeader />
+          )}
+        </div>
 
         <Content style={{ padding: 20 }}>
-          <div id="print-area">
-            <Card style={{ borderRadius: 12 }}>
-              <Row justify="space-between" align="middle">
-                <Col>
-                  <Title level={5}>Profit &amp; Loss Snapshot</Title>
-                </Col>
 
-                <Col>
-                  <Button type="primary" onClick={handlePrint}>
-                    Print
-                  </Button>
-                </Col>
-              </Row>
-
-              <Row gutter={16} style={{ marginTop: 10 }}>
-                <Col span={6}>
-                  <Card size="small">
-                    <Text strong>Financial Year Id</Text>
-                    <br />
-                    <Text>{snapshot?.financialYearId}</Text>
-                  </Card>
-                </Col>
-
-                <Col span={6}>
-                  <Card size="small">
-                    <Text strong>Created By</Text>
-                    <br />
-                    <Text>{snapshot?.createdBy}</Text>
-                  </Card>
-                </Col>
-
-                <Col span={6}>
-                  <Card size="small">
-                    <Text strong>Created At</Text>
-                    <br />
-                    <Text>
-                      {snapshot?.createdAt
-                        ? new Date(snapshot.createdAt).toLocaleString()
-                        : "-"}
-                    </Text>
-                  </Card>
-                </Col>
-                <Col span={6}>
-                  <Card size="small">
-                    <Text strong>Remarks</Text>
-                    <br />
-                    <Text>{snapshot?.remarks || "-"}</Text>
-                  </Card>
-                </Col>
-              </Row>
-
-              <Row gutter={16} style={{ marginTop: 10 }}>
-                <Col>
-                  <Card
-                    size="small"
-                    style={{
-                      minWidth: 180,
-                      textAlign: "center",
-                    }}
-                  >
-                    <b>Total Income</b>
-
-                    <div
-                      style={{
-                        color: "green",
-                        fontSize: 14,
-                        fontWeight: 700,
-                      }}
-                    >
-                      ₹{" "}
-                      {totalIncome.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </div>
-                  </Card>
-                </Col>
-
-                <Col>
-                  <Card
-                    size="small"
-                    style={{
-                      minWidth: 180,
-                      textAlign: "center",
-                    }}
-                  >
-                    <b>Total Expense</b>
-
-                    <div
-                      style={{
-                        color: "red",
-                        fontSize: 14,
-                        fontWeight: 700,
-                      }}
-                    >
-                      ₹{" "}
-                      {totalExpense.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </div>
-                  </Card>
-                </Col>
-
-                <Col>
-                  <Card
-                    size="small"
-                    style={{
-                      minWidth: 220,
-                      textAlign: "center",
-                      border:
-                        netProfit >= 0 ? "1px solid green" : "1px solid red",
-                    }}
-                  >
-                    <b>Net Profit / Loss</b>
-
-                    <div
-                      style={{
-                        color: netProfit >= 0 ? "green" : "red",
-                        fontSize: 15,
-                        fontWeight: 700,
-                      }}
-                    >
-                      ₹{" "}
-                      {netProfit.toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </div>
-                  </Card>
-                </Col>
-              </Row>
-
-              <Table
-                rowKey="id"
-                className="compact-table"
-                style={{ marginTop: 25 }}
-                bordered
-                size="small"
-                pagination={false}
-                columns={columns}
-                dataSource={rows}
-                scroll={{ x: 900 }}
-              />
-            </Card>
+          <div className="no-print" style={{ marginBottom: 15 }}>
+            <Button type="primary" onClick={handlePrint}>
+              Print Report
+            </Button>
           </div>
+
+          <div id="print-area" className="pl-report">
+
+            <div className="report-header">
+
+              <Title level={3} style={{ marginBottom: 0 }}>
+                {societyName}
+              </Title>
+
+              <Title level={4} style={{ marginTop: 5 }}>
+                PROFIT & LOSS ACCOUNT (Snapshot)
+              </Title>
+
+              <Text strong>
+                Financial Year : {financialYear}
+              </Text>
+
+            </div>
+
+            <table className="profit-loss-table">
+
+              <thead>
+
+                <tr>
+
+                  <th style={{ width: "6%" }}>Sr.</th>
+                  <th style={{ width: "34%" }}>
+                    Income Particulars
+                  </th>
+                  <th style={{ width: "15%" }}>
+                    Amount
+                  </th>
+
+                  <th style={{ width: "6%" }}>Sr.</th>
+                  <th style={{ width: "24%" }}>
+                    Expense Particulars
+                  </th>
+                  <th style={{ width: "15%" }}>
+                    Amount
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {reportRows.map((row, index) => (
+
+                  <tr key={index}>
+
+                    <td align="center">
+                      {row.income ? index + 1 : ""}
+                    </td>
+
+                    <td>
+                      {row.income?.accountName ?? ""}
+                    </td>
+
+                    <td align="right">
+                      {row.income
+                        ? row.income.amount.toLocaleString(
+                            "en-IN",
+                            {
+                              minimumFractionDigits: 2,
+                            }
+                          )
+                        : ""}
+                    </td>
+
+                    <td align="center">
+                      {row.expense ? index + 1 : ""}
+                    </td>
+
+                    <td>
+                      {row.expense?.accountName ?? ""}
+                    </td>
+
+                    <td align="right">
+                      {row.expense
+                        ? row.expense.amount.toLocaleString(
+                            "en-IN",
+                            {
+                              minimumFractionDigits: 2,
+                            }
+                          )
+                        : ""}
+                    </td>
+
+                  </tr>
+
+                ))}
+
+                <tr className="total-row">
+
+                  <td></td>
+
+                  <td>
+                    <b>Total</b>
+                  </td>
+
+                  <td align="right">
+                    <b>
+                      {totalIncome.toLocaleString(
+                        "en-IN",
+                        {
+                          minimumFractionDigits: 2,
+                        }
+                      )}
+                    </b>
+                  </td>
+
+                  <td></td>
+
+                  <td>
+                    <b>Total</b>
+                  </td>
+
+                  <td align="right">
+                    <b>
+                      {totalExpense.toLocaleString(
+                        "en-IN",
+                        {
+                          minimumFractionDigits: 2,
+                        }
+                      )}
+                    </b>
+                  </td>
+
+                </tr>
+
+                <tr className="net-row">
+
+                  <td
+                    colSpan={6}
+                    style={{
+                      textAlign: "center",
+                      fontWeight: 700,
+                      fontSize: 18,
+                    }}
+                  >
+                    {netProfit >= 0
+                      ? `Net Profit : ₹ ${netProfit.toLocaleString(
+                          "en-IN",
+                          {
+                            minimumFractionDigits: 2,
+                          }
+                        )}`
+                      : `Net Loss : ₹ ${Math.abs(
+                          netProfit
+                        ).toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                        })}`}
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+            <div className="signature-section">
+
+              <div className="signature-box">
+                <br />
+                ______________________
+                <br />
+                Auditor
+              </div>
+
+              <div className="signature-box">
+                <br />
+                ______________________
+                <br />
+                Secretary
+              </div>
+
+              <div className="signature-box">
+                <br />
+                ______________________
+                <br />
+                Chairman
+              </div>
+
+            </div>
+
+          </div>
+
         </Content>
+
       </Layout>
+
     </Layout>
   );
 };
