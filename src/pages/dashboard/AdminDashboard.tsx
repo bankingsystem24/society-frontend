@@ -289,18 +289,14 @@ const AdminDashboard: React.FC = () => {
           >
             <div>
               <Title level={2}>
-                Housing Society Dashboard
+                Dashboard
               </Title>
-
-              <Text type="secondary">
-                Welcome back. Here's your latest
-                society overview.
-              </Text>
             </div>
 
             <Row gutter={[20, 20]}>
               <Col xs={24} sm={12} lg={6}>
                 <DashboardCard
+                  
                   title="Financial Year"
                   value={financialYear}
                   color="#1677ff"
@@ -354,7 +350,7 @@ const AdminDashboard: React.FC = () => {
               style={cardStyle}
             >
               <Row gutter={[20, 20]}>
-                <Col xs={24} md={8}>
+                <Col xs={24} md={6}>
                   <DashboardCard
                     title="Pending Maintenance"
                     value={memberStats.pendingMaintenance}
@@ -363,7 +359,7 @@ const AdminDashboard: React.FC = () => {
                   />
                 </Col>
 
-                <Col xs={24} md={8}>
+                <Col xs={24} md={6}>
                   <DashboardCard
                     title="Paid Maintenance"
                     value={memberStats.paidMaintenance}
@@ -372,7 +368,7 @@ const AdminDashboard: React.FC = () => {
                   />
                 </Col>
 
-                <Col xs={24} md={8}>
+                <Col xs={24} md={6}>
                   <DashboardCard
                     title="Receipts"
                     value={memberStats.receipts}
@@ -429,7 +425,7 @@ const AdminDashboard: React.FC = () => {
             ============================ */}
 
             <Row gutter={[20, 20]}>
-              <Col xs={24} lg={12}>
+              <Col xs={24} lg={6}>
                 <Card
                   title="Maintenance Collection"
                   style={cardStyle}
@@ -458,7 +454,7 @@ const AdminDashboard: React.FC = () => {
                 </Card>
               </Col>
 
-              <Col xs={24} lg={12}>
+              <Col xs={24} lg={6}>
                 <Card
                   title="Fund Collection"
                   style={cardStyle}
@@ -486,10 +482,7 @@ const AdminDashboard: React.FC = () => {
                   />
                 </Card>
               </Col>
-            </Row>
-
-            <Row gutter={[20, 20]}>
-              <Col span={24}>
+              <Col  xs={24} lg={6}>
                 <Card
                   title="Contribution Collection"
                   style={cardStyle}
@@ -524,7 +517,7 @@ const AdminDashboard: React.FC = () => {
             ============================ */}
 
             <Row gutter={[20, 20]}>
-              <Col xs={24} md={8}>
+              <Col xs={24} md={6}>
                 <Card style={cardStyle}>
                   <Statistic
                     title="Total Pending Items"
@@ -541,7 +534,7 @@ const AdminDashboard: React.FC = () => {
                 </Card>
               </Col>
 
-              <Col xs={24} md={8}>
+              <Col xs={24} md={6}>
                 <Card style={cardStyle}>
                   <Statistic
                     title="Total Paid Items"
@@ -558,7 +551,7 @@ const AdminDashboard: React.FC = () => {
                 </Card>
               </Col>
 
-              <Col xs={24} md={8}>
+              <Col xs={24} md={6}>
                 <Card style={cardStyle}>
                   <Statistic
                     title="Receipts Generated"
