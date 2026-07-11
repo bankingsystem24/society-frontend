@@ -59,8 +59,9 @@ import PenaltyPolicy from "./pages/billing/PenaltyPolicy";
 import Societies from "./pages/auditor/societies/Societies";
 import EditSociety from "./pages/society/EditSociety";
 import Payments from "./pages/reports/Payments";
-
+import OpenFinancialYear from "./pages/accounting/OpenFinancialYear";
 import ChangePassword from "./pages/auth/ChangePassword";
+
 import TrialBalanceSnapshotEntry from "./pages/accounting/TrialBalanceSnapshotEntry";
 import TrialBalanceSnapshotView from "./pages/accounting/TrialBalanceSnapshotView";
 import ProfitLossSnapshotEntry from "./pages/accounting/ProfitLossSnapshotEntry";
@@ -79,7 +80,7 @@ export default function App() {
       {/* <Route path="/member-receipts" element={<MemberBills />} /> */}
       {/* <Route path="/member-pending-bills" element={<MemberPendingBills />} /> */}
       <Route path="/member-paying-maintenance" element={<MemberPayingMaintenance />} />
-
+      <Route path="/open-financial-year" element={<OpenFinancialYear />}/>
       {/* <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} /> */}
       <Route path="/contributions" element={<PendingContributions />} />
       <Route path="/view-receipts" element={<ViewReceipts />} />
