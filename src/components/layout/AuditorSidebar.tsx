@@ -48,7 +48,7 @@ const AuditorSidebar: React.FC = () => {
           },
           {
             key: "/open-financial-year",
-            label: "Open Financial Year",
+            label: "Open/Close Financial Year",
           },
           {
             key: "/members",
