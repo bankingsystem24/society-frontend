@@ -19,46 +19,73 @@ const OpenFinancialYear: React.FC = () => {
 
   
 
-  const openFinancialYear = async () => {
-    console.log("button cliked")
-try {
-  setLoading(true);
+ const openFinancialYear = async () => {
+  try {
+    setLoading(true);
 
-  console.log({
-    societyId,
-    accountingYearId,
-    username,
-  });
-
-  const response = await axios.post(
-    `${BASE_URL}/accounting-year/open`,
-    {
+    console.log({
       societyId,
       accountingYearId,
       username,
-    }
-  );
+    });
 
-  message.success(response.data.message || response.data);
-
-} catch (error: any) {
-
-  if (error.response) {
-    message.error(
-      error.response.data.message || "Unable to open financial year"
+    const response = await axios.post(
+      `${BASE_URL}/accounting-year/open`,
+      {
+        societyId,
+        accountingYearId,
+        username,
+      }
     );
-  } else {
-    message.error("Something went wrong");
-  }
 
-} finally {
-  setLoading(false);
-}
-  }
- const { Content } = Layout;
+    message.success(response.data.message || response.data);
 
- 
- 
+  } catch (error: any) {
+
+    if (error.response) {
+      message.error(
+        error.response.data.message || "Unable to open financial year"
+      );
+    } else {
+      message.error("Something went wrong");
+    }
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+const closeFinancialYear = async () => {
+  try {
+    setLoading(true);
+
+    const response = await axios.post(
+      `${BASE_URL}/accounting-year/close`,
+      {
+        societyId,
+        accountingYearId,
+        username,
+      }
+    );
+
+    message.success(response.data.message || response.data);
+
+  } catch (error: any) {
+
+    if (error.response) {
+      message.error(
+        error.response.data.message || "Unable to close financial year"
+      );
+    } else {
+      message.error("Something went wrong");
+    }
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+const { Content } = Layout;
 
 return (
   <Layout style={{ minHeight: "100vh" }}>
@@ -87,23 +114,32 @@ return (
         >
           {/* Your existing content */}
 
-          <Title level={3}>Open Financial Year</Title>
+          <Title level={3}>Open/Close Financial Year</Title>
 
-          <Button
-            type="primary"
-            loading={loading}
-            onClick={openFinancialYear}
-            
-          >
-            Open Financial Year
-          </Button>
+       <div style={{ display: "flex", gap: 16 }}>
+  <Button
+    type="primary"
+    loading={loading}
+    onClick={openFinancialYear}
+  >
+    Open Financial Year
+  </Button>
+
+  <Button
+    type="primary"
+    loading={loading}
+    onClick={closeFinancialYear}
+  >
+    Close Financial Year
+  </Button>
+</div>
 
         </Card>
       </Content>
     </Layout>
   </Layout>
-);
 
+        );
 };
 
 export default OpenFinancialYear;
