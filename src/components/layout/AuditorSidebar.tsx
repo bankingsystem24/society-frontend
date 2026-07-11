@@ -241,6 +241,16 @@ const AuditorSidebar: React.FC = () => {
                 label: "View TrialBalance",
                 icon: <HomeOutlined />,
               },
+              {
+                key: "/profit-loss-snapshot-entry",
+                label: "Profit & Loss Entry",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/profit-loss-snapshot-view",
+                label: "View P&L",
+                icon: <HomeOutlined />,
+              },
             ]
           },
 
