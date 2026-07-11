@@ -109,11 +109,7 @@ const ProfitLossSnapshotView: React.FC = () => {
     } catch (error) {
 
       console.error(error);
-
-      message.error(
-        "Unable to load Profit & Loss Snapshot."
-      );
-
+      message.error("Profit & Loss Snapshot not found");
     } finally {
 
       setLoading(false);
@@ -342,7 +338,7 @@ const ProfitLossSnapshotView: React.FC = () => {
 
                 </tr>
 
-                <tr className="net-row">
+                {/* <tr className="net-row">
 
                   <td
                     colSpan={6}
@@ -366,7 +362,7 @@ const ProfitLossSnapshotView: React.FC = () => {
                         })}`}
                   </td>
 
-                </tr>
+                </tr> */}
 
               </tbody>
 
