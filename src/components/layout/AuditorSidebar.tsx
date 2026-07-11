@@ -134,8 +134,8 @@ const AuditorSidebar: React.FC = () => {
             label: "Vendors",
           },
           {
-            key: "Bills",
-            label: "Bills",
+            key: "Mainteannce",
+            label: "Maintenance",
             children: [
               {
                 key: "/bill-generate",
@@ -228,6 +228,34 @@ const AuditorSidebar: React.FC = () => {
                 icon: <HomeOutlined />,
               },
             ],
+          },
+
+          {
+            key: "Snapshot",
+            icon: <UserOutlined />,
+            label: "Snapshots",
+            children: [
+              // {
+              //   key: "/trial-balance-snapshot",
+              //   label: "TrialBalance Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/trial-balance-snapshot-view",
+                label: "View TrialBalance",
+                icon: <HomeOutlined />,
+              },
+              // {
+              //   key: "/profit-loss-snapshot-entry",
+              //   label: "Profit & Loss Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/profit-loss-snapshot-view",
+                label: "View P&L",
+                icon: <HomeOutlined />,
+              },
+            ]
           },
 
         ]}

@@ -35,7 +35,7 @@ interface PnlResponse {
   totalIncome: number;
   totalExpense: number;
   surplus: number;
-}
+} 
 
 const ProfitAndLoss: React.FC = () => {
   const [data, setData] = useState<PnlResponse | null>(null);

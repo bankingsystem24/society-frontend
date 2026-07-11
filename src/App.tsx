@@ -62,6 +62,11 @@ import Payments from "./pages/reports/Payments";
 import OpenFinancialYear from "./pages/accounting/OpenFinancialYear";
 import ChangePassword from "./pages/auth/ChangePassword";
 
+import TrialBalanceSnapshotEntry from "./pages/accounting/TrialBalanceSnapshotEntry";
+import TrialBalanceSnapshotView from "./pages/accounting/TrialBalanceSnapshotView";
+import ProfitLossSnapshotEntry from "./pages/accounting/ProfitLossSnapshotEntry";
+import ProfitLossSnapshotView from "./pages/accounting/ProfitLossSnapshotView";
+ 
 export default function App() {
   return (
     <Routes>
@@ -84,7 +89,13 @@ export default function App() {
       <Route path="/view-journal" element={<JournalView />} />
       <Route path="/view-ledger" element={<LedgerView />} />
       <Route path="/trial-balance" element={<TrialBalance />} />
+      <Route path="/trial-balance-snapshot" element={<TrialBalanceSnapshotEntry />} />
+      <Route path="/trial-balance-snapshot-view" element={<TrialBalanceSnapshotView />} />
+
       <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
+      <Route path="/profit-loss-snapshot-entry" element={<ProfitLossSnapshotEntry />} />
+      <Route path="/profit-loss-snapshot-view" element={<ProfitLossSnapshotView />} />
+
       <Route path="/verify-payment" element={<VerifyPayemnt />} />
       <Route path="/gl-mapping" element={<GlMappingEntry />} />
       <Route path="/users" element={<Users />} />
