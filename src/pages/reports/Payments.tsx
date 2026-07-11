@@ -20,6 +20,15 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import { Progress } from "antd";
+import {
+  HomeOutlined,
+  FileTextOutlined,
+  CheckCircleOutlined,
+  WarningOutlined,
+  ClockCircleOutlined,
+  PieChartOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 
 const { Option } = Select;
@@ -133,9 +142,18 @@ export default function FlatPaymentDashboard() {
     {
       title: "Status",
       dataIndex: "status",
-      render: (status: string) => (
-        <Tag color={status === "PAID" ? "green" : "red"}>{status}</Tag>
-      ),
+    render: (status: string) => (
+  <Tag
+    color={status === "PAID" ? "green" : "volcano"}
+    style={{
+      borderRadius: 20,
+      fontWeight: 600,
+      padding: "3px 12px",
+    }}
+  >
+    {status}
+  </Tag>
+),
     },
   ];
 
@@ -176,31 +194,76 @@ export default function FlatPaymentDashboard() {
           <AuditorHeader />
         )}
         <Content>
-          <Space orientation="vertical" size="small" style={{ width: "100%", marginTop:10 }}>
+          <Space orientation="vertical" size="small" style={{ width: "100%", marginTop:10,background:"#f5f7fb",
+        padding:16,}}>
             {/* Summary Cards */}
 
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card size="small">
+               <Card 
+  hoverable
+  size="small"
+  style={{
+    boxShadow:"0 5px 15px rgba(0,0,0,0.08)",
+    borderRadius: 12,
+    transition: "0.3s",
+    background: "#f0f5ff",
+border: "1px solid #d6e4ff",
+
+
+    
+  }}
+>
                   <Statistic 
-                  title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Total Flats </span>}
+                 title={
+<span
+style={{
+fontSize:"13px",
+display:"block",
+textAlign:"center"
+}}
+>
+<HomeOutlined style={{color:"#1677ff"}} /> Total Flats
+</span>
+}
                   value={summary.totalFlats} 
                   styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}/>
                 </Card>
               </Col>
 
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card size="small">
+                <Card
+  hoverable
+  size="small"
+  style={{
+    boxShadow:"0 5px 15px rgba(0,0,0,0.08)",
+    borderRadius: 12,
+    transition: "0.3s",
+    background: "#fff7e6",
+border: "1px solid #ffd591"
+    
+  }}
+>
                   <Statistic 
-                  title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Bills</span>}
+                  title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}><FileTextOutlined style={{color:"#fa8c16"}} /> Bills</span>}
                   value={summary.bills} prefix="₹" styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}/>
                 </Card>
               </Col>
 
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card size="small">
+                <Card
+                hoverable
+                size="small"
+                style={{
+                borderRadius: 12,
+                transition: "0.3s",
+                boxShadow:"0 5px 15px rgba(0,0,0,0.08)",
+                background: "#f6ffed",
+border: "1px solid #b7eb8f"
+                }}
+>
                   <Statistic
-                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Received</span>}
+                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}><CheckCircleOutlined style={{color:"green"}} /> Received</span>}
                     value={summary.received}
                     prefix="₹" styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}
                   />
@@ -208,9 +271,19 @@ export default function FlatPaymentDashboard() {
               </Col>
 
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card size="small">
+                <Card
+                hoverable
+                size="small"
+                style={{
+                borderRadius: 12,
+                transition: "0.3s",
+                boxShadow:"0 5px 15px rgba(0,0,0,0.08)",
+                background: "#fff2f0",
+                border: "1px solid #ffccc7"
+                 }}
+>
                   <Statistic
-                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Outstanding</span>}
+                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}><WarningOutlined style={{color:"red"}} /> Outstanding</span>}
                     value={summary.pending}
                     prefix="₹" styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}
                   />
@@ -218,21 +291,44 @@ export default function FlatPaymentDashboard() {
               </Col>
 
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card size="small">
+                <Card
+                hoverable
+                size="small"
+                style={{
+                borderRadius: 12,
+                transition: "0.3s",
+                boxShadow:"0 5px 15px rgba(0,0,0,0.08)",
+                background: "#f9f0ff",
+                border: "1px solid #d3adf7"
+                }}
+>
                   <Statistic
-                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}>Pending Flats</span>}
+                    title={<span style={{ fontSize: "13px",display: "block", textAlign:"center" }}><ClockCircleOutlined style={{color:"#722ed1"}} /> Pending Flats</span>}
                     value={summary.pendingFlats} styles={{ content: {fontSize: 20, fontWeight: 600,textAlign:"center"},}}
                   />
                 </Card>
               </Col>
 
               <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card size="small">
+                <Card
+                 hoverable
+                 size="small"
+                 style={{
+                 borderRadius: 12,
+                 transition: "0.3s",
+                 boxShadow:"0 5px 15px rgba(0,0,0,0.08)",
+                 background: "#e6fffb",
+                 border: "1px solid #87e8de"
+
+                 }}
+>
                   <Statistic
-                    title={<span style={{ fontSize: "13px", display: "block", textAlign:"center"}}>Collection %</span>}
+                    title={<span style={{ fontSize: "13px", display: "block", textAlign:"center"}}><PieChartOutlined style={{color:"#13c2c2"}} /> Collection %</span>}
                     value={collection}
-                    suffix="%" styles={{ content: {fontSize: 20, fontWeight: 600, textAlign:"center"},}}
-                  />
+                    suffix="%" styles={{ content: {fontSize: 20, fontWeight: 600, textAlign:"center",    },
+    }}
+  />
+
                 </Card>
               </Col>
             </Row>
@@ -243,6 +339,7 @@ export default function FlatPaymentDashboard() {
               <Row gutter={[16, 16]}>
                 <Col xs={24} sm={12} md={12} lg={6}>
                   <Select
+                  size="large"
                     value={status}
                     onChange={setStatus}
                     style={{ width: "100%" }}
@@ -255,10 +352,11 @@ export default function FlatPaymentDashboard() {
 
                 <Col xs={24} sm={24} md={24} lg={6}>
                   <Search
-                    placeholder="Search Flat / Owner"
-                    onSearch={setSearch}
-                    onChange={(e) => setSearch(e.target.value)}
-                    allowClear
+                    size="large"
+placeholder="Search Flat / Owner"
+allowClear
+onSearch={setSearch}
+onChange={(e)=>setSearch(e.target.value)}
                   />
                 </Col>
               </Row>
@@ -266,11 +364,14 @@ export default function FlatPaymentDashboard() {
 
             {/* Table */}
 
-            <Card>
+            <Card >
               <Table
                 loading={loading}
                 columns={columns}
                 dataSource={filteredData}
+                rowClassName={(record) =>
+  record.status === "PENDING" ? "pending-row" : ""
+}
                 rowKey="key"
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 700 }}

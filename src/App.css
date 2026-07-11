@@ -241,3 +241,29 @@
   padding-top: 3px !important;
   padding-bottom: 3px !important;
 }
+
+.pending-row {
+  background-color: #fff7f7;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #eef6ff !important;
+}
+
+.ant-table-tbody > tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.ant-table-tbody > tr:hover {
+  background: #e6f4ff !important;
+}
+
+.ant-table-thead > tr > th {
+  background: #1677ff !important;
+  color: rgb(255, 255, 255) !important;
+  font-weight: 600;
+}
+
+.ant-table-tbody > tr:hover{
+    background:#7d8083 !important;
+}
