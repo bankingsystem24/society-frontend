@@ -96,13 +96,15 @@ const AuditorDashboard: React.FC = () => {
 
 
 const cardStyle: React.CSSProperties = {
-  borderRadius: 12,
-  border: "1px solid #d6e4ff",
-  boxShadow: "0 4px 12px rgba(22,119,255,0.15)",
-  height: 90,
+  borderRadius: 18,
+  border: "none",
+  background: "#ffffff",
+  boxShadow: "0 10px 30px rgba(72, 19, 19, 0.08)",
+  transition: "0.3s",
+  height: 130,
 };
   return (
-    <div style={{ padding: 24, background: "#f0f5ff", minHeight: "100vh" }}>
+    <div style={{ padding: 24, background: "#f1f2f4", minHeight: "100vh" }}>
       <Title level={4} style={{color: "#1677ff",marginBottom: 16,}}
 >   Auditor Dashboard
       </Title>
@@ -111,9 +113,9 @@ const cardStyle: React.CSSProperties = {
         <Col xs={12} sm={12} md={6} lg={6} xl={6}>
           <Card style={cardStyle}>
             <Statistic
-              title={<span style={{ color: "#1677ff" }}>Users</span>}
+              title={<span style={{ color: "#1677ff",fontSize: 22,fontWeight: 600}}>Users</span>}
               value={stats.users + 1}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+              prefix={<TeamOutlined style={{ color: "#1677ff",fontSize: 28, }} />}
               styles={{ content : { color: "#1677ff"} }}
             />
           </Card>
@@ -121,15 +123,17 @@ const cardStyle: React.CSSProperties = {
         <Col xs={12} sm={12} md={6} lg={6} xl={6}>
           <Card style={cardStyle}>
             <Statistic
-              title={<span style={{ color: "#1677ff" }}>Societies</span>}
+              title={<span style={{color: "#1677ff",fontSize: 22,fontWeight: 600, }}>Societies</span>}
               value={stats.societies}
-              prefix={<HomeOutlined style={{ color: "#1677ff" }} />}
+              prefix={<HomeOutlined style={{ color: "#52c41a",fontSize: 28, }} />}
               styles={{ content : { color: "#1677ff"} }}
             />
           </Card>
         </Col>
       </Row>
     </div>
+
+    
   );
 };
 
