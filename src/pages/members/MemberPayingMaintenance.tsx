@@ -21,6 +21,9 @@ import AuditorSidebar from "../../components/layout/AuditorSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import dayjs from "dayjs";
+
+const today = dayjs().format("YYYY-MM-DD");
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
@@ -77,6 +80,7 @@ const MemberPayingMaintenance: React.FC = () => {
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
+  const [payableAmount, setPayableAmount] = useState(0);
 
   useEffect(() => {
     loadFlats();
@@ -94,30 +98,34 @@ const MemberPayingMaintenance: React.FC = () => {
 
   const loadFlats = async () => {
     if (memberId && societyId) {
-    try {
-      const res = await axios.get(`${BASE_URL}/members/flats`, { params: { societyId, memberId },});
+      try {
+        const res = await axios.get(`${BASE_URL}/members/flats`, {
+          params: { societyId, memberId },
+        });
 
-      const flatsData = res.data || [];
+        const flatsData = res.data || [];
 
-      setFlats(flatsData);
+        setFlats(flatsData);
 
-      // ✅ Auto select first flat
-      if (flatsData.length > 0) {
-        const firstFlatId = flatsData[0].id;
+        // ✅ Auto select first flat
+        if (flatsData.length > 0) {
+          const firstFlatId = flatsData[0].id;
 
-        setSelectedFlat(firstFlatId);
+          setSelectedFlat(firstFlatId);
 
-        fetchBills(firstFlatId);
+          fetchBills(firstFlatId);
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
     }
-  }
   };
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
+      );
 
       const mapping = res.data.find(
         (item: any) =>
@@ -221,6 +229,25 @@ const MemberPayingMaintenance: React.FC = () => {
       message.warning("Select bills first");
       return;
     }
+    let amount = 0.0;
+    if (selectedRowKeys.length === 12) {
+      const payload = {
+        billIds: selectedRowKeys,
+        paymentDate: today,
+        financialYearId,
+        selectedCount: selectedRowKeys.length,
+      };
+      const discount = await axios.post(
+        `${BASE_URL}/billing/calculate-discount`,
+        payload,
+      );
+
+      const discountAmount = discount.data.discountAmount || 0;
+      amount = totalAmount - discountAmount;
+
+      setPayableAmount(amount);
+
+    }
 
     const billRef = `BILL-${Date.now()}`;
     const societyUpiId = upi; // from DB/API
@@ -228,6 +255,7 @@ const MemberPayingMaintenance: React.FC = () => {
     const qr = `upi://pay?pa=${societyUpiId}
     &pn=${encodeURIComponent(societyName ?? "")}
     &am=${1}
+    // &am=${amount.toFixed(2)}
     &cu=INR
     &tn=${billRef}`;
 
@@ -240,26 +268,30 @@ const MemberPayingMaintenance: React.FC = () => {
       message.error("Enter UTR / Transaction Id");
       return;
     }
-
     try {
-      await axios.post(`${BASE_URL}/billing/manual-payment`, {
-        billIds: selectedRowKeys,
-        memberId,
-        amount: totalAmount,
-        paymentMode: "UPI",
-        transactionId,
-        financialYearId,
-        userId,
-        glReceivable,
-        glCreditAccount,
-        glCashInHand,
-        glBankAccount,
-        glInterestIncome,
-        glDiscount,
-        interestAmount: totalInterest,
-        discountAmount: totalDiscount,
-
-      });
+      const res = await axios.post(
+        `${BASE_URL}/billing/member/manual-payment`,
+        {
+          billIds: selectedRowKeys,
+          memberId,
+          amount: Math.round(totalAmount),
+          paymentMode: "UPI",
+          transactionId,
+          financialYearId,
+          userId,
+          glReceivable,
+          glCreditAccount,
+          glCashInHand,
+          glBankAccount,
+          glInterestIncome,
+          glDiscount,
+          interestAmount: Math.round(totalInterest),
+          discountAmount: Math.round(totalDiscount),
+          selectedCount: selectedRowKeys.length,
+          societyId,
+        },
+      );
+      console.log("Response:", res);
 
       message.success("Payment submitted. Awaiting verification.");
 
@@ -357,10 +389,14 @@ const MemberPayingMaintenance: React.FC = () => {
         )}
 
         <Content style={{ padding: 24, background: "#f0f5ff" }}>
-          <Title level={3}>Pending Bills (Member Paying Online)</Title>
+          {/* <Title level={5}>Pending Bills (Member Paying Online)</Title> */}
 
           {/* ================= FLAT FILTER ================= */}
           <div style={{ marginBottom: 12 }}>
+            {" "}
+            <span style={{ fontSize: 16, fontWeight: 600 }}>
+              Pending Bills (Member Paying Online) :{" "}
+            </span>
             <Select
               placeholder="Select Flat"
               style={{ width: 220 }}
@@ -428,7 +464,7 @@ const MemberPayingMaintenance: React.FC = () => {
                   disabled: record.status !== "PENDING",
                 }),
               }}
-              pagination={{ pageSize: 8 }}
+              pagination={{ pageSize: 12 }}
               bordered
             />
           )}
@@ -443,7 +479,7 @@ const MemberPayingMaintenance: React.FC = () => {
               <QRCodeCanvas value={upiUrl} size={250} />
 
               <div style={{ marginTop: 15 }}>
-                <b>Amount:</b> ₹ {totalAmount}
+                <b>Amount:</b> ₹ {payableAmount}
               </div>
 
               <div style={{ marginTop: 15 }}>

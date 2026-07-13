@@ -10,7 +10,7 @@ import {
   Form,
   Row,
   Col,
-  Layout
+  Layout,
 } from "antd";
 import axios from "axios";
 import { apiPost } from "../../api/axios";
@@ -52,12 +52,13 @@ const BillGenerate: React.FC = () => {
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`);
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
+      );
 
       const mapping = res.data.find(
         (item: any) =>
-          item.description?.trim().toLowerCase() ===
-          "monthly maintenance"
+          item.description?.trim().toLowerCase() === "monthly maintenance",
       );
 
       if (!mapping) {
@@ -71,7 +72,6 @@ const BillGenerate: React.FC = () => {
 
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
-
     } catch (err) {
       console.error(err);
 
@@ -83,9 +83,7 @@ const BillGenerate: React.FC = () => {
 
   const onFinish = async (values: BillingFormValues) => {
     const financialYear = sessionStorage.getItem("financialYear");
-    const financialYearId = Number(
-      sessionStorage.getItem("financialYearId")
-    );
+    const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
     if (!financialYear) {
       message.error("Financial Year not found");
@@ -93,15 +91,14 @@ const BillGenerate: React.FC = () => {
     }
 
     if (!glReceivable || !glCreditAccount) {
-      message.error(
-        "Monthly Maintenance GL Mapping not configured"
-      );
+      message.error("Monthly Maintenance GL Mapping not configured");
       return;
     }
 
     const [start, end] = financialYear.trim().split("-");
     const startYear = Number(start);
-    const endYear = end.length === 2 ? Number(start.substring(0, 2) + end) : Number(end);
+    const endYear =
+      end.length === 2 ? Number(start.substring(0, 2) + end) : Number(end);
 
     const selectedYear = Number(values.year);
     const selectedMonth = values.month;
@@ -118,20 +115,16 @@ const BillGenerate: React.FC = () => {
       "DECEMBER",
     ];
 
-    const validMonthsEndYear = [
-      "JANUARY",
-      "FEBRUARY",
-      "MARCH",
-    ];
+    const validMonthsEndYear = ["JANUARY", "FEBRUARY", "MARCH"];
 
     const isValid =
       (selectedYear === startYear &&
         validMonthsStartYear.includes(selectedMonth)) ||
-      (selectedYear === endYear &&
-        validMonthsEndYear.includes(selectedMonth));
+      (selectedYear === endYear && validMonthsEndYear.includes(selectedMonth));
 
     if (!isValid) {
-      message.error(`Bill generation is allowed only for Financial Year ${financialYear}`
+      message.error(
+        `Bill generation is allowed only for Financial Year ${financialYear}`,
       );
       return;
     }
@@ -150,9 +143,7 @@ const BillGenerate: React.FC = () => {
         month: selectedMonth,
         year: selectedYear,
         societyId: Number(societyId),
-        createdBy: Number(
-          sessionStorage.getItem("userId")
-        ),
+        createdBy: Number(sessionStorage.getItem("userId")),
         financialYearId,
         glReceivable,
         glCreditAccount,
@@ -176,112 +167,153 @@ const BillGenerate: React.FC = () => {
     }
   };
 
+  const generateFinancialYearBills = async () => {
+  const values = await form.validateFields();
+  const payload = {
+    month: values.month,   // ignored by backend
+    year: Number(values.year),
+    societyId,
+    createdBy: Number(sessionStorage.getItem("userId")),
+    financialYearId: Number(sessionStorage.getItem("financialYearId")),
+    glReceivable,
+    glCreditAccount,
+  };
+
+  await apiPost("/billing/generate-financial-year-bills", payload);
+  message.success("Financial Year bills generated successfully");
+};
+
   return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <Card
-      title={`Generate Monthly Bills (FY: ${
-        sessionStorage.getItem("financialYear") || "N/A"
-      })`}
-      style={{ marginBottom: 20 }}
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        initialValues={{
-          year: new Date().getFullYear(),
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
         }}
       >
-        <Row gutter={16}>
-          <Col xs={24} md={10}>
-            <Form.Item
-              label="Month"
-              name="month"
-              rules={[
-                {
-                  required: true,
-                  message: "Select month",
-                },
-              ]}
-            >
-              <Select placeholder="Select Month">
-                <Option value="JANUARY">JANUARY</Option>
-                <Option value="FEBRUARY">FEBRUARY</Option>
-                <Option value="MARCH">MARCH</Option>
-                <Option value="APRIL">APRIL</Option>
-                <Option value="MAY">MAY</Option>
-                <Option value="JUNE">JUNE</Option>
-                <Option value="JULY">JULY</Option>
-                <Option value="AUGUST">AUGUST</Option>
-                <Option value="SEPTEMBER">SEPTEMBER</Option>
-                <Option value="OCTOBER">OCTOBER</Option>
-                <Option value="NOVEMBER">NOVEMBER</Option>
-                <Option value="DECEMBER">DECEMBER</Option>
-              </Select>
-            </Form.Item>
-          </Col>
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-          <Col xs={24} md={8}>
-            <Form.Item
-              label="Year"
-              name="year"
-              rules={[
-                {
-                  required: true,
-                  message: "Enter year",
-                },
-              ]}
-            >
-              <Input
-                type="number"
-                placeholder="Enter year"
-              />
-            </Form.Item>
-          </Col>
-
-          <Col
-            xs={24}
-            md={6}
-            style={{
-              display: "flex",
-              alignItems: "center",
-            }}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card
+            title={`Generate Monthly Bills (FY: ${sessionStorage.getItem("financialYear") || "N/A"})`}
+            style={{ marginBottom: 20 }}
           >
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              disabled={!maintenanceMappingExists}
-              block
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onFinish}
+              initialValues={{
+                year: new Date().getFullYear(),
+              }}
             >
-              Generate Bills
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    </Card>
-    </Content>
-    </Layout>
+              <Row gutter={16}>
+                <Col xs={24} md={10}>
+                  <Form.Item
+                    label="Month"
+                    name="month"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Select month",
+                      },
+                    ]}
+                  >
+                    <Select placeholder="Select Month">
+                      <Option value="JANUARY">JANUARY</Option>
+                      <Option value="FEBRUARY">FEBRUARY</Option>
+                      <Option value="MARCH">MARCH</Option>
+                      <Option value="APRIL">APRIL</Option>
+                      <Option value="MAY">MAY</Option>
+                      <Option value="JUNE">JUNE</Option>
+                      <Option value="JULY">JULY</Option>
+                      <Option value="AUGUST">AUGUST</Option>
+                      <Option value="SEPTEMBER">SEPTEMBER</Option>
+                      <Option value="OCTOBER">OCTOBER</Option>
+                      <Option value="NOVEMBER">NOVEMBER</Option>
+                      <Option value="DECEMBER">DECEMBER</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={8}>
+                  <Form.Item
+                    label="Year"
+                    name="year"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Enter year",
+                      },
+                    ]}
+                  >
+                    <Input type="number" placeholder="Enter year" />
+                  </Form.Item>
+                </Col>
+
+                <Col
+                  xs={24}
+                  md={6}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={loading}
+                    disabled={!maintenanceMappingExists}
+                    block
+                  >
+                    Generate Bills
+                  </Button>
+                </Col>
+
+              </Row>
+              <Row gutter={24}>
+                  <Col xs={12} md={12}>
+                    <Button
+                      type="primary"
+                      loading={loading}
+                      disabled={!maintenanceMappingExists}
+                      block
+                      onClick={generateFinancialYearBills}
+                    >
+                      Generate Maintenance for 12 months (Accounting Year : April
+                      to March)
+                    </Button>
+                  </Col>
+              </Row>
+            </Form>
+          </Card>
+        </Content>
+      </Layout>
     </Layout>
   );
 };
