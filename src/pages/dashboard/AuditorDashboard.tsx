@@ -11,13 +11,14 @@ import {
   Layout,
 } from "antd";
 import {
-  TeamOutlined,
+   TeamOutlined,
   HomeOutlined,
-  CalendarOutlined,
   AuditOutlined,
   FileDoneOutlined,
   FundProjectionScreenOutlined,
   FileTextOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { apiGet } from "../../api/axios";
@@ -28,7 +29,6 @@ import "./AuditorDashboard.css";
 const { Content } = Layout;
 const { Title, Text } = Typography;
 const BASE_URL = import.meta.env.VITE_API_URL;
-
 const AuditorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const auditorId = Number(sessionStorage.getItem("userId"));
@@ -36,11 +36,24 @@ const AuditorDashboard: React.FC = () => {
   const [stats, setStats] = useState({
     users: 0,
     societies: 0,
+    wings: 0,
+    flats: 0,
+    members: 0,
+
   });
 
   const [societyName, setSocietyName] = useState("-");
 
   const [financialYear, setFinancialYear] = useState("-");
+  
+const [maintenancePaid, setMaintenancePaid] = useState(0);
+const [maintenancePending, setMaintenancePending] = useState(0);
+
+const [sinkingPaid, setSinkingPaid] = useState(0);
+const [sinkingPending, setSinkingPending] = useState(0);
+
+const [contributionPaid, setContributionPaid] = useState(0);
+const [contributionPending, setContributionPending] = useState(0);
 
   useEffect(() => {
     loadDashboard();
@@ -93,22 +106,49 @@ const AuditorDashboard: React.FC = () => {
       message.error("Unable to load GL Mapping.");
     }
   };
+const loadPaymentSummary = async (societyId: number) => {
+  try {
+    const res = await apiGet(`/billing/pending/${societyId}`);
+    console.log("Billing Response:", res);
+console.log("Is Array:", Array.isArray(res));
 
+    console.log(res);
+
+    setMaintenancePending(res.length);
+  } catch (err) {
+    console.log(err);
+  }
+};
   const loadDashboard = async () => {
     try {
       setLoading(true);
       const users = await apiGet("/users");
       const societies = await apiGet("/societies");
+      const wings = await apiGet("/wings");
+      const flats = await apiGet("/flats");
+      const members = await apiGet("/members");
       const auditorSocieties = societies.filter((s: any) => s.auditor?.id === auditorId,);
       const societyIds = auditorSocieties.map((s: any) => s.id);
+      const filteredWings = wings.filter((w: any) =>
+      societyIds.includes(w.society?.id)
+    );
+      const filteredFlats = flats.filter((f: any) =>
+      societyIds.includes(f.societyId)
+    );
+      const filteredMembers = members.filter((m: any) =>
+      societyIds.includes(m.societyId)
+    );
       const filteredUsers = users.filter((u: any) =>
         societyIds.includes(u.societyId),
-      );
+    );
 
       setStats({
-        users: filteredUsers.length,
-        societies: auditorSocieties.length,
-      });
+  users: filteredUsers.length,
+  societies: auditorSocieties.length,
+  wings: filteredWings.length,
+  flats: filteredFlats.length,
+  members: filteredMembers.length,
+});
 
       if (auditorSocieties.length > 0) {
         const society = auditorSocieties[0];
@@ -118,6 +158,7 @@ const AuditorDashboard: React.FC = () => {
         window.dispatchEvent(new Event("societyChanged"));
         await loadFinancialYear();
         await fetchGlMapping();
+        await loadPaymentSummary(society.id);
       }
     } catch (error) {
       console.error(error);
@@ -137,6 +178,34 @@ const AuditorDashboard: React.FC = () => {
     transition: ".3s",
     cursor: "pointer",
   };
+
+  const statusCardStyle: React.CSSProperties = {
+  borderRadius: 18,
+  border: "none",
+  height: 160,
+  boxShadow: "0 8px 25px rgba(0,0,0,.08)",
+};
+
+const pendingIconStyle: React.CSSProperties = {
+  width: 70,
+  height: 70,
+  borderRadius: "50%",
+  background: "#fdeaea",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const paidIconStyle: React.CSSProperties = {
+  width: 70,
+  height: 70,
+  borderRadius: "50%",
+  background: "#edf8e7",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
   return (
     <Content
       style={{
@@ -154,31 +223,8 @@ const AuditorDashboard: React.FC = () => {
       {/* KPI CARDS */}
 
       <Row gutter={[20, 20]} style={{ marginTop: 25 }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card hoverable style={cardStyle} onClick={() => navigate("/financial-year")} >
-            <Space direction="vertical">
-              <CalendarOutlined
-                style={{
-                  fontSize: 34,
-                  color: "#722ed1",
-                }}
-              />
-
-              <Text type="secondary">Financial Year</Text>
-              <Title
-                level={3}
-                style={{
-                  margin: 0,
-                  color: "#722ed1",
-                }}
-              >
-                {financialYear}
-              </Title>
-            </Space>
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} lg={6}>
+      
+         <Col xs={24} sm={12} md={8} lg={4} xl={4}>
           <Card hoverable style={cardStyle} onClick={() => navigate("/users")} >
             <Space direction="vertical">
               <TeamOutlined
@@ -198,13 +244,13 @@ const AuditorDashboard: React.FC = () => {
           </Card>
         </Col>
 
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} md={8} lg={4} xl={4}>
           <Card hoverable style={cardStyle} onClick={() => navigate("/societies")}>
             <Space direction="vertical">
               <HomeOutlined
                 style={{
                   fontSize: 34,
-                  color: "#52c41a",
+                  color: "#52c41a", 
                 }}
               />
               <Text type="secondary">Societies</Text>
@@ -220,8 +266,191 @@ const AuditorDashboard: React.FC = () => {
             </Space>
           </Card>
         </Col>
-      </Row>
+     
 
+<Col xs={24} sm={12} md={8} lg={4} xl={4}>
+       <Card
+        hoverable
+        style={cardStyle}
+        onClick={() => navigate("/wings")}
+    >
+     <Space direction="vertical">
+      <AuditOutlined
+        style={{
+          fontSize: 34,
+          color: "#fa8c16",
+        }}
+        />
+        <Text type="secondary">Wings</Text>
+        <Title level={2} style={{ margin: 0, color: "#fa8c16" }}>
+         {stats.wings}
+        </Title>
+        </Space>
+        </Card>
+        </Col>
+
+      <Col xs={24} sm={12} md={8} lg={4} xl={4}>
+  <Card
+    hoverable
+    style={cardStyle}
+    onClick={() => navigate("/flats")}
+  >
+    <Space direction="vertical">
+      <HomeOutlined
+        style={{
+          fontSize: 34,
+          color: "#eb2f96",
+        }}
+      />
+      <Text type="secondary">Flats</Text>
+      <Title level={2} style={{ margin: 0, color: "#eb2f96" }}>
+        {stats.flats}
+      </Title>
+    </Space>
+  </Card>
+</Col>
+
+      <Col xs={24} sm={12} md={8} lg={4} xl={4}>
+  <Card
+    hoverable
+    style={cardStyle}
+    onClick={() => navigate("/members")}
+  >
+    <Space direction="vertical">
+      <TeamOutlined
+        style={{
+          fontSize: 34,
+          color: "#13c2c2",
+        }}
+      />
+      <Text type="secondary">Members</Text>
+      <Title level={2} style={{ margin: 0, color: "#13c2c2" }}>
+        {stats.members}
+      </Title>
+    </Space>
+  </Card>
+</Col>
+ </Row>
+
+<Row gutter={[20,20]} style={{marginTop:25}}>
+
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Pending Maintenance</Text>
+          <Title level={2} style={{color:"#ff4d4f",marginTop:20}}>
+            {maintenancePending}
+          </Title>
+        </Col>
+
+        <Col>
+          <div style={pendingIconStyle}>
+            <ClockCircleOutlined style={{fontSize:34,color:"#ff4d4f"}} />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Paid Maintenance</Text>
+          <Title level={2} style={{color:"#52c41a",marginTop:20}}>
+            {maintenancePaid}
+          </Title>
+        </Col>
+
+        <Col>
+          <div style={paidIconStyle}>
+            <CheckCircleOutlined style={{fontSize:34,color:"#52c41a"}} />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Pending Sinking Fund</Text>
+          <Title level={2} style={{color:"#ff4d4f",marginTop:20}}>
+            {sinkingPending}
+          </Title>
+        </Col>
+
+        <Col>
+          <div style={pendingIconStyle}>
+            <ClockCircleOutlined style={{fontSize:34,color:"#ff4d4f"}} />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Paid Sinking Fund</Text>
+          <Title level={2} style={{color:"#52c41a",marginTop:20}}>
+            {sinkingPaid}
+          </Title>
+        </Col>
+
+        <Col>
+          <div style={paidIconStyle}>
+            <CheckCircleOutlined style={{fontSize:34,color:"#52c41a"}} />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Pending Contribution</Text>
+          <Title level={2} style={{color:"#ff4d4f",marginTop:20}}>
+            {contributionPending}
+          </Title>
+        </Col>
+
+        <Col>
+          <div style={pendingIconStyle}>
+            <ClockCircleOutlined style={{fontSize:34,color:"#ff4d4f"}} />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Paid Contribution</Text>
+          <Title level={2} style={{color:"#52c41a",marginTop:20}}>
+            {contributionPaid}
+          </Title>
+        </Col>
+
+        <Col>
+          <div style={paidIconStyle}>
+            <CheckCircleOutlined style={{fontSize:34,color:"#52c41a"}} />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+
+
+</Row>
       {/* QUICK ACTIONS */}
 
       <Card
