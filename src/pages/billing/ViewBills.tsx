@@ -20,6 +20,10 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrBefore);
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -81,8 +85,7 @@ export default function ViewBills() {
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-  const [maintenanceMappingExists, setMaintenanceMappingExists] =
-    useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
@@ -95,14 +98,16 @@ export default function ViewBills() {
   const [paymentMaintenance, setPaymentMaintenance] = useState(0);
   const [paymentInterest, setPaymentInterest] = useState(0);
   const [paymentDiscount, setPaymentDiscount] = useState(0);
+  const [discountPolicy, setDiscountPolicy] = useState<any>(null);
 
-  const paymentTotal = paymentMaintenance + paymentInterest + paymentDiscount;
+  const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
 
   useEffect(() => {
     loadFlats();
     loadBills();
     loadMembers();
     loadGlMapping();
+    loadDiscountPolicy();
   }, []);
 
   useEffect(() => {}, [
@@ -197,6 +202,7 @@ export default function ViewBills() {
   };
 
   const handlePay = async () => {
+
     try {
       const billIds = selectedRowKeys.map(Number);
 
@@ -217,6 +223,7 @@ export default function ViewBills() {
         glBankAccount,
         glInterestIncome,
         glDiscount,
+        selectedCount : selectedRowKeys.length,
       };
 
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
@@ -229,6 +236,20 @@ export default function ViewBills() {
       message.error("Payment failed");
     }
   };
+
+  const loadDiscountPolicy = async () => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/discount-policy/society/${societyId}`
+    );
+
+    const activePolicy = res.data.find((p: any) => p.active);
+
+    setDiscountPolicy(activePolicy || null);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const filterBills = async () => {
     try {
@@ -477,34 +498,43 @@ export default function ViewBills() {
 
             {/* ================= BUTTON ================= */}
             <div style={{ marginBottom: 12 }}>
-              <Button
-                type="primary"
-                disabled={selectedRowKeys.length === 0}
-                onClick={() => {
-                  setPaymentMaintenance(
-                    selectedBills.reduce(
-                      (s, b) => s + (b.maintenanceAmount || 0),
-                      0,
-                    ),
-                  );
-                  setPaymentInterest(
-                    selectedBills.reduce(
-                      (s, b) => s + (b.interestAmount || 0),
-                      0,
-                    ),
-                  );
-                  setPaymentDiscount(
-                    selectedBills.reduce(
-                      (s, b) => s + (b.discountAmount || 0),
-                      0,
-                    ),
-                  );
-                  setPaymentModalOpen(true);
-                }}
-              >
-                Payment Received by Admin ({selectedRowKeys.length})
-              </Button>
-            </div>
+<Button
+  type="primary"
+  disabled={selectedRowKeys.length === 0}
+  onClick={() => {
+    const maintenance = selectedBills.reduce(
+      (s, b) => s + (b.maintenanceAmount || 0),
+      0
+    );
+
+    const interest = selectedBills.reduce(
+      (s, b) => s + (b.interestAmount || 0),
+      0
+    );
+
+    let discount = 0;
+
+    if (
+      discountPolicy &&
+      discountPolicy.active && selectedRowKeys.length == 12 &&
+      dayjs().isSameOrBefore(
+        dayjs(discountPolicy.paidBeforeDate),
+        "day"
+      )
+    ) {
+      discount =
+        (maintenance * discountPolicy.discountPercent) / 100;
+    }
+
+    setPaymentMaintenance(maintenance);
+    setPaymentInterest(interest);
+    setPaymentDiscount(discount);
+
+    setPaymentModalOpen(true);
+  }}
+>
+  Payment Received by Admin ({selectedRowKeys.length})
+</Button>            </div>
 
             {/* ================= TABLE ================= */}
             <Table

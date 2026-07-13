@@ -15,7 +15,7 @@ import {
   Tag,
   Popconfirm,
   Layout
-} from "antd";
+} from "antd"; 
 import dayjs from "dayjs";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
@@ -36,7 +36,7 @@ const role = sessionStorage.getItem("role");
 interface DiscountPolicyForm {
   policyName: string;
   active: boolean;
-  daysBeforeDue: number;
+  paidBeforeDate: dayjs.Dayjs;
   discountPercent: number;
   effectiveDates?: [dayjs.Dayjs, dayjs.Dayjs];
 }
@@ -45,7 +45,7 @@ interface DiscountPolicyData {
   id: number;
   policyName: string;
   active: boolean;
-  daysBeforeDue: number;
+  paidBeforeDate: string;
   discountPercent: number;
   effectiveFrom: string;
   effectiveTo: string;
@@ -62,7 +62,6 @@ const DiscountPolicy: React.FC = () => {
   useEffect(() => {
     form.setFieldsValue({
       active: true,
-      daysBeforeDue: 7,
       discountPercent: 5,
     });
 
@@ -93,7 +92,7 @@ const DiscountPolicy: React.FC = () => {
 
     form.setFieldsValue({
       policyName: record.policyName,
-      daysBeforeDue: record.daysBeforeDue,
+      paidBeforeDate: dayjs(record.paidBeforeDate),
       discountPercent: record.discountPercent,
       active: record.active,
       effectiveDates: [
@@ -110,7 +109,7 @@ const DiscountPolicy: React.FC = () => {
         societyId,
         policyName: values.policyName,
         active: values.active,
-        daysBeforeDue: values.daysBeforeDue,
+        paidBeforeDate: values.paidBeforeDate.format("YYYY-MM-DD"),
         discountPercent: values.discountPercent,
         effectiveFrom: values.effectiveDates?.[0]?.format("YYYY-MM-DD"),
         effectiveTo: values.effectiveDates?.[1]?.format("YYYY-MM-DD"),
@@ -161,8 +160,9 @@ const DiscountPolicy: React.FC = () => {
       dataIndex: "policyName",
     },
     {
-      title: "Days Before Due",
-      dataIndex: "daysBeforeDue",
+      title: "Paid Before Date",
+      dataIndex: "paidBeforeDate",
+      render: (date: string) => dayjs(date).format("DD-MM-YYYY"),
     },
     {
       title: "Discount %",
@@ -252,11 +252,14 @@ const DiscountPolicy: React.FC = () => {
 
           <Col xs={24} sm={12} md={8}>
             <Form.Item
-              label="Days Before Due"
-              name="daysBeforeDue"
-              rules={[{ required: true }]}
+              label="Paid Before Date"
+              name="paidBeforeDate"
+              rules={[{ required: true, message: "Please select Paid Before Date" }]}
             >
-              <InputNumber style={{ width: "100%" }} min={0} />
+              <DatePicker
+                style={{ width: "100%" }}
+                format="DD-MM-YYYY"
+              />
             </Form.Item>
           </Col>
 
