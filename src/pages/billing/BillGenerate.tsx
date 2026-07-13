@@ -99,10 +99,9 @@ const BillGenerate: React.FC = () => {
       return;
     }
 
-    const [startYear, endYear] = financialYear
-      .trim()
-      .split("-")
-      .map(Number);
+    const [start, end] = financialYear.trim().split("-");
+    const startYear = Number(start);
+    const endYear = end.length === 2 ? Number(start.substring(0, 2) + end) : Number(end);
 
     const selectedYear = Number(values.year);
     const selectedMonth = values.month;

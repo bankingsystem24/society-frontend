@@ -66,8 +66,6 @@ const TrialBalance: React.FC = () => {
 
       const res = await axios.get(`${BASE_URL}/gl/reports/trial-balance`, {
         params: {societyId, financialYearId, },});
-
-        console.log("Res:",res);
       const filteredData = (res.data || []).filter(
         (item: any) =>
           (item.openingBalance ?? 0) !== 0 ||

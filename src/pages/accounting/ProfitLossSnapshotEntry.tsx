@@ -152,8 +152,6 @@ const ProfitLossSnapshotEntry: React.FC = () => {
         })),
       };
 
-      console.log(payload);
-
       await axios.post(`${BASE_URL}/profit-loss-snapshot/save`,payload );
 
       message.success("Profit & Loss Snapshot saved successfully.");

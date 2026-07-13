@@ -22,13 +22,6 @@ const OpenFinancialYear: React.FC = () => {
  const openFinancialYear = async () => {
   try {
     setLoading(true);
-
-    console.log({
-      societyId,
-      accountingYearId,
-      username,
-    });
-
     const response = await axios.post(
       `${BASE_URL}/accounting-year/open`,
       {

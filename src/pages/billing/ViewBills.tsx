@@ -8,6 +8,7 @@ import {
   Table,
   message,
   Layout,
+  DatePicker,
 } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -85,7 +86,9 @@ export default function ViewBills() {
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
+  const [paymentDate, setPaymentDate] = useState(dayjs());
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
@@ -202,28 +205,26 @@ export default function ViewBills() {
   };
 
   const handlePay = async () => {
-
     try {
       const billIds = selectedRowKeys.map(Number);
 
       const payload = {
         billIds,
         paymentMode,
+        paymentDate: paymentDate.format("YYYY-MM-DD"),
         financialYearId,
         transactionId,
-
         maintenanceAmount: paymentMaintenance,
         interestAmount: paymentInterest,
         discountAmount: paymentDiscount,
         totalAmount: paymentTotal,
-
         glReceivable,
         glCreditAccount,
         glCashInHand,
         glBankAccount,
         glInterestIncome,
         glDiscount,
-        selectedCount : selectedRowKeys.length,
+        selectedCount: selectedRowKeys.length,
       };
 
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
@@ -231,6 +232,7 @@ export default function ViewBills() {
       // message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
+      setPaymentDate(dayjs());
       loadBills();
     } catch {
       message.error("Payment failed");
@@ -238,18 +240,16 @@ export default function ViewBills() {
   };
 
   const loadDiscountPolicy = async () => {
-  try {
-    const res = await axios.get(
-      `${BASE_URL}/discount-policy/society/${societyId}`
-    );
-
-    const activePolicy = res.data.find((p: any) => p.active);
-
-    setDiscountPolicy(activePolicy || null);
-  } catch (err) {
-    console.error(err);
-  }
-};
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/discount-policy/society/${societyId}`,
+      );
+      const activePolicy = res.data.find((p: any) => p.active);
+      setDiscountPolicy(activePolicy || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const filterBills = async () => {
     try {
@@ -308,6 +308,24 @@ export default function ViewBills() {
     },
     {},
   ];
+
+  const calculateInterest = async (date: dayjs.Dayjs | null) => {
+    if (!date || selectedRowKeys.length === 0) return;
+
+    try {
+      const res = await axios.post(`${BASE_URL}/billing/calculate-interest`, {
+        billIds: selectedRowKeys,
+        paymentDate: date.format("YYYY-MM-DD"),
+        financialYearId
+      });
+
+      setPaymentInterest(res.data.interestAmount);
+      setPaymentDiscount(res.data.discountAmount);
+      setPaymentMaintenance(res.data.maintenanceAmount);
+    } catch (err) {
+      message.error("Unable to calculate interest.");
+    }
+  };
 
   const totalMaintenance = bills.reduce(
     (s, b) => s + (b.maintenanceAmount || 0),
@@ -498,43 +516,46 @@ export default function ViewBills() {
 
             {/* ================= BUTTON ================= */}
             <div style={{ marginBottom: 12 }}>
-<Button
-  type="primary"
-  disabled={selectedRowKeys.length === 0}
-  onClick={() => {
-    const maintenance = selectedBills.reduce(
-      (s, b) => s + (b.maintenanceAmount || 0),
-      0
-    );
+              <Button
+                type="primary"
+                disabled={selectedRowKeys.length === 0}
+                onClick={() => {
+                  const maintenance = selectedBills.reduce(
+                    (s, b) => s + (b.maintenanceAmount || 0),
+                    0,
+                  );
 
-    const interest = selectedBills.reduce(
-      (s, b) => s + (b.interestAmount || 0),
-      0
-    );
+                  const interest = selectedBills.reduce(
+                    (s, b) => s + (b.interestAmount || 0),
+                    0,
+                  );
 
-    let discount = 0;
+                  let discount = 0;
 
-    if (
-      discountPolicy &&
-      discountPolicy.active && selectedRowKeys.length == 12 &&
-      dayjs().isSameOrBefore(
-        dayjs(discountPolicy.paidBeforeDate),
-        "day"
-      )
-    ) {
-      discount =
-        (maintenance * discountPolicy.discountPercent) / 100;
-    }
+                  if (
+                    discountPolicy &&
+                    discountPolicy.active &&
+                    selectedRowKeys.length == 12 &&
+                    dayjs().isSameOrBefore(
+                      dayjs(discountPolicy.paidBeforeDate),
+                      "day",
+                    )
+                  ) {
+                    discount =
+                      (maintenance * discountPolicy.discountPercent) / 100;
+                  }
 
-    setPaymentMaintenance(maintenance);
-    setPaymentInterest(interest);
-    setPaymentDiscount(discount);
+                  setPaymentMaintenance(maintenance);
+                  setPaymentInterest(interest);
+                  setPaymentDiscount(discount);
 
-    setPaymentModalOpen(true);
-  }}
->
-  Payment Received by Admin ({selectedRowKeys.length})
-</Button>            </div>
+                  setPaymentModalOpen(true);
+                  calculateInterest(paymentDate);
+                }}
+              >
+                Payment Received by Admin ({selectedRowKeys.length})
+              </Button>{" "}
+            </div>
 
             {/* ================= TABLE ================= */}
             <Table
@@ -578,6 +599,19 @@ export default function ViewBills() {
                       { label: "CARD", value: "CARD" },
                       { label: "NETBANKING", value: "NETBANKING" },
                     ]}
+                  />
+                </Form.Item>
+                <Form.Item label="Payment Date" required>
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    value={paymentDate}
+                    format="DD-MM-YYYY"
+                    onChange={(date) => {
+                      if (date) {
+                        setPaymentDate(date);
+                        calculateInterest(date);
+                      }
+                    }}
                   />
                 </Form.Item>
                 <Form.Item label="Maintenance">

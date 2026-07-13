@@ -60,9 +60,7 @@ const TrialBalanceSnapshotEntry: React.FC = () => {
       const res = await axios.get(
         `${BASE_URL}/gl/master?societyId=${societyId}`,
       );
-
       setGlAccounts(res.data);
-      console.log(res.data);
     } catch (error) {
       message.error("Failed to load GL Accounts");
     }
@@ -150,8 +148,6 @@ const TrialBalanceSnapshotEntry: React.FC = () => {
           accountType: "SNAPSHOT",
         })),
       };
-
-      console.log("Payload:", payload);
 
       await axios.post(`${BASE_URL}/trial-balance-snapshot/save`, payload);
 
