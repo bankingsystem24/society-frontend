@@ -11,6 +11,7 @@ import {
   Row,
   Col,
   Layout,
+  Modal,
 } from "antd";
 import axios from "axios";
 import { apiPost } from "../../api/axios";
@@ -167,20 +168,41 @@ const BillGenerate: React.FC = () => {
     }
   };
 
-  const generateFinancialYearBills = async () => {
-  const values = await form.validateFields();
-  const payload = {
-    month: values.month,   // ignored by backend
-    year: Number(values.year),
-    societyId,
-    createdBy: Number(sessionStorage.getItem("userId")),
-    financialYearId: Number(sessionStorage.getItem("financialYearId")),
-    glReceivable,
-    glCreditAccount,
-  };
+const generateFinancialYearBills = () => {
+  Modal.confirm({
+    title: "Generate Bills for Entire Financial Year",
+    content:
+      "This will generate maintenance bills for all 12 months (April to March). Continue?",
+    okText: "Generate",
+    cancelText: "Cancel",
+    onOk: async () => {
+      try {
+        setLoading(true);
 
-  await apiPost("/billing/generate-financial-year-bills", payload);
-  message.success("Financial Year bills generated successfully");
+        const year = form.getFieldValue("year");
+
+        const payload = {
+          year: Number(year),
+          societyId,
+          createdBy: Number(sessionStorage.getItem("userId")),
+          financialYearId: Number(sessionStorage.getItem("financialYearId")),
+          glReceivable,
+          glCreditAccount,
+        };
+
+        await apiPost("/billing/generate-financial-year-bills", payload);
+
+        message.success(
+          "Bills generated successfully for all 12 months."
+        );
+      } catch (err) {
+        console.error(err);
+        message.error("Failed to generate yearly bills.");
+      } finally {
+        setLoading(false);
+      }
+    },
+  });
 };
 
   return (

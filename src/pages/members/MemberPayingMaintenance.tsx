@@ -242,7 +242,7 @@ const MemberPayingMaintenance: React.FC = () => {
         payload,
       );
 
-      const discountAmount = discount.data.discountAmount || 0;
+      const discountAmount = Math.round(discount.data.discountAmount || 0);
       amount = totalAmount - discountAmount;
 
       setPayableAmount(amount);
