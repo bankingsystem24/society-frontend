@@ -1,0 +1,67 @@
+.bs-report {
+  background: #fff;
+  padding: 20px;
+}
+
+.report-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.balance-sheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.balance-sheet-table th,
+.balance-sheet-table td {
+  border: 1px solid #000;
+  padding: 6px 8px;
+}
+
+.balance-sheet-table th {
+  background: #f2f2f2;
+  text-align: center;
+}
+
+.total-row {
+  font-weight: bold;
+  background: #fafafa;
+}
+
+.signature-section {
+    width: 100%;
+    margin-top: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: nowrap;   /* Important */
+}
+
+.signature-box {
+    width: 32%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@media print {
+
+    .signature-section {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+        width: 100%;
+        page-break-inside: avoid;
+    }
+
+    .signature-box {
+        width: 32% !important;
+        display: block;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+}

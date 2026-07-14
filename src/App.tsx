@@ -67,6 +67,7 @@ import TrialBalanceSnapshotView from "./pages/accounting/TrialBalanceSnapshotVie
 import ProfitLossSnapshotEntry from "./pages/accounting/ProfitLossSnapshotEntry";
 import ProfitLossSnapshotView from "./pages/accounting/ProfitLossSnapshotView";
 import BalanceSheetSnapshot from "./pages/accounting/BalanceSheetSnapshot";
+import BalanceSheetSnapshotView from "./pages/accounting/BalanceSheetSnapshotView";
  
 export default function App() {
   return (
@@ -98,6 +99,7 @@ export default function App() {
       <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
       <Route path="/profit-loss-snapshot-entry" element={<ProfitLossSnapshotEntry />} />
       <Route path="/profit-loss-snapshot-view" element={<ProfitLossSnapshotView />} />
+      <Route path="/balance-sheet-snapshot-view" element={<BalanceSheetSnapshotView />} />
 
       <Route path="/verify-payment" element={<VerifyPayemnt />} />
       <Route path="/gl-mapping" element={<GlMappingEntry />} />
