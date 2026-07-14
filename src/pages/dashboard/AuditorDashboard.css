@@ -136,25 +136,6 @@ body {
    Buttons
 ========================================== */
 
-.ant-btn-primary {
-
-    height: 48px;
-
-    border-radius: 10px;
-
-    font-weight: 600;
-
-}
-
-.ant-btn-primary:hover {
-
-    transform: translateY(-2px);
-
-}
-
-/* ==========================================
-   Information Box
-========================================== */
 
 .info-item {
 

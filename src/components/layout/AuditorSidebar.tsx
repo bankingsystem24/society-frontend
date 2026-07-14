@@ -255,6 +255,12 @@ const AuditorSidebar: React.FC = () => {
                 label: "View P&L",
                 icon: <HomeOutlined />,
               },
+              {
+                key: "/balance-sheet-snapsnot",
+                label: "BalanceSheet Snapshot Entry",
+                icon: <HomeOutlined />,
+              },
+              
             ]
           },
 

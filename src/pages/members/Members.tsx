@@ -145,7 +145,7 @@ const Members: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      width: 220,
+      width: 120,
       render: (_: any, record: any) => (
         <Space>
           <Button
