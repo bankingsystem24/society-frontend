@@ -109,6 +109,14 @@ const Members: React.FC = () => {
       dataIndex: "name",
       key: "name",
       width: 150,
+     render: (text: string) => (
+      <Typography.Text
+        ellipsis={{ tooltip: text }}
+        style={{ width: 130, display: "inline-block" }}
+      >
+        {text}
+      </Typography.Text>
+    ),
     },
     {
       title: "Mobile",
@@ -256,7 +264,7 @@ const Members: React.FC = () => {
             loading={loading}
             size="small"
             pagination={{
-              pageSize: 8,
+              pageSize: 12,
               showSizeChanger: true,
               responsive: true,
             }}
