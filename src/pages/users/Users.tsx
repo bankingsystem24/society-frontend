@@ -311,7 +311,7 @@ const Users: React.FC = () => {
           loading={loading}
           size="small"
           pagination={{
-            pageSize: 8,
+            pageSize: 12,
             showSizeChanger: true,
           }}
           scroll={{ x: "max-content" }}
