@@ -24,11 +24,17 @@ const Societies: React.FC = () => {
       setLoading(true);
 
       const res = await apiGet("/societies");
+      if (!Array.isArray(res)) {
+        console.error("Unexpected response:", res);
+        return;
+      }
+
       const auditorId = Number(sessionStorage.getItem("auditorId"));
 
-      const filtered = (res || []).filter(
+      const filtered = res.filter(
         (society: any) => society?.auditor?.id === auditorId,
       );
+
       setSocieties(filtered);
     } catch (error) {
       console.error("Error loading societies:", error);

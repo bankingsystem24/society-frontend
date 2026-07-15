@@ -109,11 +109,6 @@ const [contributionPending, setContributionPending] = useState(0);
 const loadPaymentSummary = async (societyId: number) => {
   try {
     const res = await apiGet(`/billing/pending/${societyId}`);
-    console.log("Billing Response:", res);
-console.log("Is Array:", Array.isArray(res));
-
-    console.log(res);
-
     setMaintenancePending(res.length);
   } catch (err) {
     console.log(err);

@@ -291,8 +291,6 @@ const MemberPayingMaintenance: React.FC = () => {
           societyId,
         },
       );
-      console.log("Response:", res);
-
       message.success("Payment submitted. Awaiting verification.");
 
       setQrVisible(false);
