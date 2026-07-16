@@ -108,11 +108,11 @@ const Members: React.FC = () => {
       title: "Member Name",
       dataIndex: "name",
       key: "name",
-      width: 150,
+      width: 250,
      render: (text: string) => (
       <Typography.Text
         ellipsis={{ tooltip: text }}
-        style={{ width: 130, display: "inline-block" }}
+        style={{ width:250, display: "inline-block" }}
       >
         {text}
       </Typography.Text>
@@ -122,13 +122,13 @@ const Members: React.FC = () => {
       title: "Mobile",
       dataIndex: "mobile",
       key: "mobile",
-      width: 140,
+      width: 100,
     },
     {
       title: "Address",
       dataIndex: "address",
       key: "address",
-      width: 150,
+      width: 250,
     },
     {
       title: "Email",
@@ -265,7 +265,7 @@ const Members: React.FC = () => {
             loading={loading}
             size="small"
             pagination={{
-              pageSize: 8,
+              pageSize: 12,
               showSizeChanger: true,
               responsive: true,
             }}

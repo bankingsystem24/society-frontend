@@ -130,6 +130,7 @@ const SuperAdminSocieties: React.FC = () => {
         <Space>
           <Button
             type="primary"
+            size="small"
             onClick={() => navigate(`/superadmin-edit-societies/${record.id}`)}
           >
             Edit
@@ -141,7 +142,7 @@ const SuperAdminSocieties: React.FC = () => {
             cancelText="No"
             onConfirm={() => handleDelete(record.id)}
           >
-            <Button danger>Delete</Button>
+            <Button danger size="small">Delete</Button>
           </Popconfirm>
         </Space>
       ),

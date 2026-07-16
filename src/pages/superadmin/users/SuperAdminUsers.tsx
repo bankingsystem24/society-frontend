@@ -107,13 +107,16 @@ const SuperAdminUsers: React.FC = () => {
       title: "Society",
       dataIndex: "societyName",
       key: "societyName",
-      width:120,
+      width:220,
       ellipsis: true,
-      onCell: () => ({
-        style: {
-          whiteSpace: "nowrap",
-        },
-      }),
+      render: (text: string) => (
+      <Typography.Text
+        ellipsis={{ tooltip: text }}
+        style={{ width:220, display: "inline-block" }}
+      >
+        {text}
+      </Typography.Text>
+    ),
     },
     {
       title: "Role",
@@ -125,15 +128,24 @@ const SuperAdminUsers: React.FC = () => {
       dataIndex: "username",
       key: "username",
     },
-    {
-      title: "Member Name",
-      dataIndex: "memberName",
-      key: "memberName",
-    },
+    // {
+    //   title: "Member Name",
+    //   dataIndex: "memberName",
+    //   key: "memberName",
+    // },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      width:200,
+      render: (text: string) => (
+      <Typography.Text
+        ellipsis={{ tooltip: text }}
+        style={{ width:200, display: "inline-block" }}
+      >
+        {text}
+      </Typography.Text>
+    ),
     },
     {
       title: "Email",
@@ -181,6 +193,7 @@ const SuperAdminUsers: React.FC = () => {
         >
           <Button
             type="primary"
+            size="small"
             icon={<EditOutlined />}
             onClick={() => navigate(`/superadmin-edit-user/${record.id}`)}
           >
@@ -194,7 +207,7 @@ const SuperAdminUsers: React.FC = () => {
             cancelText="No"
             onConfirm={() => deleteUser(record.id)}
           >
-            <Button danger icon={<DeleteOutlined />}>
+            <Button danger  size="small" icon={<DeleteOutlined />}>
               Delete
             </Button>
           </Popconfirm>
@@ -204,20 +217,16 @@ const SuperAdminUsers: React.FC = () => {
   ];
 
   return (
-    <Card
-      style={{
-        width: "100%",
-        padding: 16,
-      }}
-    >
+    <>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 20,
+          marginBottom: 10,
+          marginTop:0,
           flexWrap: "wrap",
-          gap: 16,
+          gap: 6,
         }}
       >
         <div>
@@ -265,11 +274,11 @@ const SuperAdminUsers: React.FC = () => {
         loading={loading}
         size="small"
         pagination={{
-          pageSize: 8,
+          pageSize: 12,
         }}
         scroll={{ x: 700 }}
       />
-    </Card>
+      </>
   );
 };
 

@@ -112,10 +112,43 @@ const MemberSidebar: React.FC = () => {
           },
 
           {
-            key: "/member-login",
-            icon: <LogoutOutlined />,
-            label: "Logout",
+            key: "Snapshot",
+            icon: <UserOutlined />,
+            label: "Snapshots",
+            children: [
+              // {
+              //   key: "/trial-balance-snapshot",
+              //   label: "TrialBalance Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/trial-balance-snapshot-view",
+                label: "View TrialBalance",
+                icon: <HomeOutlined />,
+              },
+              // {
+              //   key: "/profit-loss-snapshot-entry",
+              //   label: "Profit & Loss Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/profit-loss-snapshot-view",
+                label: "View P&L",
+                icon: <HomeOutlined />,
+              },
+              // {
+              //   key: "/balance-sheet-snapsnot",
+              //   label: "BalanceSheet Snapshot Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/balance-sheet-snapshot-view",
+                label: "View BalanceSheet",
+                icon: <HomeOutlined />,
+              },              
+            ]
           },
+
         ]}
       />
     </Sider>

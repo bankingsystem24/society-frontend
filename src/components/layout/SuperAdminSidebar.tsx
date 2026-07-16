@@ -39,11 +39,7 @@ const SuperAdminSidebar: React.FC = () => {
             icon: <DashboardOutlined />,
             label: "Dashboard",
           },
-          {
-            key: "/superadminusers",
-            icon: <TeamOutlined />,
-            label: "Users",
-          },
+
           {
             key: "/superadmin-view-societies",
             icon: <BankOutlined />,
@@ -53,6 +49,16 @@ const SuperAdminSidebar: React.FC = () => {
             key: "/set-society",
             icon: <BankOutlined />,
             label: "Set Society",
+          },
+          {
+            key: "/members",
+            icon: <TeamOutlined />,
+            label: "Members",
+          },
+          {
+            key: "/superadminusers",
+            icon: <TeamOutlined />,
+            label: "Users",
           },
           {
             key: "/view-receipts",
@@ -90,6 +96,44 @@ const SuperAdminSidebar: React.FC = () => {
               },
             ],
           },
+          {
+            key: "Snapshot",
+            icon: <UserOutlined />,
+            label: "Snapshots",
+            children: [
+              // {
+              //   key: "/trial-balance-snapshot",
+              //   label: "TrialBalance Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/trial-balance-snapshot-view",
+                label: "View TrialBalance",
+                icon: <HomeOutlined />,
+              },
+              // {
+              //   key: "/profit-loss-snapshot-entry",
+              //   label: "Profit & Loss Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/profit-loss-snapshot-view",
+                label: "View P&L",
+                icon: <HomeOutlined />,
+              },
+              // {
+              //   key: "/balance-sheet-snapsnot",
+              //   label: "BalanceSheet Snapshot Entry",
+              //   icon: <HomeOutlined />,
+              // },
+              {
+                key: "/balance-sheet-snapshot-view",
+                label: "View BalanceSheet",
+                icon: <HomeOutlined />,
+              },              
+            ]
+          },
+      
         ]}
       />
     </>

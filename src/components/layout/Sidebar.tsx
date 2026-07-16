@@ -264,11 +264,26 @@ const Sidebar: React.FC = () => {
           label: "View TrialBalance",
           icon: <HomeOutlined />,
         },
+        // {
+        //   key: "/profit-loss-snapshot-entry",
+        //   label: "Profit & Loss Entry",
+        //   icon: <HomeOutlined />,
+        // },
         {
           key: "/profit-loss-snapshot-view",
           label: "View P&L",
           icon: <HomeOutlined />,
         },
+        // {
+        //   key: "/balance-sheet-snapsnot",
+        //   label: "BalanceSheet Snapshot Entry",
+        //   icon: <HomeOutlined />,
+        // },
+        {
+          key: "/balance-sheet-snapshot-view",
+          label: "View BalanceSheet",
+          icon: <HomeOutlined />,
+        },              
       ]
     },
   ];

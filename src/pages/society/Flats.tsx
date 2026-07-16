@@ -72,13 +72,13 @@ const Flats: React.FC = () => {
       title: "Flat Number",
       dataIndex: "flatNo",
       key: "flatNo",
-      width: 120,
+      width: 100,
     },
     {
       title: "Wing",
       dataIndex: "wingName",
       key: "wingName",
-      width: 120,
+      width: 50,
       responsive: ["sm"],
     },
     {
@@ -86,6 +86,14 @@ const Flats: React.FC = () => {
       dataIndex: "ownerName",
       key: "ownerName",
       width: 180,
+      render: (text: string) => (
+      <Typography.Text
+        ellipsis={{ tooltip: text }}
+        style={{ width:180, display: "inline-block" }}
+      >
+        {text}
+      </Typography.Text>
+    ),
     },
     {
       title: "Area (Sq Ft)",

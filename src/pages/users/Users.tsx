@@ -132,6 +132,7 @@ const Users: React.FC = () => {
       title: "Society",
       dataIndex: "societyName",
       key: "societyName",
+      width:250
     },
     {
       title: "Role",
@@ -151,15 +152,24 @@ const Users: React.FC = () => {
       dataIndex: "username",
       key: "username",
     },
-    {
-      title: "Member Name",
-      dataIndex: "memberName",
-      key: "memberName",
-    },
+    // {
+    //   title: "Member Name",
+    //   dataIndex: "memberName",
+    //   key: "memberName",
+    // },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      width : 200,
+      render: (text: string) => (
+      <Typography.Text
+        ellipsis={{ tooltip: text }}
+        style={{ width:200, display: "inline-block" }}
+      >
+        {text}
+      </Typography.Text>
+    ),
     },
     {
       title: "Email",
