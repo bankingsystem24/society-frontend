@@ -118,6 +118,7 @@ const Societies: React.FC = () => {
         <Space>
           <Button
             type="primary"
+            size="small"
             onClick={() => navigate(`/edit-society/${record.id}`)}
           >
             Edit
@@ -129,7 +130,7 @@ const Societies: React.FC = () => {
             cancelText="No"
             onConfirm={() => handleDelete(record.id)}
           >
-            <Button danger>Delete</Button>
+            <Button danger size="small">Delete</Button>
           </Popconfirm>
         </Space>
       ),

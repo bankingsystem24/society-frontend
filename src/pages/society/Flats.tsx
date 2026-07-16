@@ -127,8 +127,8 @@ const Flats: React.FC = () => {
             type="primary"
             icon={<EditOutlined />}
             size="small"
-            onClick={() => navigate(`/edit-flat/${record.id}`)}
-          />
+            onClick={() => navigate(`/edit-flat/${record.id}`)}>Edit </Button>
+          
 
           <Popconfirm
             title="Delete Flat"
@@ -137,7 +137,7 @@ const Flats: React.FC = () => {
             cancelText="No"
             onConfirm={() => deleteFlat(record.id)}
           >
-            <Button danger icon={<DeleteOutlined />} size="small" />
+            <Button danger icon={<DeleteOutlined />} size="small">Delete</Button>
           </Popconfirm>
         </Space>
       ),

@@ -182,7 +182,7 @@ const Vendors: React.FC = () => {
       title: "Action",
       render: (_: any, record: Vendor) => (
         <Space>
-          <Button type="primary" onClick={() => openModal(record)}>
+          <Button type="primary" size="small"  onClick={() => openModal(record)}>
             Edit
           </Button>
 
@@ -190,7 +190,7 @@ const Vendors: React.FC = () => {
             title="Delete Vendor?"
             onConfirm={() => handleDelete(record.id!)}
           >
-            <Button type="primary" danger>
+            <Button type="primary" danger size="small">
               Delete
             </Button>
           </Popconfirm>

@@ -303,6 +303,7 @@ const SuperAdminEditSociety: React.FC = () => {
                     <Space style={{ width: "100%", justifyContent: "center" }}>
                       <Button
                         type="primary"
+                        size="small"
                         htmlType="submit"
                         loading={loading}
                       >
@@ -311,6 +312,7 @@ const SuperAdminEditSociety: React.FC = () => {
 
                       <Button
                         danger
+                        size="small"
                         onClick={() => navigate("/societies")}
                       >
                         Cancel

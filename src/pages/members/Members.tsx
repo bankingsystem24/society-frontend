@@ -153,11 +153,12 @@ const Members: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      width: 120,
+      width: 110,
       render: (_: any, record: any) => (
         <Space>
           <Button
             type="primary"
+            size="small"
             icon={<EditOutlined />}
             onClick={() => navigate(`/edit-member/${record.id}`)}
           >
@@ -171,7 +172,7 @@ const Members: React.FC = () => {
             cancelText="No"
             onConfirm={() => deleteMember(record.id)}
           >
-            <Button danger icon={<DeleteOutlined />}>
+            <Button danger icon={<DeleteOutlined />} size="small">
               Delete
             </Button>
           </Popconfirm>
@@ -264,7 +265,7 @@ const Members: React.FC = () => {
             loading={loading}
             size="small"
             pagination={{
-              pageSize: 12,
+              pageSize: 8,
               showSizeChanger: true,
               responsive: true,
             }}

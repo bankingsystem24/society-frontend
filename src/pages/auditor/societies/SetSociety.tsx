@@ -91,7 +91,7 @@ const handleSetSociety = async (record: Society) => {
       width: 180,
       render: (_: any, record: Society) => (
         <Space>
-          <Button type="primary" onClick={() => handleSetSociety(record)}>
+          <Button type="primary" size="small"   onClick={() => handleSetSociety(record)}>
             Set Society
           </Button>
         </Space>

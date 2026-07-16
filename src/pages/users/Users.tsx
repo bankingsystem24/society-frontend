@@ -188,6 +188,7 @@ const Users: React.FC = () => {
         <Space>
           <Button
             type="primary"
+            size="small"
             icon={<EditOutlined />}
             onClick={(e) => {
               e.stopPropagation();
@@ -206,6 +207,7 @@ const Users: React.FC = () => {
           >
             <Button
               danger
+              size="small"
               icon={<DeleteOutlined />}
               onClick={(e) => e.stopPropagation()}
             >

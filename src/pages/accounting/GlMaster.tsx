@@ -173,7 +173,7 @@ const GlMaster: React.FC = () => {
       key: "action",
       render: (_: any, record: GlMaster) => (
         <Space>
-          <Button type="primary" onClick={() => handleEdit(record)}>
+          <Button type="primary" size="small"  onClick={() => handleEdit(record)}>
             Edit
           </Button>
 
@@ -181,7 +181,7 @@ const GlMaster: React.FC = () => {
             title="Delete Record?"
             onConfirm={() => handleDelete(record.glCode)}
           >
-            <Button type="primary" danger>
+            <Button type="primary" danger size="small">
               Delete
             </Button>
           </Popconfirm>
