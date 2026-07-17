@@ -68,38 +68,58 @@ import ProfitLossSnapshotEntry from "./pages/accounting/ProfitLossSnapshotEntry"
 import ProfitLossSnapshotView from "./pages/accounting/ProfitLossSnapshotView";
 import BalanceSheetSnapshot from "./pages/accounting/BalanceSheetSnapshot";
 import BalanceSheetSnapshotView from "./pages/accounting/BalanceSheetSnapshotView";
- 
+import DayBook from "./pages/billing/Daybook";
+import ReportsMenu from "./pages/reports/ReportsMenu";
+import { Typography } from "antd";
+
 export default function App() {
   return (
     <Routes>
-
       {/* Login Page */}
       <Route path="/" element={<Login />} />
-      
+
       <Route path="/change-password" element={<ChangePassword />} />
       <Route path="/member-login" element={<MemberLogin />} />
       <Route path="/member-dashboard" element={<MemberDashboard />} />
       {/* <Route path="/member-receipts" element={<MemberBills />} /> */}
       {/* <Route path="/member-pending-bills" element={<MemberPendingBills />} /> */}
-      <Route path="/member-paying-maintenance" element={<MemberPayingMaintenance />} />
-      <Route path="/open-financial-year" element={<OpenFinancialYear />}/>
+      <Route
+        path="/member-paying-maintenance"
+        element={<MemberPayingMaintenance />}
+      />
+      <Route path="/open-financial-year" element={<OpenFinancialYear />} />
       {/* <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} /> */}
       <Route path="/contributions" element={<PendingContributions />} />
       <Route path="/view-receipts" element={<ViewReceipts />} />
       <Route path="/financial-year" element={<FinancialYear />} />
-      <Route path="/set-society" element={<SetSociety/>} />
+      <Route path="/set-society" element={<SetSociety />} />
       <Route path="/view-journal" element={<JournalView />} />
       <Route path="/view-ledger" element={<LedgerView />} />
-      <Route path="/trial-balance" element={<TrialBalance />} />
-      <Route path="/trial-balance-snapshot" element={<TrialBalanceSnapshotEntry />} />
-      <Route path="/trial-balance-snapshot-view" element={<TrialBalanceSnapshotView />} />
-      <Route path="/balance-sheet-snapsnot" element={<BalanceSheetSnapshot />} />
+      <Route
+        path="/trial-balance-snapshot"
+        element={<TrialBalanceSnapshotEntry />}
+      />
+      <Route
+        path="/trial-balance-snapshot-view"
+        element={<TrialBalanceSnapshotView />}
+      />
+      <Route
+        path="/balance-sheet-snapsnot"
+        element={<BalanceSheetSnapshot />}
+      />
 
-
-      <Route path="/profit-and-loss" element={<ProfitAndLoss />} />
-      <Route path="/profit-loss-snapshot-entry" element={<ProfitLossSnapshotEntry />} />
-      <Route path="/profit-loss-snapshot-view" element={<ProfitLossSnapshotView />} />
-      <Route path="/balance-sheet-snapshot-view" element={<BalanceSheetSnapshotView />} />
+      <Route
+        path="/profit-loss-snapshot-entry"
+        element={<ProfitLossSnapshotEntry />}
+      />
+      <Route
+        path="/profit-loss-snapshot-view"
+        element={<ProfitLossSnapshotView />}
+      />
+      <Route
+        path="/balance-sheet-snapshot-view"
+        element={<BalanceSheetSnapshotView />}
+      />
 
       <Route path="/verify-payment" element={<VerifyPayemnt />} />
       <Route path="/gl-mapping" element={<GlMappingEntry />} />
@@ -110,7 +130,7 @@ export default function App() {
       <Route path="/create-wing" element={<CreateWings />} />
       <Route path="/edit-wing/:id" element={<EditWing />} />
       <Route path="/flats" element={<Flats />} />
-      <Route path="/create-flat" element={<CreateFlat />}/>
+      <Route path="/create-flat" element={<CreateFlat />} />
       <Route path="/edit-flat/:id" element={<EditFlat />} />
       <Route path="/members" element={<Members />} />
       <Route path="/create-member" element={<CreateMember />} />
@@ -121,43 +141,74 @@ export default function App() {
       <Route path="/income" element={<Income />} />
       <Route path="/transfer" element={<Transfer />} />
       <Route path="/vendors" element={<Vendors />} />
-      <Route path="/bill-generate" element={<BillGenerate />}/>
+      <Route path="/bill-generate" element={<BillGenerate />} />
       <Route path="/view-bills" element={<ViewBills />} />
-      <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />}/>
-      <Route path="/view-sinking-fund" element={<ViewSinkingFund />}/>
+      <Route path="/generate-sinking-fund" element={<GenerateSinkingFund />} />
+      <Route path="/view-sinking-fund" element={<ViewSinkingFund />} />
       <Route path="/sinking-funds" element={<PendingSinkingFunds />} />
-      <Route path="/view-contribution" element={<ViewContribution />}/>
+      <Route path="/view-contribution" element={<ViewContribution />} />
       <Route path="/generate-contribution" element={<ContributionPage />} />
       <Route path="/admindashboard" element={<AdminDashboard />} />
       <Route path="/create-user" element={<CreateUser />} />
       <Route path="/edit-user/:id" element={<EditUser />} />
       {/* <Route path="/pending-bills" element={<PendingBills />} /> */}
       <Route path="/penalty-policy" element={<PenaltyPolicy />} />
-      <Route path="/societies" element={<Societies />} /> 
+      <Route path="/societies" element={<Societies />} />
       <Route path="/edit-society/:id" element={<EditSociety />} />
       <Route path="/payments" element={<Payments />} />
+      <Route path="/reports-menu" element={<ReportsMenu />} />
 
+      <Route path="/reports-daybook" element={<DayBook />} />
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
         <Route path="/superadminusers" element={<SuperAdminUsers />} />
-        <Route path="/superadmin-create-user" element={<SuperAdminCreateUser />} />
-        <Route path="/superadmin-edit-user/:id" element={<SuperAdminEditUser />} />
-        <Route path="/superadmin-create-society" element={<SuperAdminCreateSociety />} />
-        <Route path="/superadmin-view-societies" element={<SuperAdminSocieties />} />
-        <Route path="/superadmin-edit-societies/:id" element={<SuperAdminEditSociety />} />
-
+        <Route
+          path="/superadmin-create-user"
+          element={<SuperAdminCreateUser />}
+        />
+        <Route
+          path="/superadmin-edit-user/:id"
+          element={<SuperAdminEditUser />}
+        />
+        <Route
+          path="/superadmin-create-society"
+          element={<SuperAdminCreateSociety />}
+        />
+        <Route
+          path="/superadmin-view-societies"
+          element={<SuperAdminSocieties />}
+        />
+        <Route
+          path="/superadmin-edit-societies/:id"
+          element={<SuperAdminEditSociety />}
+        />
       </Route>
       <Route element={<AuditorLayout />}>
         <Route path="/auditordashboard" element={<AuditorDashboard />} />
         <Route path="/auditorusers" element={<AuditorUsers />} />
+      </Route>
+      <Route path="/reports" element={<ReportsMenu />}>
+        <Route
+          index
+          element={
+            <div style={{ textAlign: "center", padding: "80px 0" }}>
+              <Typography.Title level={4}>
+                Select a report from the menu
+              </Typography.Title>
+            </div>
+          }
+        />
+
+        <Route path="daybook" element={<DayBook />} />
+        <Route path="trial-balance" element={<TrialBalance />} />
+        <Route path="profit-and-loss" element={<ProfitAndLoss />} />
+
 
       </Route>
-
       {/* Layout Pages */}
       {/* <Route element={<Layout />}>
       </Route> */}
-
     </Routes>
   );
 }

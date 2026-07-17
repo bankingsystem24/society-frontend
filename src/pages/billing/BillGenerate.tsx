@@ -29,6 +29,8 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
+const financialYear = sessionStorage.getItem("financialYear");
+const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
 interface BillingFormValues {
   month: string;
@@ -83,9 +85,6 @@ const BillGenerate: React.FC = () => {
   };
 
   const onFinish = async (values: BillingFormValues) => {
-    const financialYear = sessionStorage.getItem("financialYear");
-    const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
     if (!financialYear) {
       message.error("Financial Year not found");
       return;
@@ -157,7 +156,8 @@ const BillGenerate: React.FC = () => {
       form.resetFields();
 
       form.setFieldsValue({
-        year: new Date().getFullYear(),
+        // year: new Date().getFullYear(),
+        year: undefined,
       });
     } catch (error) {
       console.error(error);
@@ -168,42 +168,39 @@ const BillGenerate: React.FC = () => {
     }
   };
 
-const generateFinancialYearBills = () => {
-  Modal.confirm({
-    title: "Generate Bills for Entire Financial Year",
-    content:
-      "This will generate maintenance bills for all 12 months (April to March). Continue?",
-    okText: "Generate",
-    cancelText: "Cancel",
-    onOk: async () => {
-      try {
-        setLoading(true);
+  const generateFinancialYearBills = () => {
+    Modal.confirm({
+      title: "Generate Bills for Entire Financial Year",
+      content:
+        "This will generate maintenance bills for all 12 months (April to March). Continue?",
+      okText: "Generate",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          setLoading(true);
+          // const year = form.getFieldValue("year");
+          const financialYear = sessionStorage.getItem("financialYear");
 
-        const year = form.getFieldValue("year");
-
-        const payload = {
-          year: Number(year),
-          societyId,
-          createdBy: Number(sessionStorage.getItem("userId")),
-          financialYearId: Number(sessionStorage.getItem("financialYearId")),
-          glReceivable,
-          glCreditAccount,
-        };
-
-        await apiPost("/billing/generate-financial-year-bills", payload);
-
-        message.success(
-          "Bills generated successfully for all 12 months."
-        );
-      } catch (err) {
-        console.error(err);
-        message.error("Failed to generate yearly bills.");
-      } finally {
-        setLoading(false);
-      }
-    },
-  });
-};
+          const year = financialYear ? financialYear.substring(0, 4) : 0;
+          const payload = {
+            year: Number(year),
+            societyId,
+            createdBy: Number(sessionStorage.getItem("userId")),
+            financialYearId: Number(sessionStorage.getItem("financialYearId")),
+            glReceivable,
+            glCreditAccount,
+          };
+          await apiPost("/billing/generate-financial-year-bills", payload);
+          message.success("Bills generated successfully for all 12 months.");
+        } catch (err) {
+          console.error(err);
+          message.error("Failed to generate yearly bills.");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -316,21 +313,26 @@ const generateFinancialYearBills = () => {
                     Generate Bills
                   </Button>
                 </Col>
-
               </Row>
               <Row gutter={24}>
-                  <Col xs={12} md={12}>
-                    <Button
-                      type="primary"
-                      loading={loading}
-                      disabled={!maintenanceMappingExists}
-                      block
-                      onClick={generateFinancialYearBills}
-                    >
-                      Generate Maintenance for 12 months (Accounting Year : April
-                      to March)
-                    </Button>
-                  </Col>
+                <Col xs={12} md={8}>
+                  <Button
+                    type="primary"
+                    loading={loading}
+                    disabled={!maintenanceMappingExists}
+                    block
+                    onClick={generateFinancialYearBills}
+                    style={{
+                      height: "auto",
+                      whiteSpace: "normal",
+                      lineHeight: "20px",
+                      padding: "8px 16px",
+                    }}
+                  >
+                    Generate Maintenance for 12 months (Accounting Year: April
+                    to March)
+                  </Button>
+                </Col>
               </Row>
             </Form>
           </Card>

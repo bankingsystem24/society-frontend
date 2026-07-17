@@ -65,7 +65,8 @@ const TrialBalance: React.FC = () => {
       setLoading(true);
 
       const res = await axios.get(`${BASE_URL}/gl/reports/trial-balance`, {
-        params: {societyId, financialYearId, },});
+        params: { societyId, financialYearId },
+      });
       const filteredData = (res.data || []).filter(
         (item: any) =>
           (item.openingBalance ?? 0) !== 0 ||
@@ -192,42 +193,42 @@ const TrialBalance: React.FC = () => {
   const isBalanced = Math.abs(difference) < 0.01;
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Layout.Sider
-        width={role === "MEMBER" ? 200 : 250}
-        breakpoint="lg"
-        collapsedWidth="0"
-        style={{
-          height: "100vh",
-          position: "sticky",
-          top: 0,
-          overflowY: "auto",
-        }}
-      >
-        {role === "ADMIN" ? (
-          <Sidebar />
-        ) : role === "MEMBER" ? (
-          <MemberSidebar />
-        ) : role === "SUPER_ADMIN" ? (
-          <SuperAdminSidebar />
-        ) : (
-          <AuditorSidebar />
-        )}
-      </Layout.Sider>
+    // <Layout style={{ minHeight: "100vh" }}>
+    //   <Layout.Sider
+    //     width={role === "MEMBER" ? 200 : 250}
+    //     breakpoint="lg"
+    //     collapsedWidth="0"
+    //     style={{
+    //       height: "100vh",
+    //       position: "sticky",
+    //       top: 0,
+    //       overflowY: "auto",
+    //     }}
+    //   >
+    //     {role === "ADMIN" ? (
+    //       <Sidebar />
+    //     ) : role === "MEMBER" ? (
+    //       <MemberSidebar />
+    //     ) : role === "SUPER_ADMIN" ? (
+    //       <SuperAdminSidebar />
+    //     ) : (
+    //       <AuditorSidebar />
+    //     )}
+    //   </Layout.Sider>
 
-      {/* MAIN AREA */}
-      <Layout style={{ minWidth: 0 }}>
-        {/* HEADER (NO EXTRA DIV) */}
-        {role === "ADMIN" ? (
-          <Header />
-        ) : role === "MEMBER" ? (
-          <MemberHeader />
-        ) : role === "SUPER_ADMIN" ? (
-          <SuperAdminHeader />
-        ) : (
-          <AuditorHeader />
-        )}
-        <Content>
+    //   {/* MAIN AREA */}
+    //   <Layout style={{ minWidth: 0 }}>
+    //     {/* HEADER (NO EXTRA DIV) */}
+    //     {role === "ADMIN" ? (
+    //       <Header />
+    //     ) : role === "MEMBER" ? (
+    //       <MemberHeader />
+    //     ) : role === "SUPER_ADMIN" ? (
+    //       <SuperAdminHeader />
+    //     ) : (
+    //       <AuditorHeader />
+    //     )}
+    //     <Content>
           <Card style={{ borderRadius: 12 }}>
             <Title level={3}>Trial Balance</Title>
 
@@ -247,19 +248,21 @@ const TrialBalance: React.FC = () => {
                   summary={() => (
                     <Table.Summary fixed>
                       <Table.Summary.Row>
-                        <Table.Summary.Cell index={0} colSpan={3}>
+                        <Table.Summary.Cell index={0} colSpan={4}>
                           <strong>Total</strong>
                         </Table.Summary.Cell>
 
-                        <Table.Summary.Cell index={3} align="right">
+                        <Table.Summary.Cell index={4} align="right">
                           <strong>{totalDebit.toFixed(2)}</strong>
                         </Table.Summary.Cell>
 
-                        <Table.Summary.Cell index={4} align="right">
+                        <Table.Summary.Cell index={5} align="right">
                           <strong>{totalCredit.toFixed(2)}</strong>
                         </Table.Summary.Cell>
 
-                        <Table.Summary.Cell index={5} colSpan={2} />
+                        <Table.Summary.Cell index={6} />
+                        <Table.Summary.Cell index={7} />
+                        <Table.Summary.Cell index={8} />
                       </Table.Summary.Row>
                     </Table.Summary>
                   )}
@@ -317,9 +320,9 @@ const TrialBalance: React.FC = () => {
               </>
             )}
           </Card>
-        </Content>
-      </Layout>
-    </Layout>
+    //     </Content>
+    //   </Layout>
+    // </Layout>
   );
 };
 

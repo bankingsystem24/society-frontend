@@ -1,6 +1,7 @@
 import React from "react";
 import { Menu } from "antd";
 import {
+  BookOutlined,
   DashboardOutlined,
   DollarOutlined,
   HomeOutlined,
@@ -83,6 +84,12 @@ const MemberSidebar: React.FC = () => {
             icon: <UserOutlined />,
             label: "Reports",
             children: [
+              {
+                key: "/daybook",
+                icon:<BookOutlined />,
+                label: "View Daybook",
+              },
+
               {
                 key: "/view-journal",
                 label: "View Journal",

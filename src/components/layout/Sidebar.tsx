@@ -8,6 +8,7 @@ import {
   UserOutlined,
   DollarOutlined,
   MenuOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -225,6 +226,11 @@ const Sidebar: React.FC = () => {
       icon: <UserOutlined />,
       label: "Reports",
       children: [
+        {
+          key: "/daybook",
+          icon:<BookOutlined />,
+          label: "View Daybook",
+        },
         {
           key: "/view-journal",
           label: "View Journal",

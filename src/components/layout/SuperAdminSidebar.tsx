@@ -6,6 +6,7 @@ import {
   UserOutlined,
   TeamOutlined,
   HomeOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -69,6 +70,11 @@ const SuperAdminSidebar: React.FC = () => {
             icon: <UserOutlined />,
             label: "Reports",
             children: [
+              {
+                key: "/daybook",
+                icon:<BookOutlined />,
+                label: "View Daybook",
+              },
               {
                 key: "/view-journal",
                 label: "View Journal",

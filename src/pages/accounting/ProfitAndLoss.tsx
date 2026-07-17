@@ -90,27 +90,27 @@ const ProfitAndLoss: React.FC = () => {
   }
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+    // <Layout style={{ minHeight: "100vh" }}>
+    //     <Layout.Sider
+    //   width={role === "MEMBER" ? 200 : 250}
+    //   breakpoint="lg"
+    //   collapsedWidth="0"
+    //   style={{
+    //     height: "100vh",
+    //     position: "sticky",
+    //     top: 0,
+    //     overflowY: "auto",
+    //   }}
+    // >
+    //   {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
+    // </Layout.Sider>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
+    // {/* MAIN AREA */}
+    // <Layout style={{ minWidth: 0 }}>
 
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content>
+    //   {/* HEADER (NO EXTRA DIV) */}
+    //   {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
+    //   <Content>
 
     <div style={{ padding: 20 }}>
       <Title level={3}>Income & Expenditure Account</Title>
@@ -250,9 +250,9 @@ const ProfitAndLoss: React.FC = () => {
         </Title>
       </Card>
     </div>
-    </Content>
-    </Layout>
-    </Layout>
+    // </Content>
+    // </Layout>
+    // </Layout>
   );
 };
 

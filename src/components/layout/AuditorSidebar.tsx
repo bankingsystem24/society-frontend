@@ -9,6 +9,7 @@ import {
   ApartmentOutlined,
   TeamOutlined,
   DollarOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../App.css";
@@ -198,10 +199,19 @@ const AuditorSidebar: React.FC = () => {
             label: "Receipts",
           },
           {
+            key:"/reports-menu",
+            label:"Reports Menu"
+          },
+          {
             key: "Reports",
             icon: <UserOutlined />,
             label: "Reports",
             children: [
+              // {
+              //   key: "/daybook",
+              //   icon:<BookOutlined />,
+              //   label: "View Daybook",
+              // },
               {
                 key: "/view-journal",
                 label: "View Journal",
@@ -212,16 +222,16 @@ const AuditorSidebar: React.FC = () => {
                 label: "View Ledger",
                 icon: <HomeOutlined />,
               },
-              {
-                key: "/trial-balance",
-                label: "Trial Balance",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/profit-and-loss",
-                label: "Profit & Loss",
-                icon: <HomeOutlined />,
-              },
+              // {
+              //   key: "/trial-balance",
+              //   label: "Trial Balance",
+              //   icon: <HomeOutlined />,
+              // },
+              // {
+              //   key: "/profit-and-loss",
+              //   label: "Profit & Loss",
+              //   icon: <HomeOutlined />,
+              // },
               {
                 key: "/payments",
                 label: "Payments",

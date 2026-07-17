@@ -125,7 +125,7 @@ export default function VerifyPayemnt() {
       const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "monthly maintenance",
       );
       setMappings(res.data);
-
+      
       if (!mapping) {
         setMaintenanceMappingExists(false);
         message.error("Monthly Maintenance GL Mapping not configured");
@@ -173,7 +173,6 @@ export default function VerifyPayemnt() {
       };
 
       const res = await axios.post(`${BASE_URL}/receipts/viewReceipts`,payload,);
-
       if (!financialYear) {
         setReceipts(res.data);
         return;
