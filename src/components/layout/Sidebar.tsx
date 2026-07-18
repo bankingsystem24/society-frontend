@@ -150,6 +150,10 @@ const Sidebar: React.FC = () => {
           key: "/transfer",
           label: "Transfer",
         },
+        { 
+          key: "/arrears",
+          label: "Arrears",
+        },
       ],
     },
     {
@@ -221,47 +225,47 @@ const Sidebar: React.FC = () => {
       label: "Receipts",
       icon: <HomeOutlined />,
     },
-          {
-            key:"/reports-menu",
-            label:"Reports Menu"
-          },
-          {
-            key: "Reports",
-            icon: <UserOutlined />,
-            label: "Reports",
-            children: [
-              // {
-              //   key: "/daybook",
-              //   icon:<BookOutlined />,
-              //   label: "View Daybook",
-              // },
-              {
-                key: "/view-journal",
-                label: "View Journal",
-                icon: <HomeOutlined />,
-              },
-              {
-                key: "/view-ledger",
-                label: "View Ledger",
-                icon: <HomeOutlined />,
-              },
-              // {
-              //   key: "/trial-balance",
-              //   label: "Trial Balance",
-              //   icon: <HomeOutlined />,
-              // },
-              // {
-              //   key: "/profit-and-loss",
-              //   label: "Profit & Loss",
-              //   icon: <HomeOutlined />,
-              // }, 
-              {
-                key: "/payments",
-                label: "Payments",
-                icon: <HomeOutlined />,
-              },
-            ],
-          },
+    {
+      key: "/reports-menu",
+      label: "Reports Menu",
+    },
+    {
+      key: "Reports",
+      icon: <UserOutlined />,
+      label: "Reports",
+      children: [
+        // {
+        //   key: "/daybook",
+        //   icon:<BookOutlined />,
+        //   label: "View Daybook",
+        // },
+        {
+          key: "/view-journal",
+          label: "View Journal",
+          icon: <HomeOutlined />,
+        },
+        {
+          key: "/view-ledger",
+          label: "View Ledger",
+          icon: <HomeOutlined />,
+        },
+        // {
+        //   key: "/trial-balance",
+        //   label: "Trial Balance",
+        //   icon: <HomeOutlined />,
+        // },
+        // {
+        //   key: "/profit-and-loss",
+        //   label: "Profit & Loss",
+        //   icon: <HomeOutlined />,
+        // },
+        {
+          key: "/payments",
+          label: "Payments",
+          icon: <HomeOutlined />,
+        },
+      ],
+    },
     {
       key: "Snapshot",
       icon: <UserOutlined />,
@@ -296,8 +300,8 @@ const Sidebar: React.FC = () => {
           key: "/balance-sheet-snapshot-view",
           label: "View BalanceSheet",
           icon: <HomeOutlined />,
-        },              
-      ]
+        },
+      ],
     },
   ];
 

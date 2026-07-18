@@ -72,6 +72,7 @@ import DayBook from "./pages/billing/Daybook";
 import ReportsMenu from "./pages/reports/ReportsMenu";
 import { Typography } from "antd";
 import CashBookReport from "./pages/reports/CashBookReport";
+import ArrearsEntry from "./pages/society/ArrearsEntry";
 
 export default function App() {
   return (
@@ -158,8 +159,8 @@ export default function App() {
       <Route path="/edit-society/:id" element={<EditSociety />} />
       <Route path="/payments" element={<Payments />} />
       <Route path="/reports-menu" element={<ReportsMenu />} />
-
-      <Route path="/reports-daybook" element={<DayBook />} />
+      {/* <Route path="/reports-daybook" element={<DayBook />} /> */}
+      <Route path="/arrears" element={<ArrearsEntry />} />
 
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />

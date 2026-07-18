@@ -124,8 +124,11 @@ const AuditorSidebar: React.FC = () => {
               },
               { 
                 key: "/transfer",
-
                 label: "Transfer",
+              },
+              { 
+                key: "/arrears",
+                label: "Arrears",
               },
             ],
           },
