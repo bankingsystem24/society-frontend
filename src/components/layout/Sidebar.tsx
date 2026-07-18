@@ -221,40 +221,47 @@ const Sidebar: React.FC = () => {
       label: "Receipts",
       icon: <HomeOutlined />,
     },
-    {
-      key: "Reports",
-      icon: <UserOutlined />,
-      label: "Reports",
-      children: [
-        {
-          key: "/daybook",
-          icon:<BookOutlined />,
-          label: "View Daybook",
-        },
-        {
-          key: "/view-journal",
-          label: "View Journal",
-        },
-        {
-          key: "/view-ledger",
-          label: "View Ledger",
-        },
-        {
-          key: "/trial-balance",
-          label: "Trial Balance",
-        },
-        {
-          key: "/profit-and-loss",
-          label: "Profit & Loss",
-        },
-        {
-          key: "/payments",
-          label: "Payments",
-          icon: <HomeOutlined />,
-        },
-
-      ],
-    },
+          {
+            key:"/reports-menu",
+            label:"Reports Menu"
+          },
+          {
+            key: "Reports",
+            icon: <UserOutlined />,
+            label: "Reports",
+            children: [
+              // {
+              //   key: "/daybook",
+              //   icon:<BookOutlined />,
+              //   label: "View Daybook",
+              // },
+              {
+                key: "/view-journal",
+                label: "View Journal",
+                icon: <HomeOutlined />,
+              },
+              {
+                key: "/view-ledger",
+                label: "View Ledger",
+                icon: <HomeOutlined />,
+              },
+              // {
+              //   key: "/trial-balance",
+              //   label: "Trial Balance",
+              //   icon: <HomeOutlined />,
+              // },
+              // {
+              //   key: "/profit-and-loss",
+              //   label: "Profit & Loss",
+              //   icon: <HomeOutlined />,
+              // }, 
+              {
+                key: "/payments",
+                label: "Payments",
+                icon: <HomeOutlined />,
+              },
+            ],
+          },
     {
       key: "Snapshot",
       icon: <UserOutlined />,

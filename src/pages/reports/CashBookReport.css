@@ -1,0 +1,22 @@
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  #cashBookReport,
+  #cashBookReport * {
+    visibility: visible;
+  }
+
+  #cashBookReport {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .ant-pagination {
+    display: none !important;
+  }
+}

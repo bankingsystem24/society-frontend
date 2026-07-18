@@ -92,8 +92,7 @@ const ReportsMenu = () => {
                   label: "Accounting",
                   children: [
                     { key: "/reports/daybook", label: "Day Book" },
-                    // { key: "/reports/cashbook", label: "Cash Book" },
-                    // { key: "/reports/bankbook", label: "Bank Book" },
+                    { key: "/reports/cashbook", label: "Cash/Bank Book" },
                     // { key: "/reports/general-ledger", label: "General Ledger" },
                     // { key: "/reports/member-ledger", label: "Member Ledger" },
                     { key: "/reports/trial-balance", label: "Trial Balance" },

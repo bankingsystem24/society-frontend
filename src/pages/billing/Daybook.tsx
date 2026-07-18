@@ -77,8 +77,6 @@ const Daybook = () => {
           date: date.format("YYYY-MM-DD"),
         },
       });
-      console.log("Response:", res.data);
-
       setReport(res.data);
     } catch (e) {
       console.error(e);

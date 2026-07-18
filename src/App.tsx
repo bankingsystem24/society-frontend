@@ -71,6 +71,7 @@ import BalanceSheetSnapshotView from "./pages/accounting/BalanceSheetSnapshotVie
 import DayBook from "./pages/billing/Daybook";
 import ReportsMenu from "./pages/reports/ReportsMenu";
 import { Typography } from "antd";
+import CashBookReport from "./pages/reports/CashBookReport";
 
 export default function App() {
   return (
@@ -203,6 +204,7 @@ export default function App() {
         <Route path="daybook" element={<DayBook />} />
         <Route path="trial-balance" element={<TrialBalance />} />
         <Route path="profit-and-loss" element={<ProfitAndLoss />} />
+        <Route path="cashbook" element={<CashBookReport />} />
 
 
       </Route>
