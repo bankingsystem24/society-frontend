@@ -26,10 +26,12 @@ import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 import { DeleteOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
+
 
 interface Expense {
   id: number;
@@ -54,13 +56,36 @@ const Expenses: React.FC = () => {
   const GlBankAccount = Number(sessionStorage.getItem("GlBankAccount"));
   const [form] = Form.useForm();
   const [data, setData] = useState<Expense[]>([]);
+  const [searchText, setSearchText] = useState("");
+const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
-
+  
   useEffect(() => {
     fetchVendors();
   }, []);
+useEffect(() => {
+const filtered = data.filter((item: any) => {
+  const gl = glList.find(
+    (g: any) => g.glCode === item.expenseGlCode
+  );
+
+  return (
+    dayjs(item.expenseDate)
+      .format("DD-MMM-YYYY")
+      .toLowerCase()
+      .includes(searchText.toLowerCase()) ||
+
+    gl?.accountName
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase())
+  );
+});
+
+  setFilteredExpenses(filtered);
+}, [data, searchText, glList]);
 
   const fetchVendors = async () => {
     try {
@@ -100,6 +125,7 @@ const Expenses: React.FC = () => {
         `${BASE_URL}/expenses/${societyId}/${financialYearId}`,
       );
       setData(res.data);
+      setFilteredExpenses(res.data);
     } catch (err) {
       message.error("Failed to load expenses");
     } finally {
@@ -321,8 +347,24 @@ const Expenses: React.FC = () => {
 
             {/* EXPENSE LIST */}
             <Card title="Expense List">
+              <div
+  style={{
+    marginBottom: 15,
+    display: "flex",
+    justifyContent: "flex-start",
+  }}
+>
+  <Input
+    placeholder="Search by Date or Expense Account"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 320 }}
+  />
+</div>
               <Table
-                dataSource={data}
+                dataSource={filteredExpenses}
                 columns={columns}
                 rowKey="id"
                 loading={loading}

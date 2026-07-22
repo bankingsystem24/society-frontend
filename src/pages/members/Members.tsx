@@ -9,10 +9,11 @@ import {
   Button,
   Popconfirm,
   Space,
-  Layout
+  Layout,
+  Input,
 } from "antd";
 import { apiDelete, apiGet, apiPut } from "../../api/axios";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined,} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
 import AuditorHeader from "../../components/layout/AuditorHeader";
@@ -37,6 +38,7 @@ const Members: React.FC = () => {
 
   // default filter = active
   const [statusFilter, setStatusFilter] = useState("active");
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     loadMembers();
@@ -44,7 +46,7 @@ const Members: React.FC = () => {
 
   useEffect(() => {
     applyFilter(statusFilter);
-  }, [data, statusFilter]);
+  }, [data, statusFilter,searchText]);
 
   const loadMembers = async () => {
     try {
@@ -60,14 +62,19 @@ const Members: React.FC = () => {
   };
 
   const applyFilter = (filter: string) => {
-    if (filter === "all") {
-      setFilteredData(data);
-    } else if (filter === "active") {
-      setFilteredData(data.filter((item) => item.active));
-    } else {
-      setFilteredData(data.filter((item) => !item.active));
-    }
-  };
+    let result = data;
+    if (filter === "active") {
+      result = data.filter((item) => item.active);
+    } else if (filter === "inactive") {
+      result = data.filter((item) => !item.active);
+    }  if (searchText.trim() !== "") {
+    result = result.filter((item) =>
+      item.name?.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }
+
+  setFilteredData(result);
+};
 
   const updateStatus = async (id: number, checked: boolean) => {
     try {
@@ -232,6 +239,14 @@ const Members: React.FC = () => {
             gap: 12,
           }}
         >
+          <Input
+  placeholder="Search Member"
+  prefix={<SearchOutlined />}
+  allowClear
+  value={searchText}
+  onChange={(e) => setSearchText(e.target.value)}
+  style={{ width: 220 }}
+/>
           <Select
             value={statusFilter}
             onChange={(value) => setStatusFilter(value)}

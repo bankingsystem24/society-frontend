@@ -23,7 +23,7 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
-
+import { SearchOutlined } from "@ant-design/icons";
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
 const financialYearId = Number(sessionStorage.getItem("financialYearId"));
@@ -60,6 +60,8 @@ const ArrearsEntry: React.FC = () => {
   const societyId = sessionStorage.getItem("societyId");
   const userId = sessionStorage.getItem("userId");
   const [arrears, setArrears] = useState<Arrears[]>([]);
+  const [filteredArrears, setFilteredArrears] = useState<Arrears[]>([]);
+const [searchText, setSearchText] = useState("");
     const [glReceivable, setGlReceivable] = useState<number>(0);
     const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
   const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
@@ -69,6 +71,16 @@ const ArrearsEntry: React.FC = () => {
     loadArrears();
     loadGlMapping();
   }, []);
+
+  useEffect(() => {
+  const filtered = arrears.filter(
+    (item) =>
+      item.flatNo?.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.ownerName?.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  setFilteredArrears(filtered);
+}, [searchText, arrears]);
 
   const loadGlMapping = async () => {
     try {
@@ -116,6 +128,7 @@ const ArrearsEntry: React.FC = () => {
         `${BASE_URL}/billing/arrears?societyId=${societyId}&financialYearId=${financialYearId}`,
       );
       setArrears(res.data);
+      setFilteredArrears(res.data);
       console.log("Response:",res.data);
     } catch {
       message.error("Unable to load arrears");
@@ -270,11 +283,30 @@ const ArrearsEntry: React.FC = () => {
                 </Col>
               </Row>
             </Form>
+
+<div
+  style={{
+    marginTop: 5,
+    marginBottom: 5,
+    display: "flex",
+    justifyContent: "flex-start",
+  }}
+>
+  <Input
+    placeholder="Search by Flat or Owner"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 295 }}
+  />
+</div>
+
             <Table
               style={{ marginTop: 20 }}
               rowKey="id"
               columns={columns}
-              dataSource={arrears}
+              dataSource={filteredArrears}
               bordered
               pagination={{ pageSize: 10 }}
             />
