@@ -215,7 +215,7 @@ const Members: React.FC = () => {
           marginBottom: 20,
         }}
       >
-        <div>
+        <div style={{ marginTop:0}}>
           <Title level={4} style={{ margin: 0 }}>
             Members Management
           </Title>
@@ -265,7 +265,7 @@ const Members: React.FC = () => {
             loading={loading}
             size="small"
             pagination={{
-              pageSize: 12,
+              pageSize: 14,
               showSizeChanger: true,
               responsive: true,
             }}

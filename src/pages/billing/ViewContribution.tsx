@@ -340,7 +340,11 @@ const ViewContribution: React.FC = () => {
           loading={loading}
           dataSource={filteredData}
           columns={columns}
-          pagination={{ pageSize: 10 }}
+          pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              responsive: true,
+            }}
           size="small"
           scroll={{ x: "max-content" }}
           rowSelection={{

@@ -366,7 +366,11 @@ const ViewSinkingFund: React.FC = () => {
           columns={columns}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 8 }}
+          pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              responsive: true,
+            }}
           size="small"
           rowSelection={{
             selectedRowKeys,

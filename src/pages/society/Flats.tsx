@@ -224,7 +224,7 @@ const Flats: React.FC = () => {
         size="small"
         scroll={{ x: "max-content" }}
         pagination={{
-          pageSize: 8,
+          pageSize: 14,
           showSizeChanger: true,
           responsive: true,
         }}

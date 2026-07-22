@@ -146,6 +146,7 @@ const GlMaster: React.FC = () => {
       title: "GL Code",
       dataIndex: "glCode",
       key: "glCode",
+      width:80
     },
     {
       title: "Account Name",
@@ -156,16 +157,19 @@ const GlMaster: React.FC = () => {
       title: "Group Name",
       dataIndex: "groupName",
       key: "groupName",
+      width:120
     },
     {
       title: "Parent GL",
       dataIndex: "parentGlCode",
       key: "parentGlCode",
+      width:80
     },
     {
       title: "Active",
       dataIndex: "isActive",
       key: "isActive",
+      width:80,
       render: (value: boolean) => (value ? "Yes" : "No"),
     },
     {
@@ -262,7 +266,7 @@ const GlMaster: React.FC = () => {
               size="small"
               scroll={{ y: "calc(100vh - 240px)" }}
               pagination={{
-                pageSize: 10,
+                pageSize: 15,
               }}
             />
 

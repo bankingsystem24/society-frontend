@@ -209,7 +209,7 @@ const Wings: React.FC = () => {
               size="small"
               scroll={{ x: 900 }}
               pagination={{
-                pageSize: 8,
+                pageSize: 15,
                 showSizeChanger: true,
                 responsive: true,
               }}

@@ -920,7 +920,9 @@ export default function VerifyPayemnt() {
                 loading={loading}
                 size="small"
                 pagination={{
-                  pageSize: 10,
+                  pageSize: 14,
+                  showSizeChanger: true,
+                  responsive: true,
                 }}
                 scroll={{ x: "max-content" }}
                 onRow={(record) => ({

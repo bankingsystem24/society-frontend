@@ -123,6 +123,10 @@ const ArrearsEntry: React.FC = () => {
   };
 
   const onFinish = async (values: any) => {
+    if (!financialYearId) {
+      message.error("Please set Financial Year before saving.");
+      return;
+    }
     try {
       const payload = {
         societyId: Number(societyId),
@@ -133,7 +137,6 @@ const ArrearsEntry: React.FC = () => {
         penaltyAmount: 0,
         discountAmount: 0,
         dueDate: values.dueDate.format("YYYY-MM-DD"),
-        remarks: values.remarks,
         billType: "ARREARS",
         month: "OPENING",
         year: dayjs(values.dueDate).year(),
@@ -259,13 +262,8 @@ const ArrearsEntry: React.FC = () => {
                   </Form.Item>
                 </Col>
 
-                <Col span={6}>
-                  <Form.Item label="Remarks" name="remarks">
-                    <Input.TextArea rows={1} />
-                  </Form.Item>
-                </Col>
 
-                <Col span={6}>
+                <Col span={6} style={{ alignContent:"center"}}>
                   <Button type="primary" htmlType="submit">
                     Save Opening Arrears
                   </Button>

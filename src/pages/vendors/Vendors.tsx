@@ -237,7 +237,11 @@ const Vendors: React.FC = () => {
           rowKey="id"
           loading={loading}
           scroll={{ x: 1000 }}
-          pagination={{pageSize: 8,}}
+          pagination={{
+              pageSize: 14,
+              showSizeChanger: true,
+              responsive: true,
+            }}
         />
       </Card>
 
