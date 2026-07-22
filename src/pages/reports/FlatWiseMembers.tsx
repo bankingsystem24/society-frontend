@@ -8,11 +8,12 @@ import {
   Tag,
   message,
   Space,
+  Checkbox,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import axios from "axios";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -31,21 +32,37 @@ const FlatWiseMembers: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [printing, setPrinting] = useState(false);
   const societyId = Number(sessionStorage.getItem("societyId"));
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([
+    "srNo",
+    "flatNo",
+    "memberName",
+    "mobile",
+    "email",
+    "memberType",
+    "active",
+  ]);
 
   useEffect(() => {
     fetchMembers();
   }, []);
 
+  const columnOptions = [
+    { label: "SN.", value: "srNo" },
+    { label: "Flat No", value: "flatNo" },
+    { label: "Member Name", value: "memberName" },
+    { label: "Mobile", value: "mobile" },
+    { label: "Email", value: "email" },
+    { label: "Member Type", value: "memberType" },
+    { label: "Status", value: "active" },
+  ];
+
   const fetchMembers = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `${BASE_URL}/reports/flat-wise-members`,
-        {
-          params: { societyId },
-        }
-      );
+      const res = await axios.get(`${BASE_URL}/reports/flat-wise-members`, {
+        params: { societyId },
+      });
 
       setData(res.data || []);
     } catch (err) {
@@ -55,19 +72,19 @@ const FlatWiseMembers: React.FC = () => {
     }
   };
 
-const handlePrint = () => {
+  const handlePrint = () => {
     setPrinting(true);
 
     setTimeout(() => {
-        window.print();
-        setPrinting(false);
+      window.print();
+      setPrinting(false);
     }, 300);
-};
-
-  const columns: ColumnsType<FlatWiseMember> = [
+  };
+  const allColumns: ColumnsType<FlatWiseMember> = [
     {
       title: "SN.",
-      width: 50,
+      key: "srNo",
+      width: 40,
       align: "center",
       render: (_, __, index) => index + 1,
     },
@@ -75,7 +92,7 @@ const handlePrint = () => {
       title: "Flat No",
       dataIndex: "flatNo",
       key: "flatNo",
-      width: 100,
+      width: 70,
     },
     {
       title: "Member Name",
@@ -86,59 +103,109 @@ const handlePrint = () => {
       title: "Mobile",
       dataIndex: "mobile",
       key: "mobile",
-      width: 130,
+      width: 90,
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      render: (text: string) => (
+        <span
+          style={{
+            wordBreak: "break-word",
+            whiteSpace: "normal",
+          }}
+        >
+          {text}
+        </span>
+      ),
     },
     {
-      title: "Member Type",
+      title: "Type",
       dataIndex: "memberType",
       key: "memberType",
-      width: 120,
+      width: 90,
       align: "center",
-      render: (value: string) => (
-        <Tag color={value === "OWNER" ? "blue" : "orange"}>
-          {value}
-        </Tag>
-      ),
+      render: (value: string) =>
+        printing ? (
+          value
+        ) : (
+          <Tag color={value === "OWNER" ? "blue" : "orange"}>{value}</Tag>
+        ),
     },
     {
       title: "Status",
       dataIndex: "active",
       key: "active",
-      width: 100,
+      width: 70,
       align: "center",
-      render: (value: boolean) => (
-        <Tag color={value ? "green" : "red"}>
-          {value ? "ACTIVE" : "INACTIVE"}
-        </Tag>
-      ),
+      render: (value: boolean) =>
+        printing ? (
+          value ? (
+            "ACTIVE"
+          ) : (
+            "INACTIVE"
+          )
+        ) : (
+          <Tag color={value ? "green" : "red"}>
+            {value ? "ACTIVE" : "INACTIVE"}
+          </Tag>
+        ),
     },
   ];
 
+  const visibleColumns = allColumns.filter((col) =>
+    selectedColumns.includes(col.key as string),
+  );
+
   return (
-    <Card
-      bordered={false}
-      style={{ borderRadius: 10 }}
-    >
+    <Card bordered={false} style={{ borderRadius: 0 }}>
       <Space
         style={{
           width: "100%",
           justifyContent: "space-between",
-          marginBottom: 16,
+          marginBottom: 0,
+          marginTop: 0,
         }}
       >
-        <Title level={3} style={{ margin: 0 }}>
+        <Title level={5} className="print-title" style={{ marginTop: 0 }}>
           Flat Wise Members Report
         </Title>
 
-        <Button type="primary" onClick={handlePrint}>
+        <Button className="no-print" type="primary" onClick={handlePrint}>
           Print
         </Button>
       </Space>
+
+      <div
+        className="no-print"
+        style={{
+          background: "#f5f5f5",
+          padding: "12px 16px",
+          borderRadius: "8px",
+          border: "1px solid #d9d9d9",
+          marginBottom: "16px",
+        }}
+      >
+        <Text style={{ fontWeight: "bold", marginRight: 10 }}>
+          Select/Remove Columns :
+        </Text>
+
+        <Checkbox.Group
+          value={selectedColumns}
+          onChange={(values) => setSelectedColumns(values as string[])}
+        >
+          {columnOptions.map((item) => (
+            <Checkbox
+              key={item.value}
+              value={item.value}
+              style={{ marginRight: 16, marginBottom: 8 }}
+            >
+              {item.label}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+      </div>
 
       {loading ? (
         <Spin />
@@ -147,11 +214,11 @@ const handlePrint = () => {
           className="compact-table"
           rowKey={(record) => record.flatNo}
           dataSource={data}
-          columns={columns}
+          columns={visibleColumns}
           bordered
           size="small"
           pagination={printing ? false : { pageSize: 20 }}
-          scroll={{ x: 900 }}
+          scroll={printing ? undefined : { x: 900 }}
         />
       )}
     </Card>
