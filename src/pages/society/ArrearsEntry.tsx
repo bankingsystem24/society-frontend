@@ -61,7 +61,8 @@ const ArrearsEntry: React.FC = () => {
   const userId = sessionStorage.getItem("userId");
   const [arrears, setArrears] = useState<Arrears[]>([]);
   const [filteredArrears, setFilteredArrears] = useState<Arrears[]>([]);
-const [searchText, setSearchText] = useState("");
+const [flatSearch, setFlatSearch] = useState("");
+const [ownerSearch, setOwnerSearch] = useState("");
     const [glReceivable, setGlReceivable] = useState<number>(0);
     const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
   const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
@@ -72,15 +73,21 @@ const [searchText, setSearchText] = useState("");
     loadGlMapping();
   }, []);
 
-  useEffect(() => {
-  const filtered = arrears.filter(
-    (item) =>
-      item.flatNo?.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.ownerName?.toLowerCase().includes(searchText.toLowerCase())
-  );
+ useEffect(() => {
+  const filtered = arrears.filter((item) => {
+    const matchesFlat =
+      flatSearch === "" ||
+      item.flatNo?.toLowerCase().includes(flatSearch.toLowerCase());
+
+    const matchesOwner =
+      ownerSearch === "" ||
+      item.ownerName?.toLowerCase().includes(ownerSearch.toLowerCase());
+
+    return matchesFlat && matchesOwner;
+  });
 
   setFilteredArrears(filtered);
-}, [searchText, arrears]);
+}, [flatSearch, ownerSearch, arrears]);
 
   const loadGlMapping = async () => {
     try {
@@ -287,18 +294,28 @@ const [searchText, setSearchText] = useState("");
 <div
   style={{
     marginTop: 5,
-    marginBottom: 5,
+    marginBottom: 15,
     display: "flex",
-    justifyContent: "flex-start",
+    gap: 12,
+    flexWrap: "wrap",
   }}
 >
   <Input
-    placeholder="Search by Flat or Owner"
+    placeholder="Search by Flat"
     prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
+    value={flatSearch}
+    onChange={(e) => setFlatSearch(e.target.value)}
     allowClear
-    style={{ width: 295 }}
+    style={{ width: 250 }}
+  />
+
+  <Input
+    placeholder="Search by Owner"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={ownerSearch}
+    onChange={(e) => setOwnerSearch(e.target.value)}
+    allowClear
+    style={{ width: 250 }}
   />
 </div>
 

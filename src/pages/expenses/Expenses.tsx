@@ -56,7 +56,8 @@ const Expenses: React.FC = () => {
   const GlBankAccount = Number(sessionStorage.getItem("GlBankAccount"));
   const [form] = Form.useForm();
   const [data, setData] = useState<Expense[]>([]);
-  const [searchText, setSearchText] = useState("");
+  const [dateSearch, setDateSearch] = useState("");
+const [accountSearch, setAccountSearch] = useState("");
 const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -67,25 +68,29 @@ const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
     fetchVendors();
   }, []);
 useEffect(() => {
-const filtered = data.filter((item: any) => {
-  const gl = glList.find(
-    (g: any) => g.glCode === item.expenseGlCode
-  );
+  const filtered = data.filter((item: any) => {
+    const gl = glList.find(
+      (g: any) => g.glCode === item.expenseGlCode
+    );
 
-  return (
-    dayjs(item.expenseDate)
-      .format("DD-MMM-YYYY")
-      .toLowerCase()
-      .includes(searchText.toLowerCase()) ||
+    const matchDate =
+      !dateSearch ||
+      dayjs(item.expenseDate)
+        .format("DD-MMM-YYYY")
+        .toLowerCase()
+        .includes(dateSearch.toLowerCase());
 
-    gl?.accountName
-      ?.toLowerCase()
-      .includes(searchText.toLowerCase())
-  );
-});
+    const matchAccount =
+      !accountSearch ||
+      gl?.accountName
+        ?.toLowerCase()
+        .includes(accountSearch.toLowerCase());
+
+    return matchDate && matchAccount;
+  });
 
   setFilteredExpenses(filtered);
-}, [data, searchText, glList]);
+}, [data, glList, dateSearch, accountSearch]);
 
   const fetchVendors = async () => {
     try {
@@ -347,20 +352,30 @@ const filtered = data.filter((item: any) => {
 
             {/* EXPENSE LIST */}
             <Card title="Expense List">
-              <div
+ <div
   style={{
     marginBottom: 15,
     display: "flex",
-    justifyContent: "flex-start",
+    gap: 12,
+    flexWrap: "wrap",
   }}
 >
   <Input
-    placeholder="Search by Date or Expense Account"
+    placeholder="Search Date"
     prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
+    value={dateSearch}
+    onChange={(e) => setDateSearch(e.target.value)}
     allowClear
-    style={{ width: 320 }}
+    style={{ width: 220 }}
+  />
+
+  <Input
+    placeholder="Search Expense Account"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={accountSearch}
+    onChange={(e) => setAccountSearch(e.target.value)}
+    allowClear
+    style={{ width: 260 }}
   />
 </div>
               <Table
