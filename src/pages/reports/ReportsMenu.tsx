@@ -228,10 +228,10 @@ const ReportsMenu = () => {
                     //   key: "/reports/member-register",
                     //   label: "Member Register",
                     // },
-                    // {
-                    //   key: "/reports/flat-wise-members",
-                    //   label: "Flat Wise Members",
-                    // },
+                    {
+                      key: "/reports/flat-wise-members",
+                      label: "Flat Wise Members",
+                    },
                     // {
                     //   key: "/reports/occupancy-report",
                     //   label: "Occupancy Report",

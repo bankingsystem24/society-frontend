@@ -1,4 +1,4 @@
-@media print {
+/* @media print {
 
   body * {
     visibility: hidden;
@@ -19,4 +19,4 @@
   .ant-pagination {
     display: none !important;
   }
-}
+} */

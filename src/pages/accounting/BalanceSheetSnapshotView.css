@@ -46,7 +46,7 @@
     white-space: nowrap;
 }
 
-@media print {
+/* @media print {
 
     .signature-section {
         display: flex !important;
@@ -64,4 +64,4 @@
         white-space: nowrap;
     }
 
-}
+} */

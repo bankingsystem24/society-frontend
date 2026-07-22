@@ -103,14 +103,12 @@
     }
 }
 
-@media print {
+/* @media print {
 
-  /* Hide everything */
   body * {
     visibility: hidden;
   }
 
-  /* Show only the report */
   #daybook-print,
   #daybook-print * {
     visibility: visible;
@@ -123,9 +121,8 @@
     width: 100%;
   }
 
-  /* Hide Ant Design buttons and date picker */
   .ant-btn,
   .ant-picker {
     display: none !important;
   }
-}
+} */

@@ -73,6 +73,8 @@ import ReportsMenu from "./pages/reports/ReportsMenu";
 import { Typography } from "antd";
 import CashBookReport from "./pages/reports/CashBookReport";
 import ArrearsEntry from "./pages/society/ArrearsEntry";
+import FlatWiseMembers from "./pages/reports/FlatWiseMembers";
+import "./ReportPrint.css";
 
 export default function App() {
   return (
@@ -162,6 +164,9 @@ export default function App() {
       {/* <Route path="/reports-daybook" element={<DayBook />} /> */}
       <Route path="/arrears" element={<ArrearsEntry />} />
 
+
+
+
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
         <Route path="/superadminusers" element={<SuperAdminUsers />} />
@@ -206,6 +211,7 @@ export default function App() {
         <Route path="trial-balance" element={<TrialBalance />} />
         <Route path="profit-and-loss" element={<ProfitAndLoss />} />
         <Route path="cashbook" element={<CashBookReport />} />
+        <Route path="flat-wise-members" element={<FlatWiseMembers />} />
 
 
       </Route>

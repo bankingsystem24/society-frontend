@@ -1,0 +1,36 @@
+@media print {
+
+  /* Hide sidebar, header, menus and buttons */
+  .ant-layout-header,
+  .ant-layout-sider,
+  .ant-menu,
+  .ant-btn,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Print only the report */
+  .report-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff;
+    padding: 10px;
+  }
+
+  .report-print .ant-card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .ant-pagination {
+    display: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+}
