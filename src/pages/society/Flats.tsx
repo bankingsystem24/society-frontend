@@ -34,21 +34,28 @@ const Flats: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [filteredData, setFilteredData] = useState<any[]>([]);
-const [searchText, setSearchText] = useState("");
+const [flatSearch, setFlatSearch] = useState("");
+const [ownerSearch, setOwnerSearch] = useState("");
 
   useEffect(() => {
     loadFlats();
   }, []);
 
   useEffect(() => {
-  const filtered = data.filter(
-    (item) =>
-      item.flatNo?.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.ownerName?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filtered = data.filter((item) => {
+    const matchFlat =
+      !flatSearch ||
+      item.flatNo?.toLowerCase().includes(flatSearch.toLowerCase());
+
+    const matchOwner =
+      !ownerSearch ||
+      item.ownerName?.toLowerCase().includes(ownerSearch.toLowerCase());
+
+    return matchFlat && matchOwner;
+  });
 
   setFilteredData(filtered);
-}, [searchText, data]);
+}, [flatSearch, ownerSearch, data]);
 
   const loadFlats = async () => {
     try {
@@ -220,15 +227,30 @@ setFilteredData(res || []);
             Manage society flats and owner details
           </Typography.Text>
 
-      
-<div style={{ marginTop: 15 }}>
+<div
+  style={{
+    marginTop: 15,
+    display: "flex",
+    gap: 12,
+    flexWrap: "wrap",
+  }}
+>
   <Input
-    placeholder="Search by Flat Number or Owner"
+    placeholder="Search Flat Number"
     prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
+    value={flatSearch}
+    onChange={(e) => setFlatSearch(e.target.value)}
     allowClear
-    style={{ width: 320 }}
+    style={{ width: 220 }}
+  />
+
+  <Input
+    placeholder="Search Owner Name"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={ownerSearch}
+    onChange={(e) => setOwnerSearch(e.target.value)}
+    allowClear
+    style={{ width: 220 }}
   />
 </div>
         </div>

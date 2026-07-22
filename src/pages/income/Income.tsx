@@ -52,7 +52,8 @@ const Income: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Income[]>([]);
-  const [searchText, setSearchText] = useState("");
+  const [dateSearch, setDateSearch] = useState("");
+const [accountSearch, setAccountSearch] = useState("");
 const [filteredData, setFilteredData] = useState<Income[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
 
@@ -61,24 +62,30 @@ const [filteredData, setFilteredData] = useState<Income[]>([]);
     fetchGlMaster();
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
   const filtered = data.filter((item) => {
     const gl = glList.find(
       (g) => g.glCode === item.incomeGlCode
     );
 
-    const incomeAccount = gl?.accountName || "";
+    const matchDate =
+      !dateSearch ||
+      dayjs(item.voucherDate)
+        .format("DD-MMM-YYYY")
+        .toLowerCase()
+        .includes(dateSearch.toLowerCase());
 
-    const formattedDate = dayjs(item.voucherDate).format("DD-MMM-YYYY");
+    const matchAccount =
+      !accountSearch ||
+      gl?.accountName
+        ?.toLowerCase()
+        .includes(accountSearch.toLowerCase());
 
-    return (
-      formattedDate.toLowerCase().includes(searchText.toLowerCase()) ||
-      incomeAccount.toLowerCase().includes(searchText.toLowerCase())
-    );
+    return matchDate && matchAccount;
   });
 
   setFilteredData(filtered);
-}, [searchText, data, glList]);
+}, [data, glList, dateSearch, accountSearch]);
 
   const fetchGlMaster = async () => {
     try {
@@ -392,16 +399,26 @@ const [filteredData, setFilteredData] = useState<Income[]>([]);
   style={{
     marginBottom: 15,
     display: "flex",
-    justifyContent: "flex-start",
+    gap: 12,
+    flexWrap: "wrap",
   }}
 >
   <Input
-    placeholder="Search by Date or Income Account"
+    placeholder="Search Date"
     prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
+    value={dateSearch}
+    onChange={(e) => setDateSearch(e.target.value)}
     allowClear
-    style={{ width: 320 }}
+    style={{ width: 220 }}
+  />
+
+  <Input
+    placeholder="Search Income Account"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={accountSearch}
+    onChange={(e) => setAccountSearch(e.target.value)}
+    allowClear
+    style={{ width: 260 }}
   />
 </div>
 

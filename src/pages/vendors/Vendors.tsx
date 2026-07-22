@@ -15,6 +15,10 @@ import {
   Select,
   Layout
 } from "antd";
+import {
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 import Header from "../../components/layout/Header";
 import Sidebar from "../../components/layout/Sidebar";
@@ -41,6 +45,8 @@ interface Vendor {
 
 const Vendors: React.FC = () => {
   const [data, setData] = useState<Vendor[]>([]);
+  const [filteredData, setFilteredData] = useState<Vendor[]>([]);
+const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Vendor | null>(null);
@@ -56,6 +62,7 @@ const Vendors: React.FC = () => {
       setLoading(true);
       const res = await axios.get(`${BASE_URL}/vendors/${societyId}`);
       setData(res.data || []);
+setFilteredData(res.data || []);
     } catch {
       message.error("Failed to load vendors");
     } finally {
@@ -89,6 +96,16 @@ const Vendors: React.FC = () => {
       fetchGLCodes();
     }
   }, [societyId]);
+
+  useEffect(() => {
+  const filtered = data.filter((item) =>
+    item.vendorName
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase())
+  );
+
+  setFilteredData(filtered);
+}, [searchText, data]);
 
   const getGlName = (glCode: number) => {
     const gl = glList.find((g) => g.glCode === glCode);
@@ -231,8 +248,24 @@ const Vendors: React.FC = () => {
           </Button>
         }
       >
+        <div
+  style={{
+    marginBottom: 15,
+    display: "flex",
+    justifyContent: "flex-start",
+  }}
+>
+  <Input
+    placeholder="Search Vendor Name"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 300 }}
+  />
+</div>
         <Table
-          dataSource={data}
+          dataSource={filteredData}
           columns={columns}
           rowKey="id"
           loading={loading}
