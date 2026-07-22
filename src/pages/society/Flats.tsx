@@ -7,11 +7,12 @@ import {
   Popconfirm,
   Space,
   message,
-  Layout
+  Layout,
+  Input,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { apiDelete, apiGet } from "../../api/axios";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined,} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
 import AuditorHeader from "../../components/layout/AuditorHeader";
@@ -32,10 +33,22 @@ const Flats: React.FC = () => {
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     loadFlats();
   }, []);
+
+  useEffect(() => {
+  const filtered = data.filter(
+    (item) =>
+      item.flatNo?.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.ownerName?.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  setFilteredData(filtered);
+}, [searchText, data]);
 
   const loadFlats = async () => {
     try {
@@ -45,7 +58,9 @@ const Flats: React.FC = () => {
 
       const res = await apiGet(`/flats?societyId=${societyId}`);
 
-      setData(res || []);
+      
+     setData(res || []);
+setFilteredData(res || []);
     } catch (error) {
       console.error("Error loading flats", error);
     } finally {
@@ -204,8 +219,19 @@ const Flats: React.FC = () => {
           <Typography.Text type="secondary">
             Manage society flats and owner details
           </Typography.Text>
-        </div>
 
+      
+<div style={{ marginTop: 15 }}>
+  <Input
+    placeholder="Search by Flat Number or Owner"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 320 }}
+  />
+</div>
+        </div>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -217,7 +243,7 @@ const Flats: React.FC = () => {
 
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         rowKey="id"
         loading={loading}
         bordered

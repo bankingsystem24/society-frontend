@@ -16,7 +16,7 @@ import {
 } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
-
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import Header from "../../components/layout/Header";
 import AuditorHeader from "../../components/layout/AuditorHeader";
 import AuditorSidebar from "../../components/layout/AuditorSidebar";
@@ -47,12 +47,26 @@ const Transfer: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Transfer[]>([]);
+  const [filteredData, setFilteredData] = useState<Transfer[]>([]);
+const [searchText, setSearchText] = useState("");
   const [glList, setGlList] = useState<any[]>([]);
 
   useEffect(() => {
     fetchTransfers();
     fetchGlMaster();
   }, []);
+
+  useEffect(() => {
+  const filtered = data.filter((item) => {
+    const formattedDate = dayjs(item.voucherDate).format("DD-MMM-YYYY");
+
+    return formattedDate
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+  });
+
+  setFilteredData(filtered);
+}, [searchText, data]);
 
   const fetchGlMaster = async () => {
     try {
@@ -68,6 +82,7 @@ const Transfer: React.FC = () => {
       setLoading(true);
       const res = await axios.get(`${BASE_URL}/transfer?societyId=${societyId}&financialYearId=${financialYearId}`);
       setData(res.data);
+      setFilteredData(res.data);
 
     } catch {
       message.error("Failed to load transfers");
@@ -335,8 +350,26 @@ const Transfer: React.FC = () => {
 
             {/* Transfer List */}
             <Card title="Transfer List">
+
+<div
+  style={{
+    marginBottom: 15,
+    display: "flex",
+    justifyContent: "flex-start",
+  }}
+>
+  <Input
+    placeholder="Search by Voucher Date"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 320 }}
+  />
+</div>
+
               <Table
-                dataSource={data}
+                dataSource={filteredData}
                 columns={columns}
                 rowKey="id"
                 loading={loading}

@@ -10,9 +10,10 @@ import {
   Popconfirm,
   Space,
   Layout,
+  Input,
 } from "antd";
 import { apiDelete, apiGet, apiPut } from "../../api/axios";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined,  SearchOutlined, } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header";
@@ -36,14 +37,15 @@ const Users: React.FC = () => {
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("active");
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     loadUsers();
   }, []);
 
   useEffect(() => {
-    applyFilter(statusFilter);
-  }, [data, statusFilter]);
+    applyFilter(statusFilter,searchText);
+  }, [data, statusFilter,searchText]);
 
   const loadUsers = async () => {
     try {
@@ -82,15 +84,27 @@ const Users: React.FC = () => {
     }
   };
 
-  const applyFilter = (filter: string) => {
-    if (filter === "all") {
-      setFilteredData(data);
-    } else if (filter === "active") {
-      setFilteredData(data.filter((item) => item.active));
-    } else {
-      setFilteredData(data.filter((item) => !item.active));
-    }
-  };
+const applyFilter = (filter: string, search = searchText) => {
+  let filtered = data;
+
+  // Status filter
+  if (filter === "active") {
+    filtered = filtered.filter((item) => item.active);
+  } else if (filter === "inactive") {
+    filtered = filtered.filter((item) => !item.active);
+  }
+
+  // Search by Name or Username
+  if (search.trim()) {
+    filtered = filtered.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(search.toLowerCase()) ||
+        item.username?.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+
+  setFilteredData(filtered);
+};
 
   const updateStatus = async (id: number, checked: boolean) => {
     try {
@@ -280,6 +294,17 @@ const Users: React.FC = () => {
           <Typography.Text type="secondary">
             Manage users, roles and access permissions
           </Typography.Text>
+
+      <div style={{ marginTop: 20 }}>
+  <Input
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    placeholder="Search by Name or Username"
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 280 }}
+  />
+</div>
         </div>
 
         <div

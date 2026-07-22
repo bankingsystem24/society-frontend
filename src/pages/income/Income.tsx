@@ -14,7 +14,7 @@ import {
   Layout,
   Popconfirm,
 } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined,SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -52,12 +52,33 @@ const Income: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Income[]>([]);
+  const [searchText, setSearchText] = useState("");
+const [filteredData, setFilteredData] = useState<Income[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
 
   useEffect(() => {
     fetchIncome();
     fetchGlMaster();
   }, []);
+
+  useEffect(() => {
+  const filtered = data.filter((item) => {
+    const gl = glList.find(
+      (g) => g.glCode === item.incomeGlCode
+    );
+
+    const incomeAccount = gl?.accountName || "";
+
+    const formattedDate = dayjs(item.voucherDate).format("DD-MMM-YYYY");
+
+    return (
+      formattedDate.toLowerCase().includes(searchText.toLowerCase()) ||
+      incomeAccount.toLowerCase().includes(searchText.toLowerCase())
+    );
+  });
+
+  setFilteredData(filtered);
+}, [searchText, data, glList]);
 
   const fetchGlMaster = async () => {
     try {
@@ -84,6 +105,7 @@ const Income: React.FC = () => {
       );
 
       setData(res.data);
+      setFilteredData(res.data);
     } catch {
       message.error("Failed to load income vouchers");
     } finally {
@@ -365,10 +387,28 @@ const Income: React.FC = () => {
             </Card>
 
             <Card title="Income List">
+
+<div
+  style={{
+    marginBottom: 15,
+    display: "flex",
+    justifyContent: "flex-start",
+  }}
+>
+  <Input
+    placeholder="Search by Date or Income Account"
+    prefix={<SearchOutlined style={{ color: "#999" }} />}
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+    allowClear
+    style={{ width: 320 }}
+  />
+</div>
+
               <Table
                 rowKey="id"
                 columns={columns}
-                dataSource={data}
+                dataSource={filteredData}
                 loading={loading}
                 size="small"
                 scroll={{ x: 1000 }}
