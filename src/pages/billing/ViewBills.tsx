@@ -9,7 +9,9 @@ import {
   message,
   Layout,
   DatePicker,
+  Popconfirm,
 } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { ColumnsType } from "antd/es/table";
@@ -120,6 +122,16 @@ export default function ViewBills() {
     glDiscount,
   ]);
 
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`${BASE_URL}/billing/${id}`);
+      message.success("Bill deleted successfully.");
+      loadBills();
+    } catch (err) {
+      message.error("Unable to delete bill.");
+    }
+  };
+
   const loadGlMapping = async () => {
     try {
       const res = await axios.get(
@@ -182,7 +194,15 @@ export default function ViewBills() {
         societyId: societyId,
         financialYearId: financialYearId,
       });
-      setBills(res.data);
+
+      const sortedBills = res.data.sort((a: any, b: any) =>
+        a.flatNo.localeCompare(b.flatNo, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
+
+      setBills(sortedBills);
     } catch {
       message.error("Failed to load bills");
     } finally {
@@ -304,7 +324,23 @@ export default function ViewBills() {
       dataIndex: "dueDate",
       render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
     },
-    {},
+    {
+      title: "Action",
+      key: "action",
+      width: 90,
+      align: "center",
+      render: (_: any, record: Bill) => (
+        <Popconfirm
+          title="Delete Bill"
+          description="Are you sure you want to delete this bill?"
+          okText="Yes"
+          cancelText="No"
+          onConfirm={() => handleDelete(record.id)}
+        >
+          <Button danger type="text" icon={<DeleteOutlined />} />
+        </Popconfirm>
+      ),
+    },
   ];
 
   const calculateInterest = async (date: dayjs.Dayjs | null) => {
@@ -314,7 +350,7 @@ export default function ViewBills() {
       const res = await axios.post(`${BASE_URL}/billing/calculate-interest`, {
         billIds: selectedRowKeys,
         paymentDate: date.format("YYYY-MM-DD"),
-        financialYearId
+        financialYearId,
       });
 
       setPaymentInterest(res.data.interestAmount);
@@ -399,8 +435,6 @@ export default function ViewBills() {
                   </Form.Item>
                 </div>
 
-  
-
                 {/* Status */}
                 <div style={{ flex: "1 1 100px", minWidth: 100 }}>
                   <Form.Item label="Status" name="status">
@@ -420,17 +454,17 @@ export default function ViewBills() {
                 {/* Member */}
                 <div style={{ flex: "1 1 100px", minWidth: 100 }}>
                   <Form.Item label="Member" name="memberId">
-                 <Select
-  showSearch
-  allowClear
-  placeholder="Search Member"
-  optionFilterProp="label"
-  onChange={filterBills}
-  options={members.map((m) => ({
-    label: m.name,
-    value: m.id,
-  }))}
-/>
+                    <Select
+                      showSearch
+                      allowClear
+                      placeholder="Search Member"
+                      optionFilterProp="label"
+                      onChange={filterBills}
+                      options={members.map((m) => ({
+                        label: m.name,
+                        value: m.id,
+                      }))}
+                    />
                   </Form.Item>
                 </div>
               </div>
