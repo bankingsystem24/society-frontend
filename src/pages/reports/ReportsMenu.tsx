@@ -107,18 +107,18 @@ const ReportsMenu = () => {
                   key: "billingreports",
                   label: "Billing",
                   children: [
-                    // {
-                    //   key: "/reports/maintenance-register",
-                    //   label: "Maintenance Bill Register",
-                    // },
-                    // {
-                    //   key: "/reports/sinking-register",
-                    //   label: "Sinking Fund Register",
-                    // },
-                    // {
-                    //   key: "/reports/contribution-register",
-                    //   label: "Contribution Register",
-                    // },
+                    {
+                      key: "/reports/maintenance-register",
+                      label: "Maintenance Register",
+                    },
+                    {
+                      key: "/reports/sinking-register",
+                      label: "Sinking Fund Register",
+                    },
+                    {
+                      key: "/reports/contribution-register",
+                      label: "Contribution Register",
+                    },
                     // {
                     //   key: "/reports/interest-report",
                     //   label: "Interest Calculation Report",
