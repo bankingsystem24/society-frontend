@@ -193,6 +193,7 @@ const MemberPayingMaintenance: React.FC = () => {
       );
 
       pending = pending.filter((b: Billing) => b.flat?.id === flatId);
+      console.log("Response:",pending);
 
       setBills(pending);
     } catch (err) {
@@ -308,6 +309,10 @@ const MemberPayingMaintenance: React.FC = () => {
     {
       title: "Flat No",
       dataIndex: ["flat", "flatNo"],
+    },
+    {
+      title: "Bill Type",
+      dataIndex: "billType",
     },
     {
       title: "Month",

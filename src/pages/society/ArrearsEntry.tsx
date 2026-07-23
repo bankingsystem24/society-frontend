@@ -158,7 +158,7 @@ const [ownerSearch, setOwnerSearch] = useState("");
         discountAmount: 0,
         dueDate: values.dueDate.format("YYYY-MM-DD"),
         billType: "ARREARS",
-        month: "OPENING",
+        month: dayjs(values.dueDate).format("MMMM").toUpperCase(),
         year: dayjs(values.dueDate).year(),
         createdBy: Number(userId),
         glReceivable,
@@ -182,6 +182,10 @@ const [ownerSearch, setOwnerSearch] = useState("");
       title: "Owner",
       dataIndex: ["ownerName"],
     },
+    {
+      title: "Bill Type",
+      dataIndex: ["billType"],
+    },    
     {
       title: "Amount",
       dataIndex: "maintenanceAmount",

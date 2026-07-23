@@ -39,11 +39,13 @@ const BillingPolicy: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const societyName = sessionStorage.getItem("societyName");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+
   useEffect(() => {
     form.setFieldsValue({
       societyId,
       interestRate: 0,
       interestType: "MONTHLY",
+      graceDays:0
     });
     loadPolicy();
   }, []);
@@ -61,11 +63,13 @@ const BillingPolicy: React.FC = () => {
           societyId: data.society?.id,
           interestRate: data.interestRate,
           interestType: data.interestType,
+          graceDays : data.graceDays,
         });
       }
     } catch (error) {
       console.error("No billing policy found");
       setPolicyId(null);
+      setPolicies([]);   
     }
   };
 
@@ -79,13 +83,13 @@ const BillingPolicy: React.FC = () => {
         interestRate: values.interestRate,
         interestType: values.interestType,
         financialYearId: financialYearId,
+        graceDays:values.graceDays,
       };
 
       await apiPost("/billing-policy", payload);
-
       message.success( policyId ? "Billing policy updated successfully" : "Billing policy saved successfully",);
-
       await loadPolicy();
+
     } catch (error) {
       console.error(error);
       message.error("Failed to save billing policy");
@@ -111,13 +115,12 @@ const BillingPolicy: React.FC = () => {
 
       if (policyId === id) {
         setPolicyId(null);
-
         form.resetFields();
-
         form.setFieldsValue({
           societyId,
           interestRate: 0,
           interestType: "MONTHLY",
+          graceDays:0
         });
       }
     } catch {
@@ -165,21 +168,21 @@ const BillingPolicy: React.FC = () => {
           <Card
             title={policyId ? "Edit Billing Policy" : "Create Billing Policy"}
           >
-            <Form form={form} layout="vertical" onFinish={onFinish}>
+            <Form form={form} layout="horizontal" onFinish={onFinish}>
               <Form.Item name="societyId" hidden>
                 <Input />
               </Form.Item>
 
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item label="Society">
+                  <Form.Item label="Name of Society">
                     <Input value={societyName || ""} disabled />
                   </Form.Item>
                 </Col>
               </Row>
 
               <Row gutter={16}>
-                <Col span={12}>
+                <Col span={6}>
                   <Form.Item label="Interest Rate (%)" name="interestRate">
                     <InputNumber
                       min={0}
@@ -188,7 +191,7 @@ const BillingPolicy: React.FC = () => {
                     />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col span={6}>
                   <Form.Item label="Interest Type" name="interestType">
                     <Select>
                       <Option value="MONTHLY">Monthly</Option>
@@ -197,6 +200,16 @@ const BillingPolicy: React.FC = () => {
                     </Select>
                   </Form.Item>
                 </Col>
+                <Col span={6}>
+                  <Form.Item label="Grace Days" name="graceDays">
+                    <InputNumber
+                      min={0}
+                      step={0.01}
+                      style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                </Col>
+
               </Row>
 
               <Row gutter={12}>
@@ -225,6 +238,10 @@ const BillingPolicy: React.FC = () => {
                   {
                     title: "Interest Type",
                     dataIndex: "interestType",
+                  },
+                  {
+                    title:"Grace Days",
+                    dataIndex:"graceDays",
                   },
                   {
                     title: "Action",

@@ -203,6 +203,8 @@ export default function ViewBills() {
       );
 
       setBills(sortedBills);
+      console.log("Response:",res.data);
+
     } catch {
       message.error("Failed to load bills");
     } finally {
@@ -296,6 +298,7 @@ export default function ViewBills() {
   const columns: ColumnsType<Bill> = [
     { title: "Flat", dataIndex: "flatNo" },
     { title: "Member", dataIndex: "memberName" },
+    { title: "BillType", dataIndex: "billType" },
     { title: "Month", dataIndex: "month" },
     { title: "Year", dataIndex: "year" },
     { title: "Maintenance", dataIndex: "maintenanceAmount" },

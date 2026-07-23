@@ -89,9 +89,7 @@ export default function App() {
       {/* <Route path="/member-receipts" element={<MemberBills />} /> */}
       {/* <Route path="/member-pending-bills" element={<MemberPendingBills />} /> */}
       <Route
-        path="/member-paying-maintenance"
-        element={<MemberPayingMaintenance />}
-      />
+        path="/member-paying-maintenance" element={<MemberPayingMaintenance />} />
       <Route path="/open-financial-year" element={<OpenFinancialYear />} />
       {/* <Route path="/member-sinking-funds" element={<MemberSinkingFunds />} /> */}
       <Route path="/contributions" element={<PendingContributions />} />
