@@ -75,6 +75,7 @@ import CashBookReport from "./pages/reports/CashBookReport";
 import ArrearsEntry from "./pages/society/ArrearsEntry";
 import FlatWiseMembers from "./pages/reports/FlatWiseMembers";
 import "./ReportPrint.css";
+import DueBills from "./pages/reports/DueBills";
 
 export default function App() {
   return (
@@ -212,6 +213,7 @@ export default function App() {
         <Route path="profit-and-loss" element={<ProfitAndLoss />} />
         <Route path="cashbook" element={<CashBookReport />} />
         <Route path="flat-wise-members" element={<FlatWiseMembers />} />
+        <Route path="due-bills" element={<DueBills />} />
 
 
       </Route>

@@ -131,10 +131,10 @@ const ReportsMenu = () => {
                     //   key: "/reports/billing-summary",
                     //   label: "Billing Summary",
                     // },
-                    // {
-                    //   key: "/reports/due-bills-report",
-                    //   label: "Due Bills Report",
-                    // },
+                    {
+                      key: "/reports/due-bills",
+                      label: "Due Bills Report",
+                    },
                   ],
                 },
                 {
