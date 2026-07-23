@@ -260,8 +260,6 @@ export default function ViewBills() {
       const payload = {
         societyId: Number(societyId),
         flatId: values.flatId || null,
-        fromYear: values.fromYear || null,
-        month: values.month || null,
         status: values.status || null,
         memberId: values.memberId || null,
         financialYearId: financialYearId,
@@ -401,31 +399,7 @@ export default function ViewBills() {
                   </Form.Item>
                 </div>
 
-                {/* Year */}
-                <div style={{ flex: "1 1 100px", minWidth: 100 }}>
-                  <Form.Item label="Financial Year" name="fromYear">
-                    <Select
-                      allowClear
-                      onChange={filterBills}
-                      options={[
-                        { label: "2024-2025", value: 2024 },
-                        { label: "2025-2026", value: 2025 },
-                        { label: "2026-2027", value: 2026 },
-                      ]}
-                    />
-                  </Form.Item>
-                </div>
-
-                {/* Month */}
-                <div style={{ flex: "1 1 100px", minWidth: 100 }}>
-                  <Form.Item label="Month" name="month">
-                    <Select
-                      allowClear
-                      onChange={filterBills}
-                      options={months.map((m) => ({ label: m, value: m }))}
-                    />
-                  </Form.Item>
-                </div>
+  
 
                 {/* Status */}
                 <div style={{ flex: "1 1 100px", minWidth: 100 }}>
@@ -446,14 +420,17 @@ export default function ViewBills() {
                 {/* Member */}
                 <div style={{ flex: "1 1 100px", minWidth: 100 }}>
                   <Form.Item label="Member" name="memberId">
-                    <Select
-                      allowClear
-                      onChange={filterBills}
-                      options={members.map((m) => ({
-                        label: m.name,
-                        value: m.id,
-                      }))}
-                    />
+                 <Select
+  showSearch
+  allowClear
+  placeholder="Search Member"
+  optionFilterProp="label"
+  onChange={filterBills}
+  options={members.map((m) => ({
+    label: m.name,
+    value: m.id,
+  }))}
+/>
                   </Form.Item>
                 </div>
               </div>
