@@ -193,7 +193,6 @@ const MemberPayingMaintenance: React.FC = () => {
       );
 
       pending = pending.filter((b: Billing) => b.flat?.id === flatId);
-      console.log("Response:",pending);
 
       setBills(pending);
     } catch (err) {

@@ -203,7 +203,6 @@ export default function ViewBills() {
       );
 
       setBills(sortedBills);
-      console.log("Response:",res.data);
 
     } catch {
       message.error("Failed to load bills");

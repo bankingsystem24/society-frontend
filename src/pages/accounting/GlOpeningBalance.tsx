@@ -14,8 +14,9 @@ import {
   Col,
   Grid,
   Layout,
+  DatePicker,
 } from "antd";
-
+import  { Dayjs } from "dayjs";
 import axios from "axios";
 import Header from "../../components/layout/Header";
 import Sidebar from "../../components/layout/Sidebar";
@@ -40,6 +41,15 @@ interface GlOpeningBalance {
   openingDebit: number;
   openingCredit: number;
   openingBalance: number;
+  openingAsOn: string;
+}
+
+interface OpeningBalanceForm {
+  financialYearId: number;
+  glCode: number;
+  openingDebit: number;
+  openingCredit: number;
+  openingAsOn: Dayjs | null;
 }
 
 const GlOpeningBalance: React.FC = () => {
@@ -115,6 +125,7 @@ const GlOpeningBalance: React.FC = () => {
         openingDebit: editing.openingDebit,
         openingCredit: editing.openingCredit,
         openingBalance: editing.openingBalance,
+        openingAsOn: editing.openingAsOn,
       });
     } else {
       form.resetFields();
@@ -124,6 +135,7 @@ const GlOpeningBalance: React.FC = () => {
         openingDebit: 0,
         openingCredit: 0,
         openingBalance: null,
+        openingAaOn:null
       });
     }
   }, [open, editing, financialYearId, form]);
@@ -135,7 +147,7 @@ const GlOpeningBalance: React.FC = () => {
   };
 
   // ================= SAVE =================
-  const handleSave = async (values: GlOpeningBalance) => {
+  const handleSave = async (values: OpeningBalanceForm) => {
     try {
       const payload = {
         societyId,
@@ -144,7 +156,12 @@ const GlOpeningBalance: React.FC = () => {
         openingDebit: Number(values.openingDebit || 0),
         openingCredit: Number(values.openingCredit || 0),
         openingBalance: null,
-        createdBy : userId
+        createdBy : userId,
+            openingAsOn: values.openingAsOn
+      ? values.openingAsOn.format("YYYY-MM-DD")
+      : null,
+
+
       };
 
       if (editing?.id) {
@@ -343,7 +360,12 @@ const GlOpeningBalance: React.FC = () => {
                     ))}
                   </Select>
                 </Form.Item>
-
+                <Form.Item
+                  label="Opening As On"
+                  name="openingAsOn"
+                >
+                  <DatePicker style={{ width: "100%" }} />
+                </Form.Item>
                 <Row gutter={16}>
                   <Col xs={24} md={12}>
                     <Form.Item name="openingCredit" label="Opening Credit">

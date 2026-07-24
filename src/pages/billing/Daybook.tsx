@@ -34,6 +34,7 @@ interface DayBookDTO {
   glCode: number;
   accountName: string;
   memberName: string;
+  particulars: string;
   remarks: string;
   debitAmount: number;
   creditAmount: number;
@@ -78,6 +79,7 @@ const Daybook = () => {
         },
       });
       setReport(res.data);
+
     } catch (e) {
       console.error(e);
       message.error("Unable to load Day Book");
@@ -202,7 +204,7 @@ const Daybook = () => {
 
                                 <tr>
                                   <th>Voucher</th>
-                                  <th>Member</th>
+                                  <th>Particulars</th>
                                   <th>Debit</th>
                                 </tr>
                               </thead>
@@ -211,7 +213,7 @@ const Daybook = () => {
                                 {debit.transactions.map((t, i) => (
                                   <tr key={i}>
                                     <td>{t.voucherNo}</td>
-                                    <td>{t.memberName || "-"}</td>
+                                    <td>{t.memberName || t.particulars || "-"}</td>
                                     <td className="text-right">
                                       {t.debitAmount.toFixed(2)}
                                     </td>
@@ -247,7 +249,7 @@ const Daybook = () => {
 
                                 <tr>
                                   <th>Voucher</th>
-                                  <th>Member</th>
+                                  <th>Particulars</th>
                                   <th>Credit</th>
                                 </tr>
                               </thead>
@@ -256,7 +258,7 @@ const Daybook = () => {
                                 {credit.transactions.map((t, i) => (
                                   <tr key={i}>
                                     <td>{t.voucherNo}</td>
-                                    <td>{t.memberName || "-"}</td>
+                                    <td>{t.memberName || t.particulars || "-"}</td>
                                     <td className="text-right">
                                       {t.creditAmount.toFixed(2)}
                                     </td>
