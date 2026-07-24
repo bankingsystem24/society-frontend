@@ -267,21 +267,20 @@ const ContributionPage: React.FC = () => {
           <Col xs={24} md={8}>
             <Form.Item label="Generation Date">
               <DatePicker
-                style={{ width: "100%" }}
-                value={date}
-                onChange={(d) => setDate(d ?? dayjs())}
-                format="DD-MM-YYYY"
-              />
+  style={{ width: "100%" }}
+  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+  placeholder="DD/MM/YYYY"
+/>
             </Form.Item>
           </Col>
 
           <Col xs={24} md={8}>
             <Form.Item label="Due Date">
               <DatePicker
-                style={{ width: "100%" }}
-                value={dueDate}
-                onChange={(d) => setDueDate(d)}
-              />
+  style={{ width: "100%" }}
+  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+  placeholder="DD/MM/YYYY"
+/>
             </Form.Item>
           </Col>
 
