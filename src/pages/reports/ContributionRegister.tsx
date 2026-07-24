@@ -17,63 +17,64 @@ const { Title, Text } = Typography;
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-interface DueBill {
-  billId: number;
+interface ContributionRegister {
+  id: number;
   flatNo: string;
   memberName: string;
-  month: string;
-  year: number;
-  maintenanceAmount: number;
-  penaltyAmount: number;
-  interestAmount: number;
-  discountAmount: number;
-  totalAmount: number;
+  name: string;
+  type: string;
+  mode: string;
+  amount: number;
+  date: string;
   dueDate: string;
+  paidDate: string;
+  paymentMode: string;
+  transactionId: string;
   status: string;
 }
 
-const DueBills: React.FC = () => {
-  const [data, setData] = useState<DueBill[]>([]);
+const ContributionRegister: React.FC = () => {
+ const [data, setData] = useState<ContributionRegister[]>([]);
   const [loading, setLoading] = useState(false);
   const [printing, setPrinting] = useState(false);
 
+  
   const societyId = Number(sessionStorage.getItem("societyId"));
+const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([
-    "srNo",
-    "billNo",
-    "flatNo",
-    "memberName",
-    "month",
-    "maintenanceAmount",
-    "penaltyAmount",
-    "interestAmount",
-    "discountAmount",
-    "totalAmount",
-    "dueDate",
-    "status",
-  ]);
+const [selectedColumns, setSelectedColumns] = useState<string[]>([
+  "srNo",
+  "flatNo",
+  "memberName",
+  "type",
+  "mode",
+  "amount",
+  "date",
+  "dueDate",
+  "paidDate",
+  "paymentMode",
+  "transactionId",
+  "status",
+]);
+useEffect(() => {
+  fetchContributionRegister();
+}, []);
 
-  useEffect(() => {
-    fetchBills();
-  }, []);
+const fetchContributionRegister = async () => {
+  try {
+    setLoading(true);
 
-  const fetchBills = async () => {
-    try {
-      setLoading(true);
+const res = await axios.get(
+  `${BASE_URL}/contribution/${societyId}/${financialYearId}`
+);
 
-        const res = await axios.get(`${BASE_URL}/reports/due-bills`, {
-        params: { societyId },
-        });
-
-        setData(res.data || []);
-
-    } catch {
-      message.error("Failed to load Due Bills");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setData(res.data || []);
+  } catch {
+    message.error("Failed to load Contribution Register");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handlePrint = () => {
     setPrinting(true);
@@ -83,106 +84,91 @@ const DueBills: React.FC = () => {
       setPrinting(false);
     }, 300);
   };
-const [pagination, setPagination] = useState({
-  current: 1,
-  pageSize: 20,
-});
+
 const columnOptions = [
   { label: "SN.", value: "srNo" },
   { label: "Flat No", value: "flatNo" },
   { label: "Member Name", value: "memberName" },
-  { label: "Month", value: "month" },
-  { label: "Maintenance", value: "maintenanceAmount" },
-  { label: "Penalty", value: "penaltyAmount" },
-  { label: "Interest", value: "interestAmount" },
-  { label: "Discount", value: "discountAmount" },
-  { label: "Total Due", value: "totalAmount" },
+  { label: "Type", value: "type" },
+  { label: "Mode", value: "mode" },
+  { label: "Amount", value: "amount" },
+  { label: "Date", value: "date" },
   { label: "Due Date", value: "dueDate" },
+  { label: "Paid Date", value: "paidDate" },
+  { label: "Payment Mode", value: "paymentMode" },
+  { label: "Transaction ID", value: "transactionId" },
   { label: "Status", value: "status" },
 ];
-
-const allColumns: ColumnsType<DueBill> = [
+const [pagination, setPagination] = useState({
+  current: 1,
+  pageSize: 20,
+});
+const allColumns: ColumnsType<ContributionRegister> = [
   {
     title: "SN.",
     key: "srNo",
-    width: 50,
     align: "center",
-  render: (_, __, index) =>
+    render: (_, __, index) =>
   (pagination.current - 1) * pagination.pageSize + index + 1,
   },
   {
     title: "Flat No",
     dataIndex: "flatNo",
     key: "flatNo",
-    width: 80,
   },
   {
     title: "Member Name",
     dataIndex: "memberName",
     key: "memberName",
-    width: 250,
   },
   {
-    title: "Month",
-    key: "month",
-    render: (_, record) => `${record.month}-${record.year}`,
-    width: 120,
+    title: "Type",
+    dataIndex: "type",
+    key: "type",
   },
   {
-    title: "Maintenance",
-    dataIndex: "maintenanceAmount",
-    key: "maintenanceAmount",
+    title: "Mode",
+    dataIndex: "mode",
+    key: "mode",
+  },
+  {
+    title: "Amount",
+    dataIndex: "amount",
+    key: "amount",
     align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
+    render: (v) => `₹ ${(v ?? 0).toFixed(2)}`,
   },
   {
-    title: "Penalty",
-    dataIndex: "penaltyAmount",
-    key: "penaltyAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
-  },
-  {
-    title: "Interest",
-    dataIndex: "interestAmount",
-    key: "interestAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
-  },
-  {
-    title: "Discount",
-    dataIndex: "discountAmount",
-    key: "discountAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
-  },
-  {
-    title: "Total Due",
-    dataIndex: "totalAmount",
-    key: "totalAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => (
-      <strong>₹ {v.toFixed(2)}</strong>
-    ),
+    title: "Date",
+    dataIndex: "date",
+    key: "date",
   },
   {
     title: "Due Date",
     dataIndex: "dueDate",
     key: "dueDate",
-    width: 110,
+  },
+  {
+    title: "Paid Date",
+    dataIndex: "paidDate",
+    key: "paidDate",
+  },
+  {
+    title: "Payment Mode",
+    dataIndex: "paymentMode",
+    key: "paymentMode",
+  },
+  {
+    title: "Transaction ID",
+    dataIndex: "transactionId",
+    key: "transactionId",
   },
   {
     title: "Status",
     dataIndex: "status",
     key: "status",
     align: "center",
-    width:100,
-    render: (value: string) =>
+    render: (value) =>
       printing ? (
         value
       ) : (
@@ -192,6 +178,7 @@ const allColumns: ColumnsType<DueBill> = [
       ),
   },
 ];
+
 
   const visibleColumns = allColumns.filter((col) =>
     selectedColumns.includes(col.key as string)
@@ -207,9 +194,8 @@ const allColumns: ColumnsType<DueBill> = [
         }}
       >
         <Title level={5} className="print-title">
-          Due Bills Report
-        </Title>
-
+  Contribution Register
+</Title>
         <Button
           className="no-print"
           type="primary"
@@ -263,7 +249,7 @@ const allColumns: ColumnsType<DueBill> = [
           size="small"
           dataSource={data}
           columns={visibleColumns}
-         pagination={
+          pagination={
   printing
     ? false
     : {
@@ -285,4 +271,4 @@ onChange={(page) => {
   );
 };
 
-export default DueBills;
+export default ContributionRegister;

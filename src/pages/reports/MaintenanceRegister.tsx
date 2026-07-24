@@ -17,7 +17,7 @@ const { Title, Text } = Typography;
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-interface DueBill {
+interface MaintenanceRegister {
   billId: number;
   flatNo: string;
   memberName: string;
@@ -32,44 +32,45 @@ interface DueBill {
   status: string;
 }
 
-const DueBills: React.FC = () => {
-  const [data, setData] = useState<DueBill[]>([]);
+const MaintenanceRegister: React.FC = () => {
+ const [data, setData] = useState<MaintenanceRegister[]>([]);
   const [loading, setLoading] = useState(false);
   const [printing, setPrinting] = useState(false);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
 
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([
-    "srNo",
-    "billNo",
-    "flatNo",
-    "memberName",
-    "month",
-    "maintenanceAmount",
-    "penaltyAmount",
-    "interestAmount",
-    "discountAmount",
-    "totalAmount",
-    "dueDate",
-    "status",
-  ]);
-
+const [selectedColumns, setSelectedColumns] = useState<string[]>([
+  "srNo",
+  "flatNo",
+  "memberName",
+  "month",
+  "maintenanceAmount",
+  "penaltyAmount",
+  "interestAmount",
+  "discountAmount",
+  "totalAmount",
+  "dueDate",
+  "status",
+]);
   useEffect(() => {
-    fetchBills();
-  }, []);
+  fetchMaintenanceRegister();
+}, []);
 
-  const fetchBills = async () => {
+  const fetchMaintenanceRegister = async () => {
     try {
       setLoading(true);
 
-        const res = await axios.get(`${BASE_URL}/reports/due-bills`, {
-        params: { societyId },
-        });
+       const res = await axios.get(
+  `${BASE_URL}/reports/due-bills`,
+  {
+    params: { societyId },
+  }
+);
 
         setData(res.data || []);
 
     } catch {
-      message.error("Failed to load Due Bills");
+      message.error("Failed to load Maintenance Register");
     } finally {
       setLoading(false);
     }
@@ -83,10 +84,7 @@ const DueBills: React.FC = () => {
       setPrinting(false);
     }, 300);
   };
-const [pagination, setPagination] = useState({
-  current: 1,
-  pageSize: 20,
-});
+
 const columnOptions = [
   { label: "SN.", value: "srNo" },
   { label: "Flat No", value: "flatNo" },
@@ -100,14 +98,17 @@ const columnOptions = [
   { label: "Due Date", value: "dueDate" },
   { label: "Status", value: "status" },
 ];
-
-const allColumns: ColumnsType<DueBill> = [
+const [pagination, setPagination] = useState({
+  current: 1,
+  pageSize: 20,
+});
+const allColumns: ColumnsType<MaintenanceRegister> = [
   {
     title: "SN.",
     key: "srNo",
     width: 50,
     align: "center",
-  render: (_, __, index) =>
+    render: (_, __, index) =>
   (pagination.current - 1) * pagination.pageSize + index + 1,
   },
   {
@@ -207,9 +208,8 @@ const allColumns: ColumnsType<DueBill> = [
         }}
       >
         <Title level={5} className="print-title">
-          Due Bills Report
-        </Title>
-
+  Maintenance Register
+</Title>
         <Button
           className="no-print"
           type="primary"
@@ -285,4 +285,4 @@ onChange={(page) => {
   );
 };
 
-export default DueBills;
+export default MaintenanceRegister;

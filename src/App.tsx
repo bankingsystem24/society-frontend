@@ -76,6 +76,10 @@ import ArrearsEntry from "./pages/society/ArrearsEntry";
 import FlatWiseMembers from "./pages/reports/FlatWiseMembers";
 import "./ReportPrint.css";
 import DueBills from "./pages/reports/DueBills";
+import MaintenanceRegister from "./pages/reports/MaintenanceRegister";
+import SinkingFundRegister from "./pages/reports/SinkingFundRegister";
+import ContributionRegister from "./pages/reports/ContributionRegister";
+
 
 export default function App() {
   return (
@@ -164,6 +168,7 @@ export default function App() {
       <Route path="/reports-menu" element={<ReportsMenu />} />
       {/* <Route path="/reports-daybook" element={<DayBook />} /> */}
       <Route path="/arrears" element={<ArrearsEntry />} />
+     
 
 
 
@@ -214,8 +219,12 @@ export default function App() {
         <Route path="cashbook" element={<CashBookReport />} />
         <Route path="flat-wise-members" element={<FlatWiseMembers />} />
         <Route path="due-bills" element={<DueBills />} />
+        <Route path="maintenance-register" element={<MaintenanceRegister />} />
+        <Route path="sinking-register" element={<SinkingFundRegister />}/>
+        <Route path="contribution-register" element={<ContributionRegister />}
 
 
+ />
       </Route>
       {/* Layout Pages */}
       {/* <Route element={<Layout />}>
