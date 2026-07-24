@@ -278,7 +278,11 @@ const [ownerSearch, setOwnerSearch] = useState("");
                     name="dueDate"
                     rules={[{ required: true }]}
                   >
-                    <DatePicker style={{ width: "100%" }} />
+                    <DatePicker
+  style={{ width: "100%" }}
+  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+  placeholder="DD/MM/YYYY"
+/>
                   </Form.Item>
                 </Col>
 
