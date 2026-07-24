@@ -17,63 +17,62 @@ const { Title, Text } = Typography;
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-interface DueBill {
-  billId: number;
+interface SinkingFundRegister {
+  id: number;
   flatNo: string;
   memberName: string;
   month: string;
   year: number;
-  maintenanceAmount: number;
-  penaltyAmount: number;
-  interestAmount: number;
-  discountAmount: number;
-  totalAmount: number;
-  dueDate: string;
+  amount: number;
   status: string;
+  paidDate: string;
+  paymentMode: string;
+ transactionId: string;
+  receiptNo: string;
 }
 
-const DueBills: React.FC = () => {
-  const [data, setData] = useState<DueBill[]>([]);
+const SinkingFundRegister: React.FC = () => {
+const [data, setData] = useState<SinkingFundRegister[]>([]);
   const [loading, setLoading] = useState(false);
   const [printing, setPrinting] = useState(false);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
 
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([
-    "srNo",
-    "billNo",
-    "flatNo",
-    "memberName",
-    "month",
-    "maintenanceAmount",
-    "penaltyAmount",
-    "interestAmount",
-    "discountAmount",
-    "totalAmount",
-    "dueDate",
-    "status",
-  ]);
-
+const [selectedColumns, setSelectedColumns] = useState<string[]>([
+  "srNo",
+  "flatNo",
+  "memberName",
+  "month",
+  "maintenanceAmount",
+  "penaltyAmount",
+  "interestAmount",
+  "discountAmount",
+  "totalAmount",
+  "dueDate",
+  "status",
+]);
   useEffect(() => {
-    fetchBills();
-  }, []);
+   fetchSinkingFundRegister();
+}, []);
 
-  const fetchBills = async () => {
-    try {
-      setLoading(true);
+const fetchSinkingFundRegister = async () => {
+  try {
+    setLoading(true);
 
-        const res = await axios.get(`${BASE_URL}/reports/due-bills`, {
+    const res = await axios.get(
+       `${BASE_URL}/sinking-fund`,
+      {
         params: { societyId },
-        });
+      }
+    );
 
-        setData(res.data || []);
-
-    } catch {
-      message.error("Failed to load Due Bills");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setData(res.data || []);
+  } catch {
+    message.error("Failed to load Sinking Fund Register");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handlePrint = () => {
     setPrinting(true);
@@ -83,31 +82,27 @@ const DueBills: React.FC = () => {
       setPrinting(false);
     }, 300);
   };
-const [pagination, setPagination] = useState({
-  current: 1,
-  pageSize: 20,
-});
 const columnOptions = [
   { label: "SN.", value: "srNo" },
   { label: "Flat No", value: "flatNo" },
   { label: "Member Name", value: "memberName" },
   { label: "Month", value: "month" },
-  { label: "Maintenance", value: "maintenanceAmount" },
-  { label: "Penalty", value: "penaltyAmount" },
-  { label: "Interest", value: "interestAmount" },
-  { label: "Discount", value: "discountAmount" },
-  { label: "Total Due", value: "totalAmount" },
-  { label: "Due Date", value: "dueDate" },
+   { label: "Year", value: "year" },
+  { label: "Amount", value: "amount" },
   { label: "Status", value: "status" },
+    { label: "Transaction ID", value: "transactionId" },
 ];
-
-const allColumns: ColumnsType<DueBill> = [
+const [pagination, setPagination] = useState({
+  current: 1,
+  pageSize: 20,
+});
+const allColumns: ColumnsType<SinkingFundRegister> = [
   {
     title: "SN.",
     key: "srNo",
     width: 50,
     align: "center",
-  render: (_, __, index) =>
+    render: (_, __, index) =>
   (pagination.current - 1) * pagination.pageSize + index + 1,
   },
   {
@@ -128,60 +123,49 @@ const allColumns: ColumnsType<DueBill> = [
     render: (_, record) => `${record.month}-${record.year}`,
     width: 120,
   },
-  {
-    title: "Maintenance",
-    dataIndex: "maintenanceAmount",
-    key: "maintenanceAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
+    {
+    title: "Year",
+    dataIndex: "year",
+    key: "year",
+    width: 80,
+    align: "center",
   },
+{
+  title: "Amount",
+  dataIndex: "amount",
+  key: "amount",
+  align: "right",
+ render: (v) => `₹ ${(v || 0).toFixed(2)}`
+},
+{
+  title: "Paid Date",
+  dataIndex: "paidDate",
+  key: "paidDate",
+},
   {
-    title: "Penalty",
-    dataIndex: "penaltyAmount",
-    key: "penaltyAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
-  },
+  title: "Payment Mode",
+  dataIndex: "paymentMode",
+  key: "paymentMode",
+},
   {
-    title: "Interest",
-    dataIndex: "interestAmount",
-    key: "interestAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
+    title: "Transaction ID",
+    dataIndex: "transactionId",
+    key: "transactionId",
+    width: 180,
   },
-  {
-    title: "Discount",
-    dataIndex: "discountAmount",
-    key: "discountAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => `₹ ${v.toFixed(2)}`,
-  },
-  {
-    title: "Total Due",
-    dataIndex: "totalAmount",
-    key: "totalAmount",
-    align: "right",
-    width:100,
-    render: (v: number) => (
-      <strong>₹ {v.toFixed(2)}</strong>
-    ),
-  },
-  {
-    title: "Due Date",
-    dataIndex: "dueDate",
-    key: "dueDate",
-    width: 110,
-  },
+ {
+  title: "Receipt No",
+  dataIndex: "receiptNo",
+  key: "receiptNo",
+},
+
+ 
   {
     title: "Status",
     dataIndex: "status",
     key: "status",
     align: "center",
-    width:100,
+    width: 100,
     render: (value: string) =>
       printing ? (
         value
@@ -206,10 +190,9 @@ const allColumns: ColumnsType<DueBill> = [
           marginBottom: 0,
         }}
       >
-        <Title level={5} className="print-title">
-          Due Bills Report
-        </Title>
-
+    <Title level={5} className="print-title">
+  Sinking Fund Register
+</Title>
         <Button
           className="no-print"
           type="primary"
@@ -258,12 +241,12 @@ const allColumns: ColumnsType<DueBill> = [
       ) : (
         <Table
           className="compact-table"
-          rowKey="billId"
+          rowKey="id"
           bordered
           size="small"
           dataSource={data}
           columns={visibleColumns}
-         pagination={
+          pagination={
   printing
     ? false
     : {
@@ -285,4 +268,4 @@ onChange={(page) => {
   );
 };
 
-export default DueBills;
+export default SinkingFundRegister;

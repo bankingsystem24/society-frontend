@@ -80,13 +80,20 @@ const FlatWiseMembers: React.FC = () => {
       setPrinting(false);
     }, 300);
   };
+
+const [pagination, setPagination] = useState({
+  current: 1,
+  pageSize: 20,
+});
+
   const allColumns: ColumnsType<FlatWiseMember> = [
     {
       title: "SN.",
       key: "srNo",
       width: 40,
       align: "center",
-      render: (_, __, index) => index + 1,
+     render: (_, __, index) =>
+  (pagination.current - 1) * pagination.pageSize + index + 1,
     },
     {
       title: "Flat No",
@@ -217,7 +224,21 @@ const FlatWiseMembers: React.FC = () => {
           columns={visibleColumns}
           bordered
           size="small"
-          pagination={printing ? false : { pageSize: 20 }}
+          pagination={
+  printing
+    ? false
+    : {
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+        showSizeChanger: true,
+      }
+}
+onChange={(page) => {
+  setPagination({
+    current: page.current!,
+    pageSize: page.pageSize!,
+  });
+}}
           scroll={printing ? undefined : { x: 900 }}
         />
       )}
