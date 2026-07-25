@@ -55,6 +55,15 @@ const [sinkingPending, setSinkingPending] = useState(0);
 const [contributionPaid, setContributionPaid] = useState(0);
 const [contributionPending, setContributionPending] = useState(0);
 
+const [maintenancePendingAmount, setMaintenancePendingAmount] = useState(0);
+const [maintenancePaidAmount, setMaintenancePaidAmount] = useState(0);
+
+const [sinkingPendingAmount, setSinkingPendingAmount] = useState(0);
+const [sinkingPaidAmount, setSinkingPaidAmount] = useState(0);
+
+const [contributionPendingAmount, setContributionPendingAmount] = useState(0);
+const [contributionPaidAmount, setContributionPaidAmount] = useState(0);
+
   useEffect(() => {
     loadDashboard();
   }, []);
@@ -110,10 +119,102 @@ const loadPaymentSummary = async (societyId: number) => {
   try {
     const res = await apiGet(`/billing/pending/${societyId}`);
     setMaintenancePending(res.length);
+
+    const totalAmount = res.reduce(
+      (sum: number, item: any) => sum + Number(item.totalAmount || item.amount || 0),
+      0
+    );
+
+    setMaintenancePendingAmount(totalAmount);
   } catch (err) {
     console.log(err);
   }
 };
+
+
+const loadContributionSummary = async (societyId: number) => {
+  try {
+    const financialYearId = Number(
+      sessionStorage.getItem("financialYearId")
+    );
+
+    const res = await axios.get(
+      `${BASE_URL}/contribution/${societyId}/${financialYearId}`
+    );
+
+    const data = res.data || [];
+
+    console.log("Contribution Data", data);
+
+    // Pending
+    const pending = data.filter(
+      (x: any) => x.status?.toUpperCase() === "PENDING"
+    );
+
+    setContributionPending(pending.length);
+
+    setContributionPendingAmount(
+      pending.reduce(
+        (sum: number, x: any) => sum + Number(x.amount || 0),
+        0
+      )
+    );
+
+    // Paid
+    const paid = data.filter(
+      (x: any) => x.status?.toUpperCase() === "PAID"
+    );
+
+    setContributionPaid(paid.length);
+
+    setContributionPaidAmount(
+      paid.reduce(
+        (sum: number, x: any) => sum + Number(x.amount || 0),
+        0
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const loadSinkingFundSummary = async (societyId: number) => {
+  try {
+   const res = await axios.get(
+  `${BASE_URL}/sinking-fund?societyId=${societyId}`
+);
+
+const data = res.data || [];
+
+console.log(data);
+
+// Pending
+const pending = data.filter((x: any) => x.status === "PENDING");
+
+    setSinkingPending(pending.length);
+
+    setSinkingPendingAmount(
+      pending.reduce(
+        (sum: number, x: any) => sum + Number(x.amount || 0),
+        0
+      )
+    );
+
+    // Paid
+    const paid = data.filter((x: any) => x.status === "PAID");
+    setSinkingPaid(paid.length);
+
+    setSinkingPaidAmount(
+      paid.reduce(
+        (sum: number, x: any) => sum + Number(x.amount || 0),
+        0
+      )
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
   const loadDashboard = async () => {
     try {
       setLoading(true);
@@ -154,6 +255,8 @@ const loadPaymentSummary = async (societyId: number) => {
         await loadFinancialYear();
         await fetchGlMapping();
         await loadPaymentSummary(society.id);
+        await loadSinkingFundSummary(society.id);
+        await loadContributionSummary(society.id);
       }
     } catch (error) {
       console.error(error);
@@ -327,123 +430,245 @@ const paidIconStyle: React.CSSProperties = {
 </Col>
  </Row>
 
-<Row gutter={[20,20]} style={{marginTop:25}}>
+<Row gutter={[20, 20]} style={{ marginTop: 25 }}>
 
+  {/* ---------- ROW 1 : PENDING ---------- */}
+
+  {/* Pending Maintenance */}
   <Col xs={24} sm={12} lg={8}>
     <Card hoverable style={statusCardStyle}>
       <Row justify="space-between" align="middle">
         <Col>
           <Text>Pending Maintenance</Text>
-          <Title level={2} style={{color:"#ff4d4f",marginTop:20}}>
-            {maintenancePending}
+
+          <Title
+            level={2}
+            style={{
+              color: "#ff4d4f",
+              marginTop: 15,
+              marginBottom: 0,
+            }}
+          >
+            {maintenancePending} Bills
           </Title>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            ₹ {maintenancePendingAmount.toLocaleString("en-IN")}
+          </Text>
         </Col>
 
         <Col>
           <div style={pendingIconStyle}>
-            <ClockCircleOutlined style={{fontSize:34,color:"#ff4d4f"}} />
+            <ClockCircleOutlined
+              style={{ fontSize: 34, color: "#ff4d4f" }}
+            />
           </div>
         </Col>
       </Row>
     </Card>
   </Col>
 
-  <Col xs={24} sm={12} lg={8}>
-    <Card hoverable style={statusCardStyle}>
-      <Row justify="space-between" align="middle">
-        <Col>
-          <Text>Paid Maintenance</Text>
-          <Title level={2} style={{color:"#52c41a",marginTop:20}}>
-            {maintenancePaid}
-          </Title>
-        </Col>
-
-        <Col>
-          <div style={paidIconStyle}>
-            <CheckCircleOutlined style={{fontSize:34,color:"#52c41a"}} />
-          </div>
-        </Col>
-      </Row>
-    </Card>
-  </Col>
-
+  {/* Pending Sinking Fund */}
   <Col xs={24} sm={12} lg={8}>
     <Card hoverable style={statusCardStyle}>
       <Row justify="space-between" align="middle">
         <Col>
           <Text>Pending Sinking Fund</Text>
-          <Title level={2} style={{color:"#ff4d4f",marginTop:20}}>
-            {sinkingPending}
+
+          <Title
+            level={2}
+            style={{
+              color: "#ff4d4f",
+              marginTop: 15,
+              marginBottom: 0,
+            }}
+          >
+            {sinkingPending} Bills
           </Title>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            ₹ {sinkingPendingAmount.toLocaleString("en-IN")}
+          </Text>
         </Col>
 
         <Col>
           <div style={pendingIconStyle}>
-            <ClockCircleOutlined style={{fontSize:34,color:"#ff4d4f"}} />
+            <ClockCircleOutlined
+              style={{ fontSize: 34, color: "#ff4d4f" }}
+            />
           </div>
         </Col>
       </Row>
     </Card>
   </Col>
 
-  <Col xs={24} sm={12} lg={8}>
-    <Card hoverable style={statusCardStyle}>
-      <Row justify="space-between" align="middle">
-        <Col>
-          <Text>Paid Sinking Fund</Text>
-          <Title level={2} style={{color:"#52c41a",marginTop:20}}>
-            {sinkingPaid}
-          </Title>
-        </Col>
-
-        <Col>
-          <div style={paidIconStyle}>
-            <CheckCircleOutlined style={{fontSize:34,color:"#52c41a"}} />
-          </div>
-        </Col>
-      </Row>
-    </Card>
-  </Col>
-
+  {/* Pending Contribution */}
   <Col xs={24} sm={12} lg={8}>
     <Card hoverable style={statusCardStyle}>
       <Row justify="space-between" align="middle">
         <Col>
           <Text>Pending Contribution</Text>
-          <Title level={2} style={{color:"#ff4d4f",marginTop:20}}>
-            {contributionPending}
+
+          <Title
+            level={2}
+            style={{
+              color: "#ff4d4f",
+              marginTop: 15,
+              marginBottom: 0,
+            }}
+          >
+            {contributionPending} Bills
           </Title>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            ₹ {contributionPendingAmount.toLocaleString("en-IN")}
+          </Text>
         </Col>
 
         <Col>
           <div style={pendingIconStyle}>
-            <ClockCircleOutlined style={{fontSize:34,color:"#ff4d4f"}} />
+            <ClockCircleOutlined
+              style={{ fontSize: 34, color: "#ff4d4f" }}
+            />
           </div>
         </Col>
       </Row>
     </Card>
   </Col>
 
+  {/* ---------- ROW 2 : PAID ---------- */}
+
+  {/* Paid Maintenance */}
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Paid Maintenance</Text>
+
+          <Title
+            level={2}
+            style={{
+              color: "#52c41a",
+              marginTop: 15,
+              marginBottom: 0,
+            }}
+          >
+            {maintenancePaid} Bills
+          </Title>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            ₹ {maintenancePaidAmount.toLocaleString("en-IN")}
+          </Text>
+        </Col>
+
+        <Col>
+          <div style={paidIconStyle}>
+            <CheckCircleOutlined
+              style={{ fontSize: 34, color: "#52c41a" }}
+            />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  {/* Paid Sinking Fund */}
+  <Col xs={24} sm={12} lg={8}>
+    <Card hoverable style={statusCardStyle}>
+      <Row justify="space-between" align="middle">
+        <Col>
+          <Text>Paid Sinking Fund</Text>
+
+          <Title
+            level={2}
+            style={{
+              color: "#52c41a",
+              marginTop: 15,
+              marginBottom: 0,
+            }}
+          >
+            {sinkingPaid} Bills
+          </Title>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            ₹ {sinkingPaidAmount.toLocaleString("en-IN")}
+          </Text>
+        </Col>
+
+        <Col>
+          <div style={paidIconStyle}>
+            <CheckCircleOutlined
+              style={{ fontSize: 34, color: "#52c41a" }}
+            />
+          </div>
+        </Col>
+      </Row>
+    </Card>
+  </Col>
+
+  {/* Paid Contribution */}
   <Col xs={24} sm={12} lg={8}>
     <Card hoverable style={statusCardStyle}>
       <Row justify="space-between" align="middle">
         <Col>
           <Text>Paid Contribution</Text>
-          <Title level={2} style={{color:"#52c41a",marginTop:20}}>
-            {contributionPaid}
+
+          <Title
+            level={2}
+            style={{
+              color: "#52c41a",
+              marginTop: 15,
+              marginBottom: 0,
+            }}
+          >
+            {contributionPaid} Bills
           </Title>
+
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+            }}
+          >
+            ₹ {contributionPaidAmount.toLocaleString("en-IN")}
+          </Text>
         </Col>
 
         <Col>
           <div style={paidIconStyle}>
-            <CheckCircleOutlined style={{fontSize:34,color:"#52c41a"}} />
+            <CheckCircleOutlined
+              style={{ fontSize: 34, color: "#52c41a" }}
+            />
           </div>
         </Col>
       </Row>
     </Card>
   </Col>
-
-
 
 </Row>
       {/* QUICK ACTIONS */}
