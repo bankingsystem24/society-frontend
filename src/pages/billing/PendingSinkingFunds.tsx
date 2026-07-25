@@ -47,41 +47,32 @@ const PendingSinkingFunds: React.FC = () => {
   const [sinkingFunds, setSinkingFunds] = useState<SinkingFund[]>([]);
   const [flats, setFlats] = useState<Flat[]>([]);
   const [selectedFlat, setSelectedFlat] = useState<number | null>(null);
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [payLoading, setPayLoading] = useState(false);
-
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
   const [qrVisible, setQrVisible] = useState(false);
-
   const [transactionId, setTransactionId] = useState("");
   const [upiUrl, setUpiUrl] = useState("");
-
   const societyName = sessionStorage.getItem("societyName");
   const upi = sessionStorage.getItem("upi");
-
-    const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
-  
-    const [glReceivable, setGlReceivable] = useState<number>(0);
-    const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-  
-    const [glCashInHand, setGlCashInHand] = useState<number>(0);
-    const [glBankAccount, setGlBankAccount] = useState<number>(0);
-    const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
-    const [glDiscount, setGlDiscount] = useState<number>(0);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [glReceivable, setGlReceivable] = useState<number>(0);
+  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  const [glCashInHand, setGlCashInHand] = useState<number>(0);
+  const [glBankAccount, setGlBankAccount] = useState<number>(0);
+  const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
+  const [glDiscount, setGlDiscount] = useState<number>(0);
 
   useEffect(() => {
     loadFlats();
     loadGlMapping();
-
   }, []);
 
   useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
-  
 
   const loadFlats = async () => {
     if (memberId && societyId) {
@@ -201,6 +192,12 @@ const PendingSinkingFunds: React.FC = () => {
       return;
     }
 
+    const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+    const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+    if (isClosed) {
+      message.error("This financial year is closed. You cannot add or edit records.");
+      return
+    }
     const paymentRef = `SF-${Date.now()}`;
 
     const qr = `upi://pay?pa=${upi}

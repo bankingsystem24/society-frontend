@@ -55,13 +55,11 @@ const MemberPayingMaintenance: React.FC = () => {
   const [bills, setBills] = useState<Billing[]>([]);
   const [flats, setFlats] = useState<Flat[]>([]);
   const [selectedFlat, setSelectedFlat] = useState<number | null>(null);
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [payLoading, setPayLoading] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
   const [transactionId, setTransactionId] = useState("");
   const [upiUrl, setUpiUrl] = useState("");
-
   const memberId = Number(sessionStorage.getItem("memberId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
@@ -69,13 +67,9 @@ const MemberPayingMaintenance: React.FC = () => {
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
   const upi = sessionStorage.getItem("upi");
-
-  const [maintenanceMappingExists, setMaintenanceMappingExists] =
-    useState(false);
-
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-
   const [glCashInHand, setGlCashInHand] = useState<number>(0);
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
@@ -227,6 +221,17 @@ const MemberPayingMaintenance: React.FC = () => {
   const handlePay = async () => {
     if (selectedRowKeys.length === 0) {
       message.warning("Select bills first");
+      return;
+    }
+
+    const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
+    if (!glReceivable || !glCreditAccount) {
+      message.error("Monthly Maintenance GL Mapping not configured");
       return;
     }
     let amount = 0.0;

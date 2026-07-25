@@ -66,25 +66,18 @@ export default function VerifyPayemnt() {
   const [flats, setFlats] = useState<Flat[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(false);
-  // const [detailsOpen, setDetailsOpen] = useState(false);
-
   const [billingOpen, setBillingOpen] = useState(false);
   const [contributionOpen, setContributionOpen] = useState(false);
   const [sinkingFundOpen, setSinkingFundOpen] = useState(false);
-
   const [receiptBills, setReceiptBills] = useState<ReceiptBill[]>([]);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const societyId = sessionStorage.getItem("societyId");
   const financialYear = sessionStorage.getItem("financialYear");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
-
-  const [maintenanceMappingExists, setMaintenanceMappingExists] =
-    useState(false);
-
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-
   const [glCashInHand, setGlCashInHand] = useState<number>(0);
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
@@ -703,6 +696,13 @@ export default function VerifyPayemnt() {
   };
 
   const confirmPayment = async (receiptId: number, receiptNo: string) => {
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot confirm payment.");
+        return
+      }
+
     let paymentTable;
     let mapping;
 

@@ -43,42 +43,32 @@ interface SinkingFund {
 const ViewSinkingFund: React.FC = () => {
   const [data, setData] = useState<SinkingFund[]>([]);
   const [loading, setLoading] = useState(false);
-  // const [bills, setBills] = useState<Bill[]>([]);
   const [filteredData, setFilteredData] = useState<SinkingFund[]>([]);
   const [flatNo, setFlatNo] = useState<string | undefined>();
   const [memberName, setMemberName] = useState<string | undefined>();
   const [status, setStatus] = useState<string | undefined>();
-
   const [month, setMonth] = useState<string | undefined>();
   const [year, setYear] = useState<number | undefined>();
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
   const [transactionId, setTransactionId] = useState<string>("");
-
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
-    const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
-    
-    const [glReceivable, setGlReceivable] = useState<number>(0);
-    const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
   
-    const [glCashInHand, setGlCashInHand] = useState<number>(0);
-    const [glBankAccount, setGlBankAccount] = useState<number>(0);
-    const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
-    const [glDiscount, setGlDiscount] = useState<number>(0);
-  
-    useEffect(() => { loadGlMapping(); }, []);
-    useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
-      
-  const selectedFunds = filteredData.filter((f) =>
-    selectedRowKeys.includes(f.id),
-  );
+  const [glReceivable, setGlReceivable] = useState<number>(0);
+  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
 
-  const selectedFlatNo =
-    selectedFunds.length > 0 ? selectedFunds[0].flatNo : null;
+  const [glCashInHand, setGlCashInHand] = useState<number>(0);
+  const [glBankAccount, setGlBankAccount] = useState<number>(0);
+  const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
+  const [glDiscount, setGlDiscount] = useState<number>(0);
+  
+  useEffect(() => { loadGlMapping(); }, []);
+  useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
+  const selectedFunds = filteredData.filter((f) =>selectedRowKeys.includes(f.id),);
+  const selectedFlatNo = selectedFunds.length > 0 ? selectedFunds[0].flatNo : null;
 
   // ================= FETCH DATA =================
   const fetchData = async () => {
@@ -178,6 +168,12 @@ const ViewSinkingFund: React.FC = () => {
 
   const handlePay = async () => {
     try {
+
+
+    if (!glReceivable || !glCreditAccount) {
+      message.error("Monthly Maintenance GL Mapping not configured");
+      return;
+    }
       const sinkingFundIds = selectedRowKeys.map(Number);
 
       const payload = {
@@ -354,7 +350,15 @@ const ViewSinkingFund: React.FC = () => {
           <Button
             type="primary"
             disabled={selectedRowKeys.length === 0}
-            onClick={() => setPaymentModalOpen(true)}
+            onClick={  async () => {
+              const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+              const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+              if (isClosed) {
+                message.error("This financial year is closed. You cannot add or edit records.");
+                return
+              }
+              setPaymentModalOpen(true)
+            }}
           >
             Payment Received by Admin ({selectedRowKeys.length})
           </Button>

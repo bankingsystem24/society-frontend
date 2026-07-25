@@ -10,7 +10,7 @@ import {
   Modal,
   InputNumber,
   Input,
-  Layout
+  Layout,
 } from "antd";
 import axios from "axios";
 import Header from "../../components/layout/Header";
@@ -45,9 +45,9 @@ interface Contribution {
   createdBy: number;
   financialYearId: number;
   flatNo: string;
-  glReceivable:number;
-  glCreditAccount:number;
-} 
+  glReceivable: number;
+  glCreditAccount: number;
+}
 
 const ViewContribution: React.FC = () => {
   const [data, setData] = useState<Contribution[]>([]);
@@ -64,10 +64,17 @@ const ViewContribution: React.FC = () => {
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const [transactionId, setTransactionId] = useState("");
-  const selectedContributions = filteredData.filter((c) => selectedRowKeys.includes(c.id),);
-  const selectedFlatNo = selectedContributions.length > 0 ? selectedContributions[0].flatNo : null;
-  const selectedType = selectedContributions.length > 0 ? selectedContributions[0].type : null;
-  const totalSelectedAmount = selectedContributions.reduce((sum, contribution) => sum + Number(contribution.amount || 0),0,);
+  const selectedContributions = filteredData.filter((c) =>
+    selectedRowKeys.includes(c.id),
+  );
+  const selectedFlatNo =
+    selectedContributions.length > 0 ? selectedContributions[0].flatNo : null;
+  const selectedType =
+    selectedContributions.length > 0 ? selectedContributions[0].type : null;
+  const totalSelectedAmount = selectedContributions.reduce(
+    (sum, contribution) => sum + Number(contribution.amount || 0),
+    0,
+  );
   const glCashInHand = Number(sessionStorage.getItem("GlCashInHand"));
   const glBankAccount = Number(sessionStorage.getItem("GlBankAccount"));
 
@@ -83,10 +90,11 @@ const ViewContribution: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${BASE_URL}/contribution/${societyId}/${financialYearId}`,);
+      const res = await axios.get(
+        `${BASE_URL}/contribution/${societyId}/${financialYearId}`,
+      );
       setData(res.data || []);
       setFilteredData(res.data || []);
-
     } catch {
       message.error("Failed to load contributions");
     } finally {
@@ -96,7 +104,7 @@ const ViewContribution: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    if(!glCashInHand || !glBankAccount){
+    if (!glCashInHand || !glBankAccount) {
       message.error("Cash In Hand and Bank Account Gl are not mapped");
     }
   }, []);
@@ -127,10 +135,17 @@ const ViewContribution: React.FC = () => {
     try {
       const contributionIds = selectedRowKeys.map(Number);
 
-      const selectedContributions = filteredData.filter((c) =>selectedRowKeys.includes(c.id));
-      const glReceivable = selectedContributions.length > 0 ? selectedContributions[0].glReceivable : null;
-      const glCreditAccount = selectedContributions.length > 0 ? selectedContributions[0].glCreditAccount : null;
-
+      const selectedContributions = filteredData.filter((c) =>
+        selectedRowKeys.includes(c.id),
+      );
+      const glReceivable =
+        selectedContributions.length > 0
+          ? selectedContributions[0].glReceivable
+          : null;
+      const glCreditAccount =
+        selectedContributions.length > 0
+          ? selectedContributions[0].glCreditAccount
+          : null;
 
       if (
         selectedType === "VOLUNTARY" &&
@@ -152,11 +167,10 @@ const ViewContribution: React.FC = () => {
         glCreditAccount,
         transactionId,
         glCashInHand,
-        glBankAccount
+        glBankAccount,
+      };
 
-      }
-
-      const res = await axios.put(`${BASE_URL}/contribution/pay`,payload );
+      const res = await axios.put(`${BASE_URL}/contribution/pay`, payload);
       message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
@@ -254,180 +268,211 @@ const ViewContribution: React.FC = () => {
   const statusOptions = [...new Set(data.map((d) => d.status))];
 
   return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <div style={{ padding: 16 }}>
+            <Card title="View Contribution">
+              <Space style={{ marginBottom: 16 }} wrap>
+                <Select
+                  placeholder="Contribution Type"
+                  style={{ width: 180 }}
+                  allowClear
+                  onChange={(value) => {
+                    setType(value || undefined);
+                    setFlatNo(undefined);
+                  }}
+                >
+                  {typeOptions.map((t) => (
+                    <Select.Option key={t} value={t}>
+                      {t}
+                    </Select.Option>
+                  ))}
+                </Select>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
+                <Select
+                  placeholder="Flat No"
+                  style={{ width: 150 }}
+                  allowClear
+                  onChange={(value) => {
+                    setFlatNo(value || undefined);
+                    setType(undefined);
+                  }}
+                >
+                  {flatOptions.map((flat) => (
+                    <Select.Option key={flat} value={flat}>
+                      {flat}
+                    </Select.Option>
+                  ))}
+                </Select>
 
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <div style={{ padding: 16 }}>
-      <Card title="View Contribution">
-        <Space style={{ marginBottom: 16 }} wrap>
-          <Select
-            placeholder="Contribution Type"
-            style={{ width: 180 }}
-            allowClear
-            onChange={(value) => {
-              setType(value || undefined);
-              setFlatNo(undefined);
-            }}
-          >
-            {typeOptions.map((t) => (
-              <Select.Option key={t} value={t}>
-                {t}
-              </Select.Option>
-            ))}
-          </Select>
+                <Select
+                  placeholder="Status"
+                  style={{ width: 150 }}
+                  allowClear
+                  onChange={(value) => setStatus(value || undefined)}
+                >
+                  {statusOptions.map((s) => (
+                    <Select.Option key={s} value={s}>
+                      {s}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Space>
 
-          <Select
-            placeholder="Flat No"
-            style={{ width: 150 }}
-            allowClear
-            onChange={(value) => {
-              setFlatNo(value || undefined);
-              setType(undefined);
-            }}
-          >
-            {flatOptions.map((flat) => (
-              <Select.Option key={flat} value={flat}>
-                {flat}
-              </Select.Option>
-            ))}
-          </Select>
+              <div style={{ marginBottom: 12 }}>
+                <Button
+                  type="primary"
+                  disabled={selectedRowKeys.length === 0}
+                  onClick={async () => {
+                    const response = await axios.get(
+                      `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+                    );
+                    const isClosed =
+                      response.data === "Closed" ||
+                      response.data?.status === "Closed";
+                    if (isClosed) {
+                      message.error(
+                        "This financial year is closed. You cannot add or edit records.",
+                      );
+                      return;
+                    }
+                    setPaymentModalOpen(true);
+                  }}
+                >
+                  Payment Received by Admin ({selectedRowKeys.length})
+                </Button>
+              </div>
 
-          <Select
-            placeholder="Status"
-            style={{ width: 150 }}
-            allowClear
-            onChange={(value) => setStatus(value || undefined)}
-          >
-            {statusOptions.map((s) => (
-              <Select.Option key={s} value={s}>
-                {s}
-              </Select.Option>
-            ))}
-          </Select>
-        </Space>
+              <Table
+                rowKey="id"
+                loading={loading}
+                dataSource={filteredData}
+                columns={columns}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  responsive: true,
+                }}
+                size="small"
+                scroll={{ x: "max-content" }}
+                rowSelection={{
+                  selectedRowKeys,
+                  hideSelectAll: true,
+                  onChange: setSelectedRowKeys,
+                  getCheckboxProps: (record) => {
+                    const sameFlat =
+                      selectedFlatNo === null ||
+                      record.flatNo === selectedFlatNo;
 
-        <div style={{ marginBottom: 12 }}>
-          <Button
-            type="primary"
-            disabled={selectedRowKeys.length === 0}
-            onClick={() => setPaymentModalOpen(true)}
-          >
-            Payment Received by Admin ({selectedRowKeys.length})
-          </Button>
-        </div>
+                    const sameType =
+                      selectedType === null || record.type === selectedType;
 
-        <Table
-          rowKey="id"
-          loading={loading}
-          dataSource={filteredData}
-          columns={columns}
-          pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              responsive: true,
-            }}
-          size="small"
-          scroll={{ x: "max-content" }}
-          rowSelection={{
-            selectedRowKeys,
-            hideSelectAll: true,
-            onChange: setSelectedRowKeys,
-            getCheckboxProps: (record) => {
-              const sameFlat =
-                selectedFlatNo === null || record.flatNo === selectedFlatNo;
-
-              const sameType =
-                selectedType === null || record.type === selectedType;
-
-              return {
-                disabled:
-                  record.status !== "PENDING" ||
-                  ((!sameFlat || !sameType) &&
-                    !selectedRowKeys.includes(record.id)),
-              };
-            },
-          }}
-        />
-
-        <Modal
-          title="Select Payment Method"
-          open={paymentModalOpen}
-          onCancel={() => setPaymentModalOpen(false)}
-          onOk={handlePay}
-          okText="Pay Now"
-        >
-          <Form layout="vertical">
-            <Form.Item label="Payment Method">
-              <Select
-                value={paymentMode}
-                onChange={setPaymentMode}
-                options={[
-                  {
-                    label: "CASH",
-                    value: "CASH",
+                    return {
+                      disabled:
+                        record.status !== "PENDING" ||
+                        ((!sameFlat || !sameType) &&
+                          !selectedRowKeys.includes(record.id)),
+                    };
                   },
-                  {
-                    label: "UPI",
-                    value: "UPI",
-                  },
-                  {
-                    label: "CARD",
-                    value: "CARD",
-                  },
-                  {
-                    label: "NETBANKING",
-                    value: "NETBANKING",
-                  },
-                ]}
+                }}
               />
-            </Form.Item>
-            {paymentMode !== "CASH" && (
-              <Form.Item label="Transaction ID" required>
-                <Input
-                  value={transactionId}
-                  onChange={(e) => setTransactionId(e.target.value)}
-                  placeholder="Enter Transaction ID"
-                />
-              </Form.Item>
-            )}
-            {selectedContributions.some((c) => c.type === "VOLUNTARY") && (
-              <Form.Item label="Voluntary Amount" required>
-                <InputNumber
-                  style={{ width: "100%" }}
-                  min={1}
-                  value={contributionAmount}
-                  onChange={(value) =>
-                    setContributionAmount(Number(value || 0))
-                  }
-                  placeholder="Enter Amount"
-                />
-              </Form.Item>
-            )}
-          </Form>
-        </Modal>
-      </Card>
-    </div>
-    </Content>
-    </Layout>
+
+              <Modal
+                title="Select Payment Method"
+                open={paymentModalOpen}
+                onCancel={() => setPaymentModalOpen(false)}
+                onOk={handlePay}
+                okText="Pay Now"
+              >
+                <Form layout="vertical">
+                  <Form.Item label="Payment Method">
+                    <Select
+                      value={paymentMode}
+                      onChange={setPaymentMode}
+                      options={[
+                        {
+                          label: "CASH",
+                          value: "CASH",
+                        },
+                        {
+                          label: "UPI",
+                          value: "UPI",
+                        },
+                        {
+                          label: "CARD",
+                          value: "CARD",
+                        },
+                        {
+                          label: "NETBANKING",
+                          value: "NETBANKING",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  {paymentMode !== "CASH" && (
+                    <Form.Item label="Transaction ID" required>
+                      <Input
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        placeholder="Enter Transaction ID"
+                      />
+                    </Form.Item>
+                  )}
+                  {selectedContributions.some(
+                    (c) => c.type === "VOLUNTARY",
+                  ) && (
+                    <Form.Item label="Voluntary Amount" required>
+                      <InputNumber
+                        style={{ width: "100%" }}
+                        min={1}
+                        value={contributionAmount}
+                        onChange={(value) =>
+                          setContributionAmount(Number(value || 0))
+                        }
+                        placeholder="Enter Amount"
+                      />
+                    </Form.Item>
+                  )}
+                </Form>
+              </Modal>
+            </Card>
+          </div>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

@@ -152,6 +152,13 @@ const ContributionPage: React.FC = () => {
     };
 
     try {
+
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
       if (type === "COMPULSORY") {
         await axios.post(
           `${BASE_URL}/contribution/compulsory/${societyId}/${financialYearId}`,

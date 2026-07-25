@@ -45,32 +45,24 @@ type Flat = {
 
 const PendingContributions: React.FC = () => {
   const [loading, setLoading] = useState(false);
-
   const [allContributions, setAllContributions] = useState<Contribution[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
-
   const [flats, setFlats] = useState<Flat[]>([]);
   const [selectedFlat, setSelectedFlat] = useState<number | null>(null);
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [payLoading, setPayLoading] = useState(false);
-
   const [amountModalOpen, setAmountModalOpen] = useState(false);
   const [finalAmount, setFinalAmount] = useState<number | null>(null);
   const [minimumAmount, setMinimumAmount] = useState<number>(0);
   const [contributionType, setContributionType] = useState<string>("");
-
   const [upiUrl, setUpiUrl] = useState("");
   const [qrVisible, setQrVisible] = useState(false);
   const [transactionId, setTransactionId] = useState("");
-
   const role = sessionStorage.getItem("role");
-
   const memberId = Number(sessionStorage.getItem("memberId"));
   const societyId = Number(sessionStorage.getItem("societyId"));
   const userId = Number(sessionStorage.getItem("userId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
   const societyName = sessionStorage.getItem("societyName");
   const upi = sessionStorage.getItem("upi");
   const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "QR" | "">("", );
@@ -387,7 +379,14 @@ const PendingContributions: React.FC = () => {
           <Button
             type="primary"
             style={{ marginLeft: 10 }}
-            onClick={() => handleManualPayment()}
+            onClick={ async () => {
+              const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+              const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+              if (isClosed) {
+                message.error("This financial year is closed. You cannot add or edit records.");
+                return
+              }
+              handleManualPayment()}}
             disabled={!selectedRowKeys.length}
           >
             Pay via UPI QR
