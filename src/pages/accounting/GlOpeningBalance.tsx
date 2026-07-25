@@ -26,7 +26,8 @@ import MemberHeader from "../../components/layout/MemberHeader";
 import MemberSidebar from "../../components/layout/MemberSidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
- 
+import dayjs from "dayjs";
+
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
 
@@ -116,26 +117,25 @@ const GlOpeningBalance: React.FC = () => {
   // ================= FORM INIT WHEN MODAL OPENS =================
   useEffect(() => {
     if (!open) return;
-
     if (editing) {
       form.setFieldsValue({
-        financialYearId: editing.financialYearId,
-        glCode: editing.glCode,
-        // contraGlCode: editing.contraGlCode,
-        openingDebit: editing.openingDebit,
-        openingCredit: editing.openingCredit,
-        openingBalance: editing.openingBalance,
-        openingAsOn: editing.openingAsOn,
+          financialYearId: editing.financialYearId,
+          glCode: editing.glCode,
+          openingDebit: editing.openingDebit,
+          openingCredit: editing.openingCredit,
+          openingBalance: editing.openingBalance,
+          openingAsOn: editing.openingAsOn
+              ? dayjs(editing.openingAsOn)
+              : null,
       });
     } else {
       form.resetFields();
-
       form.setFieldsValue({
         financialYearId,
         openingDebit: 0,
         openingCredit: 0,
         openingBalance: null,
-        openingAaOn:null
+        openingAsOn:null
       });
     }
   }, [open, editing, financialYearId, form]);
@@ -150,6 +150,7 @@ const GlOpeningBalance: React.FC = () => {
   const handleSave = async (values: OpeningBalanceForm) => {
     try {
       const payload = {
+        id: editing?.id,
         societyId,
         financialYearId: values.financialYearId,
         glCode: values.glCode,
