@@ -27,9 +27,13 @@ import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 const { Title } = Typography;
 const { Option } = Select;
 const { Content } = Layout;
+
 const role = sessionStorage.getItem("role");
 
 const Members: React.FC = () => {
+
+  const role = sessionStorage.getItem("role");
+
   const navigate = useNavigate();
 
   const [data, setData] = useState<any[]>([]);
@@ -39,6 +43,7 @@ const Members: React.FC = () => {
   // default filter = active
   const [statusFilter, setStatusFilter] = useState("active");
   const [searchText, setSearchText] = useState("");
+
 
   useEffect(() => {
     loadMembers();

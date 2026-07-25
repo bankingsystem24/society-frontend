@@ -136,6 +136,8 @@ const [ownerSearch, setOwnerSearch] = useState("");
       );
       setArrears(res.data);
       setFilteredArrears(res.data);
+      console.log("Response:",res.data);
+
     } catch {
       message.error("Unable to load arrears");
     }
@@ -180,6 +182,10 @@ const [ownerSearch, setOwnerSearch] = useState("");
     {
       title: "Owner",
       dataIndex: ["ownerName"],
+    },
+    {
+      title:"Month",
+      dataIndex:["month"],
     },
     {
       title: "Bill Type",

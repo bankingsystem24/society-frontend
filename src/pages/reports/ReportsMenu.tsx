@@ -16,6 +16,7 @@ const role = sessionStorage.getItem("role");
 const ReportsMenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const role = sessionStorage.getItem("role");
 
   return (
     <Layout style={{ minHeight: "100vh" }}>

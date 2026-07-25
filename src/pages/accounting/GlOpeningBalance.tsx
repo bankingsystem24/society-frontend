@@ -232,14 +232,14 @@ const GlOpeningBalance: React.FC = () => {
       key: "action",
       render: (_: any, record: GlOpeningBalance) => (
         <Space wrap>
-          <Button type="primary" onClick={() => openModal(record)}>
+          <Button type="primary" size="small" onClick={() => openModal(record)}>
             Edit
           </Button>
           <Popconfirm
             title="Delete this record?"
             onConfirm={() => handleDelete(record.id!)}
           >
-            <Button type="primary" danger>
+            <Button type="primary" size="small" danger>
               Delete
             </Button>
           </Popconfirm>
@@ -302,6 +302,7 @@ const GlOpeningBalance: React.FC = () => {
             </Button>
 
             <Table
+            className="compact-table"
               dataSource={data}
               columns={columns}
               rowKey="id"
