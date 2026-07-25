@@ -192,6 +192,30 @@ const TrialBalance: React.FC = () => {
 
   const isBalanced = Math.abs(difference) < 0.01;
 
+  const totalOpeningDebit = data.reduce(
+    (sum, row) =>
+      sum + (row.openingType === "DR" ? row.openingBalance || 0 : 0),
+    0,
+  );
+
+  const totalOpeningCredit = data.reduce(
+    (sum, row) =>
+      sum + (row.openingType === "CR" ? row.openingBalance || 0 : 0),
+    0,
+  );
+
+  const totalClosingDebit = data.reduce(
+    (sum, row) =>
+      sum + (row.closingType === "DR" ? row.closingBalance || 0 : 0),
+    0,
+  );
+
+  const totalClosingCredit = data.reduce(
+    (sum, row) =>
+      sum + (row.closingType === "CR" ? row.closingBalance || 0 : 0),
+    0,
+  );
+
   return (
     // <Layout style={{ minHeight: "100vh" }}>
     //   <Layout.Sider
@@ -229,97 +253,115 @@ const TrialBalance: React.FC = () => {
     //       <AuditorHeader />
     //     )}
     //     <Content>
-          <Card style={{ borderRadius: 12 }}>
-            <Title level={3}>Trial Balance</Title>
+    <Card style={{ borderRadius: 12 }}>
+      <Title level={3}>Trial Balance</Title>
 
-            {loading ? (
-              <Spin />
-            ) : (
-              <>
-                <Table
-                  className="compact-table"
-                  dataSource={data}
-                  columns={columns}
-                  rowKey="glCode"
-                  pagination={{ pageSize: 12 }}
-                  bordered
-                  size="small"
-                  scroll={{ x: 800 }}
-                  summary={() => (
-                    <Table.Summary fixed>
-                      <Table.Summary.Row>
-                        <Table.Summary.Cell index={0} colSpan={4}>
-                          <strong>Total</strong>
-                        </Table.Summary.Cell>
+      {loading ? (
+        <Spin />
+      ) : (
+        <>
+          <Table
+            className="compact-table"
+            dataSource={data}
+            columns={columns}
+            rowKey="glCode"
+            pagination={{ pageSize: 50 }}
+            bordered
+            size="small"
+            scroll={{ x: 800 }}
+            summary={() => (
+              <Table.Summary fixed>
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0} colSpan={2}>
+                    <strong>Total</strong>
+                  </Table.Summary.Cell>
 
-                        <Table.Summary.Cell index={4} align="right">
-                          <strong>{totalDebit.toFixed(2)}</strong>
-                        </Table.Summary.Cell>
+                  {/* Opening Debit */}
+                  <Table.Summary.Cell index={2} align="right">
+                    <strong>{totalOpeningDebit.toFixed(2)}</strong>
+                  </Table.Summary.Cell>
 
-                        <Table.Summary.Cell index={5} align="right">
-                          <strong>{totalCredit.toFixed(2)}</strong>
-                        </Table.Summary.Cell>
+                  {/* Opening Credit */}
+                  <Table.Summary.Cell index={3} align="right">
+                    <strong>{totalOpeningCredit.toFixed(2)}</strong>
+                  </Table.Summary.Cell>
 
-                        <Table.Summary.Cell index={6} />
-                        <Table.Summary.Cell index={7} />
-                        <Table.Summary.Cell index={8} />
-                      </Table.Summary.Row>
-                    </Table.Summary>
-                  )}
-                />
+                  {/* Debit */}
+                  <Table.Summary.Cell index={4} align="right">
+                    <strong>{totalDebit.toFixed(2)}</strong>
+                  </Table.Summary.Cell>
 
-                <Row gutter={16} justify="end" style={{ marginTop: 20 }}>
-                  <Col>
-                    <Card size="small">
-                      <b>Total Debit</b>
-                      <div>{totalDebit.toFixed(2)}</div>
-                    </Card>
-                  </Col>
+                  {/* Credit */}
+                  <Table.Summary.Cell index={5} align="right">
+                    <strong>{totalCredit.toFixed(2)}</strong>
+                  </Table.Summary.Cell>
 
-                  <Col>
-                    <Card size="small">
-                      <b>Total Credit</b>
-                      <div>{totalCredit.toFixed(2)}</div>
-                    </Card>
-                  </Col>
+                  {/* Closing Debit */}
+                  <Table.Summary.Cell index={6} align="right">
+                    <strong>{totalClosingDebit.toFixed(2)}</strong>
+                  </Table.Summary.Cell>
 
-                  <Col>
-                    <Card
-                      size="small"
-                      style={{
-                        border: isBalanced
-                          ? "1px solid green"
-                          : "1px solid red",
-                      }}
-                    >
-                      <b>Difference</b>
-                      <div
-                        style={{
-                          color: isBalanced ? "green" : "red",
-                        }}
-                      >
-                        {difference.toFixed(2)}
-                      </div>
-                    </Card>
-                  </Col>
+                  {/* Closing Credit */}
+                  <Table.Summary.Cell index={7} align="right">
+                    <strong>{totalClosingCredit.toFixed(2)}</strong>
+                  </Table.Summary.Cell>
 
-                  <Col>
-                    <Card size="small">
-                      <b>Status</b>
-                      <div
-                        style={{
-                          color: isBalanced ? "green" : "red",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {isBalanced ? "BALANCED" : "NOT BALANCED"}
-                      </div>
-                    </Card>
-                  </Col>
-                </Row>
-              </>
+                  <Table.Summary.Cell index={8} />
+                </Table.Summary.Row>
+              </Table.Summary>
             )}
-          </Card>
+          />
+
+          <Row gutter={16} justify="end" style={{ marginTop: 20 }}>
+            <Col>
+              <Card size="small">
+                <b>Total Debit</b>
+                <div>{totalDebit.toFixed(2)}</div>
+              </Card>
+            </Col>
+
+            <Col>
+              <Card size="small">
+                <b>Total Credit</b>
+                <div>{totalCredit.toFixed(2)}</div>
+              </Card>
+            </Col>
+
+            <Col>
+              <Card
+                size="small"
+                style={{
+                  border: isBalanced ? "1px solid green" : "1px solid red",
+                }}
+              >
+                <b>Difference</b>
+                <div
+                  style={{
+                    color: isBalanced ? "green" : "red",
+                  }}
+                >
+                  {difference.toFixed(2)}
+                </div>
+              </Card>
+            </Col>
+
+            <Col>
+              <Card size="small">
+                <b>Status</b>
+                <div
+                  style={{
+                    color: isBalanced ? "green" : "red",
+                    fontWeight: 600,
+                  }}
+                >
+                  {isBalanced ? "BALANCED" : "NOT BALANCED"}
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
+    </Card>
     //     </Content>
     //   </Layout>
     // </Layout>
