@@ -24,6 +24,7 @@ import AuditorSidebar from "../../components/layout/AuditorSidebar";
 import MemberHeader from "../../components/layout/MemberHeader";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import axios from "axios";
 
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
@@ -76,6 +77,15 @@ const BillingPolicy: React.FC = () => {
   const onFinish = async (values: any) => {
     try {
       setLoading(true);
+      const response = await axios.get(
+            `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`
+          );
+          const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+            if (isClosed) {
+              // Option A: Block opening the modal entirely
+              message.error("This financial year is closed. You cannot add or edit records.");
+              return; 
+            }
 
       const payload = {
         id: policyId,

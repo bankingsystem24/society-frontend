@@ -40,13 +40,9 @@ interface BillingFormValues {
 const BillGenerate: React.FC = () => {
   const [form] = Form.useForm<BillingFormValues>();
   const [loading, setLoading] = useState(false);
-
-  const [maintenanceMappingExists, setMaintenanceMappingExists] =
-    useState(false);
-
+  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-
   const societyId = Number(sessionStorage.getItem("societyId"));
 
   useEffect(() => {
@@ -55,10 +51,7 @@ const BillGenerate: React.FC = () => {
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
-      );
-
+      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
       const mapping = res.data.find(
         (item: any) =>
           item.description?.trim().toLowerCase() === "monthly maintenance",
@@ -90,6 +83,12 @@ const BillGenerate: React.FC = () => {
       return;
     }
 
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
     if (!glReceivable || !glCreditAccount) {
       message.error("Monthly Maintenance GL Mapping not configured");
       return;

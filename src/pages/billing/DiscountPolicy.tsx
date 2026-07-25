@@ -58,6 +58,7 @@ const DiscountPolicy: React.FC = () => {
   const [policies, setPolicies] = useState<DiscountPolicyData[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
   useEffect(() => {
     form.setFieldsValue({
@@ -105,6 +106,13 @@ const DiscountPolicy: React.FC = () => {
   // ================= SUBMIT =================
   const onFinish = async (values: DiscountPolicyForm) => {
     try {
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        // Option A: Block opening the modal entirely
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
       const payload = {
         societyId,
         policyName: values.policyName,

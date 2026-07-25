@@ -30,7 +30,7 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
 
-interface Transfer {
+interface TransferFace {
   id: number;
   voucherDate: string;
   fromGlCode: number;
@@ -46,9 +46,9 @@ const Transfer: React.FC = () => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Transfer[]>([]);
-  const [filteredData, setFilteredData] = useState<Transfer[]>([]);
-const [searchText, setSearchText] = useState("");
+  const [data, setData] = useState<TransferFace[]>([]);
+  const [filteredData, setFilteredData] = useState<TransferFace[]>([]);
+  const [searchText, setSearchText] = useState("");
   const [glList, setGlList] = useState<any[]>([]);
 
   useEffect(() => {
@@ -57,20 +57,20 @@ const [searchText, setSearchText] = useState("");
   }, []);
 
   useEffect(() => {
-  const filtered = data.filter((item) => {
-    const formattedDate = dayjs(item.voucherDate).format("DD-MMM-YYYY");
+    const filtered = data.filter((item) => {
+      const formattedDate = dayjs(item.voucherDate).format("DD-MMM-YYYY");
 
-    return formattedDate
-      .toLowerCase()
-      .includes(searchText.toLowerCase());
-  });
+      return formattedDate.toLowerCase().includes(searchText.toLowerCase());
+    });
 
-  setFilteredData(filtered);
-}, [searchText, data]);
+    setFilteredData(filtered);
+  }, [searchText, data]);
 
   const fetchGlMaster = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/gl/master?societyId=${societyId}`);
+      const res = await axios.get(
+        `${BASE_URL}/gl/master?societyId=${societyId}`,
+      );
       setGlList(res.data || []);
     } catch {
       message.error("Failed to load GL Accounts");
@@ -80,10 +80,11 @@ const [searchText, setSearchText] = useState("");
   const fetchTransfers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}/transfer?societyId=${societyId}&financialYearId=${financialYearId}`);
+      const res = await axios.get(
+        `${BASE_URL}/transfer?societyId=${societyId}&financialYearId=${financialYearId}`,
+      );
       setData(res.data);
       setFilteredData(res.data);
-
     } catch {
       message.error("Failed to load transfers");
     } finally {
@@ -98,7 +99,12 @@ const [searchText, setSearchText] = useState("");
     }
 
     try {
-
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
       const payload = {
         societyId,
         financialYearId,
@@ -108,7 +114,7 @@ const [searchText, setSearchText] = useState("");
         amount: values.amount,
         narration: values.narration,
       };
-      
+
       await axios.post(`${BASE_URL}/transfer`, payload);
       message.success("Transfer saved successfully");
       form.resetFields();
@@ -137,25 +143,17 @@ const [searchText, setSearchText] = useState("");
     {
       title: "From Account",
       render: (_: any, record: any) => {
-        const gl = glList.find(
-          (g: any) => g.glCode === record.fromGlCode
-        );
+        const gl = glList.find((g: any) => g.glCode === record.fromGlCode);
 
-        return gl
-          ? `${gl.glCode} - ${gl.accountName}`
-          : "-";
+        return gl ? `${gl.glCode} - ${gl.accountName}` : "-";
       },
     },
     {
       title: "To Account",
       render: (_: any, record: any) => {
-        const gl = glList.find(
-          (g: any) => g.glCode === record.toGlCode
-        );
+        const gl = glList.find((g: any) => g.glCode === record.toGlCode);
 
-        return gl
-          ? `${gl.glCode} - ${gl.accountName}`
-          : "-";
+        return gl ? `${gl.glCode} - ${gl.accountName}` : "-";
       },
     },
     {
@@ -171,7 +169,7 @@ const [searchText, setSearchText] = useState("");
       title: "Narration",
       dataIndex: "narration",
     },
-        {
+    {
       title: "Action",
       render: (_: any, record: any) => (
         <Popconfirm
@@ -228,11 +226,7 @@ const [searchText, setSearchText] = useState("");
           <div style={{ padding: 16 }}>
             {/* Entry Form */}
             <Card title="Transfer Entry" style={{ marginBottom: 16 }}>
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={onFinish}
-              >
+              <Form form={form} layout="vertical" onFinish={onFinish}>
                 <Row gutter={16} style={{ marginTop: -10 }}>
                   <Col xs={24} md={6}>
                     <Form.Item
@@ -246,10 +240,10 @@ const [searchText, setSearchText] = useState("");
                       ]}
                     >
                       <DatePicker
-  style={{ width: "100%" }}
-  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
-  placeholder="DD/MM/YYYY"
-/>
+                        style={{ width: "100%" }}
+                        format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+                        placeholder="DD/MM/YYYY"
+                      />
                     </Form.Item>
                   </Col>
 
@@ -331,22 +325,14 @@ const [searchText, setSearchText] = useState("");
                 </Row>
 
                 <Row gutter={16} style={{ marginTop: -10 }}>
-
-
                   <Col xs={24} md={6}>
-                    <Form.Item
-                      name="narration"
-                      label="Narration"
-                    >
+                    <Form.Item name="narration" label="Narration">
                       <Input placeholder="Narration" />
                     </Form.Item>
                   </Col>
                 </Row>
 
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                >
+                <Button type="primary" htmlType="submit">
                   Save Transfer
                 </Button>
               </Form>
@@ -354,23 +340,22 @@ const [searchText, setSearchText] = useState("");
 
             {/* Transfer List */}
             <Card title="Transfer List">
-
-<div
-  style={{
-    marginBottom: 15,
-    display: "flex",
-    justifyContent: "flex-start",
-  }}
->
-  <Input
-    placeholder="Search by Voucher Date"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-    allowClear
-    style={{ width: 320 }}
-  />
-</div>
+              <div
+                style={{
+                  marginBottom: 15,
+                  display: "flex",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <Input
+                  placeholder="Search by Voucher Date"
+                  prefix={<SearchOutlined style={{ color: "#999" }} />}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  allowClear
+                  style={{ width: 320 }}
+                />
+              </div>
 
               <Table
                 dataSource={filteredData}

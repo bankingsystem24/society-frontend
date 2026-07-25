@@ -32,7 +32,6 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
 
-
 interface Expense {
   id: number;
   expenseDate: string;
@@ -57,40 +56,36 @@ const Expenses: React.FC = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState<Expense[]>([]);
   const [dateSearch, setDateSearch] = useState("");
-const [accountSearch, setAccountSearch] = useState("");
-const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
+  const [accountSearch, setAccountSearch] = useState("");
+  const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
-  
+
   useEffect(() => {
     fetchVendors();
   }, []);
-useEffect(() => {
-  const filtered = data.filter((item: any) => {
-    const gl = glList.find(
-      (g: any) => g.glCode === item.expenseGlCode
-    );
+  useEffect(() => {
+    const filtered = data.filter((item: any) => {
+      const gl = glList.find((g: any) => g.glCode === item.expenseGlCode);
 
-    const matchDate =
-      !dateSearch ||
-      dayjs(item.expenseDate)
-        .format("DD-MMM-YYYY")
-        .toLowerCase()
-        .includes(dateSearch.toLowerCase());
+      const matchDate =
+        !dateSearch ||
+        dayjs(item.expenseDate)
+          .format("DD-MMM-YYYY")
+          .toLowerCase()
+          .includes(dateSearch.toLowerCase());
 
-    const matchAccount =
-      !accountSearch ||
-      gl?.accountName
-        ?.toLowerCase()
-        .includes(accountSearch.toLowerCase());
+      const matchAccount =
+        !accountSearch ||
+        gl?.accountName?.toLowerCase().includes(accountSearch.toLowerCase());
 
-    return matchDate && matchAccount;
-  });
+      return matchDate && matchAccount;
+    });
 
-  setFilteredExpenses(filtered);
-}, [data, glList, dateSearch, accountSearch]);
+    setFilteredExpenses(filtered);
+  }, [data, glList, dateSearch, accountSearch]);
 
   const fetchVendors = async () => {
     try {
@@ -112,7 +107,11 @@ useEffect(() => {
       const res = await axios.get(
         `${BASE_URL}/gl/master?societyId=${societyId}`,
       );
-      setGlList((res.data || []).filter((gl: any) => gl.groupName === "EXPENSES" && gl.parentGlCode != null),);
+      setGlList(
+        (res.data || []).filter(
+          (gl: any) => gl.groupName === "EXPENSES" && gl.parentGlCode != null,
+        ),
+      );
     } catch {
       message.error("Failed to load GL Accounts");
     }
@@ -140,6 +139,14 @@ useEffect(() => {
 
   const onFinish = async (values: any) => {
     try {
+
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
+
       const payload = {
         societyId: Number(societyId),
         voucherDate: values.expenseDate.format("YYYY-MM-DD"),
@@ -149,8 +156,8 @@ useEffect(() => {
         narration: values.narration,
         vendorId: values.vendorId || null,
         financialYearId: financialYearId,
-        glCashInHand : GlCashInHand,
-        glBankAccount : GlBankAccount
+        glCashInHand: GlCashInHand,
+        glBankAccount: GlBankAccount,
       };
 
       await axios.post(`${BASE_URL}/expenses`, payload);
@@ -281,11 +288,11 @@ useEffect(() => {
                       label="Date"
                       rules={[{ required: true }]}
                     >
-<DatePicker
-  style={{ width: "100%" }}
-  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
-  placeholder="DD/MM/YYYY"
-/>
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+                        placeholder="DD/MM/YYYY"
+                      />
                     </Form.Item>
                   </Col>
 
@@ -315,7 +322,11 @@ useEffect(() => {
 
                   <Col xs={24} md={8}>
                     <Form.Item name="vendorId" label="Vendor">
-                      <Select options={vendors} placeholder="Select Vendor" allowClear/>
+                      <Select
+                        options={vendors}
+                        placeholder="Select Vendor"
+                        allowClear
+                      />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -356,32 +367,32 @@ useEffect(() => {
 
             {/* EXPENSE LIST */}
             <Card title="Expense List">
- <div
-  style={{
-    marginBottom: 15,
-    display: "flex",
-    gap: 12,
-    flexWrap: "wrap",
-  }}
->
-  <Input
-    placeholder="Search Date"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={dateSearch}
-    onChange={(e) => setDateSearch(e.target.value)}
-    allowClear
-    style={{ width: 220 }}
-  />
+              <div
+                style={{
+                  marginBottom: 15,
+                  display: "flex",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Input
+                  placeholder="Search Date"
+                  prefix={<SearchOutlined style={{ color: "#999" }} />}
+                  value={dateSearch}
+                  onChange={(e) => setDateSearch(e.target.value)}
+                  allowClear
+                  style={{ width: 220 }}
+                />
 
-  <Input
-    placeholder="Search Expense Account"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={accountSearch}
-    onChange={(e) => setAccountSearch(e.target.value)}
-    allowClear
-    style={{ width: 260 }}
-  />
-</div>
+                <Input
+                  placeholder="Search Expense Account"
+                  prefix={<SearchOutlined style={{ color: "#999" }} />}
+                  value={accountSearch}
+                  onChange={(e) => setAccountSearch(e.target.value)}
+                  allowClear
+                  style={{ width: 260 }}
+                />
+              </div>
               <Table
                 dataSource={filteredExpenses}
                 columns={columns}

@@ -82,6 +82,10 @@ const Sidebar: React.FC = () => {
       label: "Set Financial Year",
     },
     {
+      key: "/open-financial-year",
+      label: "Open/Close Financial Year",
+    },
+    {
       key: "/members",
       icon: <TeamOutlined />,
       label: "Members",
@@ -178,7 +182,6 @@ const Sidebar: React.FC = () => {
         },
       ],
     },
-
     {
       key: "Sinking Fund",
       label: "Sinking Fund",
@@ -234,11 +237,6 @@ const Sidebar: React.FC = () => {
       icon: <UserOutlined />,
       label: "Reports",
       children: [
-        // {
-        //   key: "/daybook",
-        //   icon:<BookOutlined />,
-        //   label: "View Daybook",
-        // },
         {
           key: "/view-journal",
           label: "View Journal",
@@ -249,16 +247,6 @@ const Sidebar: React.FC = () => {
           label: "View Ledger",
           icon: <HomeOutlined />,
         },
-        // {
-        //   key: "/trial-balance",
-        //   label: "Trial Balance",
-        //   icon: <HomeOutlined />,
-        // },
-        // {
-        //   key: "/profit-and-loss",
-        //   label: "Profit & Loss",
-        //   icon: <HomeOutlined />,
-        // },
         {
           key: "/payments",
           label: "Payments",

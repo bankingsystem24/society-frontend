@@ -33,7 +33,7 @@ const role = sessionStorage.getItem("role");
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-interface GlOpeningBalance {
+interface GlOpeningBalanceRecord {
   id?: number;
   societyId: number;
   financialYearId: number;
@@ -54,10 +54,10 @@ interface OpeningBalanceForm {
 }
 
 const GlOpeningBalance: React.FC = () => {
-  const [data, setData] = useState<GlOpeningBalance[]>([]);
+  const [data, setData] = useState<GlOpeningBalanceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<GlOpeningBalance | null>(null);
+  const [editing, setEditing] = useState<GlOpeningBalanceRecord | null>(null);
   const [glList, setGlList] = useState<any[]>([]);
 
   const [form] = Form.useForm();
@@ -141,9 +141,23 @@ const GlOpeningBalance: React.FC = () => {
   }, [open, editing, financialYearId, form]);
 
   // ================= OPEN MODAL =================
-  const openModal = (record?: GlOpeningBalance) => {
-    setEditing(record || null);
-    setOpen(true);
+  const openModal = async (record?: GlOpeningBalanceRecord) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        // Option A: Block opening the modal entirely
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return; 
+      }
+      setEditing(record || null);
+      setOpen(true);
+    } catch (error) {
+      console.error("Failed to verify accounting year status", error);
+      message.error("Unable to verify financial year status. Please try again.");
+    }
+
+
   };
 
   // ================= SAVE =================
@@ -206,7 +220,7 @@ const GlOpeningBalance: React.FC = () => {
     {
       title: "GL Account",
       key: "glAccount",
-      render: (_: any, record: GlOpeningBalance) => {
+      render: (_: any, record: GlOpeningBalanceRecord) => {
         const gl = glList.find((g) => g.glCode === record.glCode);
 
         return `${record.glCode} - ${gl?.accountName || ""}`;
@@ -223,14 +237,9 @@ const GlOpeningBalance: React.FC = () => {
       key: "openingDebit",
     },
     {
-      title: "Opening Credit",
-      dataIndex: "openingCredit",
-      key: "openingCredit",
-    },
-    {
       title: "Action",
       key: "action",
-      render: (_: any, record: GlOpeningBalance) => (
+      render: (_: any, record: GlOpeningBalanceRecord) => (
         <Space wrap>
           <Button type="primary" size="small" onClick={() => openModal(record)}>
             Edit
@@ -310,7 +319,7 @@ const GlOpeningBalance: React.FC = () => {
               scroll={{ x: 800 }}
               size="small"
               pagination={{
-                pageSize: 12,
+                pageSize: 15,
               }}
             />
 
@@ -387,31 +396,7 @@ const GlOpeningBalance: React.FC = () => {
                       />
                     </Form.Item>
                   </Col>
-
-
                 </Row>
-                {/* <Form.Item
-            name="contraGlCode"
-            label="Contra GL Account"
-            rules={[
-              {
-                required: true,
-                message: "Please select Contra GL",
-              },
-            ]}
-          >
-            <Select
-              showSearch
-              placeholder="Select Contra GL"
-              optionFilterProp="children"
-            >
-              {glList.map((gl) => (
-                <Select.Option key={gl.glCode} value={gl.glCode}>
-                  {gl.glCode} - {gl.accountName}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item> */}
               </Form>
             </Modal>
           </div>

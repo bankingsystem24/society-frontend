@@ -90,8 +90,6 @@ const AuditorSidebar: React.FC = () => {
               },
             ],
           },
-
-
           {
             key: "Policies",
             label: "Policies",
@@ -104,10 +102,6 @@ const AuditorSidebar: React.FC = () => {
                 key: "/discount-policy",
                 label: "Discount Policy",
               },
-              {
-                key: "/penalty-policy",
-                label: "Penalty Policy",
-              }
             ],
           },
           {
@@ -132,7 +126,6 @@ const AuditorSidebar: React.FC = () => {
               },
             ],
           },
-        
           {
             key: "/vendors",
             label: "Vendors",
@@ -196,7 +189,6 @@ const AuditorSidebar: React.FC = () => {
             label: "Verify Payment",
             icon: <HomeOutlined />,
           },
-
           {
             key: "/view-receipts",
             label: "Receipts",
@@ -210,11 +202,6 @@ const AuditorSidebar: React.FC = () => {
             icon: <UserOutlined />,
             label: "Reports",
             children: [
-              // {
-              //   key: "/daybook",
-              //   icon:<BookOutlined />,
-              //   label: "View Daybook",
-              // },
               {
                 key: "/view-journal",
                 label: "View Journal",
@@ -225,16 +212,6 @@ const AuditorSidebar: React.FC = () => {
                 label: "View Ledger",
                 icon: <HomeOutlined />,
               },
-              // {
-              //   key: "/trial-balance",
-              //   label: "Trial Balance",
-              //   icon: <HomeOutlined />,
-              // },
-              // {
-              //   key: "/profit-and-loss",
-              //   label: "Profit & Loss",
-              //   icon: <HomeOutlined />,
-              // }, 
               {
                 key: "/payments",
                 label: "Payments",
@@ -242,7 +219,6 @@ const AuditorSidebar: React.FC = () => {
               },
             ],
           },
-
           {
             key: "Snapshot",
             icon: <UserOutlined />,

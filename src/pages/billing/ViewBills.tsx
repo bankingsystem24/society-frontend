@@ -25,6 +25,7 @@ import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { apiGet } from "../../api/axios";
 
 dayjs.extend(isSameOrBefore);
 
@@ -84,27 +85,22 @@ export default function ViewBills() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMode, setPaymentMode] = useState<string>("CASH");
   const [transactionId, setTransactionId] = useState<string>("");
-
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const [maintenanceMappingExists, setMaintenanceMappingExists] =
     useState(false);
   const [paymentDate, setPaymentDate] = useState(dayjs());
-
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-
   const [glCashInHand, setGlCashInHand] = useState<number>(0);
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
-
   const [paymentMaintenance, setPaymentMaintenance] = useState(0);
   const [paymentInterest, setPaymentInterest] = useState(0);
   const [paymentDiscount, setPaymentDiscount] = useState(0);
   const [discountPolicy, setDiscountPolicy] = useState<any>(null);
-
   const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
 
   useEffect(() => {
@@ -203,7 +199,6 @@ export default function ViewBills() {
       );
 
       setBills(sortedBills);
-
     } catch {
       message.error("Failed to load bills");
     } finally {
@@ -532,42 +527,64 @@ export default function ViewBills() {
               <Button
                 type="primary"
                 disabled={selectedRowKeys.length === 0}
-                onClick={() => {
-                  const maintenance = selectedBills.reduce(
-                    (s, b) => s + (b.maintenanceAmount || 0),
-                    0,
-                  );
+                onClick={async () => {
+                  try {
+                    const response = await axios.get(
+                      `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+                    );
+                    const isClosed =
+                      response.data === "Closed" ||
+                      response.data?.status === "Closed";
+                    if (isClosed) {
+                      message.error(
+                        "This financial year is closed. You cannot add or edit records.",
+                      );
+                      return;
+                    }
+                    if (!glReceivable || !glCreditAccount) {
+                      message.error(
+                        "Monthly Maintenance GL Mapping not configured",
+                      );
+                      return;
+                    }
+                    const maintenance = selectedBills.reduce(
+                      (s, b) => s + (b.maintenanceAmount || 0),
+                      0,
+                    );
 
-                  const interest = selectedBills.reduce(
-                    (s, b) => s + (b.interestAmount || 0),
-                    0,
-                  );
+                    const interest = selectedBills.reduce(
+                      (s, b) => s + (b.interestAmount || 0),
+                      0,
+                    );
 
-                  let discount = 0;
+                    let discount = 0;
 
-                  if (
-                    discountPolicy &&
-                    discountPolicy.active &&
-                    selectedRowKeys.length == 12 &&
-                    dayjs().isSameOrBefore(
-                      dayjs(discountPolicy.paidBeforeDate),
-                      "day",
-                    )
-                  ) {
-                    discount =
-                      (maintenance * discountPolicy.discountPercent) / 100;
+                    if (
+                      discountPolicy &&
+                      discountPolicy.active &&
+                      selectedRowKeys.length === 12 &&
+                      dayjs().isSameOrBefore(
+                        dayjs(discountPolicy.paidBeforeDate),
+                        "day",
+                      )
+                    ) {
+                      discount =
+                        (maintenance * discountPolicy.discountPercent) / 100;
+                    }
+
+                    setPaymentMaintenance(maintenance);
+                    setPaymentInterest(interest);
+                    setPaymentDiscount(discount);
+
+                    setPaymentModalOpen(true);
+                    calculateInterest(paymentDate);
+                  } catch (error) {
+                    message.error("Unable to verify accounting year status.");
                   }
-
-                  setPaymentMaintenance(maintenance);
-                  setPaymentInterest(interest);
-                  setPaymentDiscount(discount);
-
-                  setPaymentModalOpen(true);
-                  calculateInterest(paymentDate);
                 }}
               >
                 Payment Received by Admin ({selectedRowKeys.length})
-              </Button>{" "}
+              </Button>
             </div>
 
             {/* ================= TABLE ================= */}

@@ -14,7 +14,7 @@ import {
   Layout,
   Popconfirm,
 } from "antd";
-import { DeleteOutlined,SearchOutlined } from "@ant-design/icons";
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -34,7 +34,7 @@ const role = sessionStorage.getItem("role");
 const cashInHand = sessionStorage.getItem("cashInHand");
 const bankAccount = sessionStorage.getItem("bankAccount");
 
-interface Income {
+interface IncomeFace {
   id: number;
   voucherDate: string;
   incomeGlCode: number;
@@ -51,10 +51,10 @@ const Income: React.FC = () => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Income[]>([]);
+  const [data, setData] = useState<IncomeFace[]>([]);
   const [dateSearch, setDateSearch] = useState("");
-const [accountSearch, setAccountSearch] = useState("");
-const [filteredData, setFilteredData] = useState<Income[]>([]);
+  const [accountSearch, setAccountSearch] = useState("");
+  const [filteredData, setFilteredData] = useState<IncomeFace[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
 
   useEffect(() => {
@@ -62,41 +62,39 @@ const [filteredData, setFilteredData] = useState<Income[]>([]);
     fetchGlMaster();
   }, []);
 
-useEffect(() => {
-  const filtered = data.filter((item) => {
-    const gl = glList.find(
-      (g) => g.glCode === item.incomeGlCode
-    );
+  useEffect(() => {
+    const filtered = data.filter((item) => {
+      const gl = glList.find((g) => g.glCode === item.incomeGlCode);
 
-    const matchDate =
-      !dateSearch ||
-      dayjs(item.voucherDate)
-        .format("DD-MMM-YYYY")
-        .toLowerCase()
-        .includes(dateSearch.toLowerCase());
+      const matchDate =
+        !dateSearch ||
+        dayjs(item.voucherDate)
+          .format("DD-MMM-YYYY")
+          .toLowerCase()
+          .includes(dateSearch.toLowerCase());
 
-    const matchAccount =
-      !accountSearch ||
-      gl?.accountName
-        ?.toLowerCase()
-        .includes(accountSearch.toLowerCase());
+      const matchAccount =
+        !accountSearch ||
+        gl?.accountName?.toLowerCase().includes(accountSearch.toLowerCase());
 
-    return matchDate && matchAccount;
-  });
+      return matchDate && matchAccount;
+    });
 
-  setFilteredData(filtered);
-}, [data, glList, dateSearch, accountSearch]);
+    setFilteredData(filtered);
+  }, [data, glList, dateSearch, accountSearch]);
 
   const fetchGlMaster = async () => {
     try {
       const res = await axios.get(
-        `${BASE_URL}/gl/master?societyId=${societyId}`
+        `${BASE_URL}/gl/master?societyId=${societyId}`,
       );
 
-      setGlList((res.data || []).filter((gl: any) =>
-           (gl.groupName === "INCOME" ||
-            gl.groupName === "OTHER INCOME") && gl.parentGlCode !=null
-        )
+      setGlList(
+        (res.data || []).filter(
+          (gl: any) =>
+            (gl.groupName === "INCOME" || gl.groupName === "OTHER INCOME") &&
+            gl.parentGlCode != null,
+        ),
       );
     } catch {
       message.error("Failed to load Income Accounts");
@@ -107,7 +105,9 @@ useEffect(() => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${BASE_URL}/income/${societyId}/${financialYearId}`);
+      const res = await axios.get(
+        `${BASE_URL}/income/${societyId}/${financialYearId}`,
+      );
 
       setData(res.data);
       setFilteredData(res.data);
@@ -119,11 +119,17 @@ useEffect(() => {
   };
 
   const onFinish = async (values: any) => {
-    const GlCashInHand=Number(sessionStorage.getItem("GlCashInHand"));
-    const GlBankAccount=Number(sessionStorage.getItem("GlBankAccount"));
-
+    const GlCashInHand = Number(sessionStorage.getItem("GlCashInHand"));
+    const GlBankAccount = Number(sessionStorage.getItem("GlBankAccount"));
 
     try {
+
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
       const payload = {
         societyId,
         financialYearId,
@@ -133,8 +139,8 @@ useEffect(() => {
         amount: values.amount,
         paymentMode: values.paymentMode,
         narration: values.narration,
-        glCashInHand : GlCashInHand,
-        glBankAccount : GlBankAccount
+        glCashInHand: GlCashInHand,
+        glBankAccount: GlBankAccount,
       };
       await axios.post(`${BASE_URL}/income`, payload);
       message.success("Income saved successfully");
@@ -170,10 +176,8 @@ useEffect(() => {
     },
     {
       title: "Income Head",
-      render: (_: any, record: Income) => {
-        const gl = glList.find(
-          (g) => g.glCode === record.incomeGlCode
-        );
+      render: (_: any, record: IncomeFace) => {
+        const gl = glList.find((g) => g.glCode === record.incomeGlCode);
 
         return gl?.accountName || "-";
       },
@@ -203,7 +207,7 @@ useEffect(() => {
       title: "Action",
       width: 110,
       align: "center" as const,
-      render: (_: any, record: Income) => (
+      render: (_: any, record: IncomeFace) => (
         <Popconfirm
           title="Delete Income"
           description="Are you sure?"
@@ -211,11 +215,7 @@ useEffect(() => {
           cancelText="No"
           onConfirm={() => deleteIncome(record.id)}
         >
-          <Button
-            danger
-            size="small"
-            icon={<DeleteOutlined />}
-          >
+          <Button danger size="small" icon={<DeleteOutlined />}>
             Delete
           </Button>
         </Popconfirm>
@@ -223,7 +223,7 @@ useEffect(() => {
     },
   ];
 
-    return (
+  return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
         width={role === "MEMBER" ? 200 : 250}
@@ -261,11 +261,7 @@ useEffect(() => {
         <Content>
           <div style={{ padding: 16 }}>
             <Card title="Add Income" style={{ marginBottom: 16 }}>
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={onFinish}
-              >
+              <Form form={form} layout="vertical" onFinish={onFinish}>
                 <Row gutter={16} style={{ marginTop: -10 }}>
                   <Col xs={24} md={8}>
                     <Form.Item
@@ -278,11 +274,11 @@ useEffect(() => {
                         },
                       ]}
                     >
-                     <DatePicker
-  style={{ width: "100%" }}
-  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
-  placeholder="DD/MM/YYYY"
-/>
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+                        placeholder="DD/MM/YYYY"
+                      />
                     </Form.Item>
                   </Col>
 
@@ -363,66 +359,53 @@ useEffect(() => {
                       ]}
                     >
                       <Select placeholder="Payment Mode">
-                        <Select.Option value="CASH">
-                          Cash
-                        </Select.Option>
-                        <Select.Option value="BANK">
-                          Bank
-                        </Select.Option>
-                        <Select.Option value="UPI">
-                          UPI
-                        </Select.Option>
+                        <Select.Option value="CASH">Cash</Select.Option>
+                        <Select.Option value="BANK">Bank</Select.Option>
+                        <Select.Option value="UPI">UPI</Select.Option>
                       </Select>
                     </Form.Item>
                   </Col>
 
                   <Col xs={24} md={8}>
-                    <Form.Item
-                      name="narration"
-                      label="Narration"
-                    >
+                    <Form.Item name="narration" label="Narration">
                       <Input placeholder="Narration" />
                     </Form.Item>
                   </Col>
                 </Row>
 
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                >
+                <Button type="primary" htmlType="submit">
                   Save Income
                 </Button>
               </Form>
             </Card>
 
             <Card title="Income List">
+              <div
+                style={{
+                  marginBottom: 15,
+                  display: "flex",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Input
+                  placeholder="Search Date"
+                  prefix={<SearchOutlined style={{ color: "#999" }} />}
+                  value={dateSearch}
+                  onChange={(e) => setDateSearch(e.target.value)}
+                  allowClear
+                  style={{ width: 220 }}
+                />
 
-<div
-  style={{
-    marginBottom: 15,
-    display: "flex",
-    gap: 12,
-    flexWrap: "wrap",
-  }}
->
-  <Input
-    placeholder="Search Date"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={dateSearch}
-    onChange={(e) => setDateSearch(e.target.value)}
-    allowClear
-    style={{ width: 220 }}
-  />
-
-  <Input
-    placeholder="Search Income Account"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={accountSearch}
-    onChange={(e) => setAccountSearch(e.target.value)}
-    allowClear
-    style={{ width: 260 }}
-  />
-</div>
+                <Input
+                  placeholder="Search Income Account"
+                  prefix={<SearchOutlined style={{ color: "#999" }} />}
+                  value={accountSearch}
+                  onChange={(e) => setAccountSearch(e.target.value)}
+                  allowClear
+                  style={{ width: 260 }}
+                />
+              </div>
 
               <Table
                 rowKey="id"

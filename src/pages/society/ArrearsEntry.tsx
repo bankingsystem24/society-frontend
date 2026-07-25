@@ -29,7 +29,6 @@ const role = sessionStorage.getItem("role");
 const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-
 interface Flat {
   id: number;
   flatNo: string;
@@ -50,7 +49,6 @@ interface Arrears {
   status: string;
 }
 
-
 const ArrearsEntry: React.FC = () => {
   const [form] = Form.useForm();
 
@@ -61,11 +59,12 @@ const ArrearsEntry: React.FC = () => {
   const userId = sessionStorage.getItem("userId");
   const [arrears, setArrears] = useState<Arrears[]>([]);
   const [filteredArrears, setFilteredArrears] = useState<Arrears[]>([]);
-const [flatSearch, setFlatSearch] = useState("");
-const [ownerSearch, setOwnerSearch] = useState("");
-    const [glReceivable, setGlReceivable] = useState<number>(0);
-    const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [flatSearch, setFlatSearch] = useState("");
+  const [ownerSearch, setOwnerSearch] = useState("");
+  const [glReceivable, setGlReceivable] = useState<number>(0);
+  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
 
   useEffect(() => {
     loadFlats();
@@ -73,21 +72,21 @@ const [ownerSearch, setOwnerSearch] = useState("");
     loadGlMapping();
   }, []);
 
- useEffect(() => {
-  const filtered = arrears.filter((item) => {
-    const matchesFlat =
-      flatSearch === "" ||
-      item.flatNo?.toLowerCase().includes(flatSearch.toLowerCase());
+  useEffect(() => {
+    const filtered = arrears.filter((item) => {
+      const matchesFlat =
+        flatSearch === "" ||
+        item.flatNo?.toLowerCase().includes(flatSearch.toLowerCase());
 
-    const matchesOwner =
-      ownerSearch === "" ||
-      item.ownerName?.toLowerCase().includes(ownerSearch.toLowerCase());
+      const matchesOwner =
+        ownerSearch === "" ||
+        item.ownerName?.toLowerCase().includes(ownerSearch.toLowerCase());
 
-    return matchesFlat && matchesOwner;
-  });
+      return matchesFlat && matchesOwner;
+    });
 
-  setFilteredArrears(filtered);
-}, [flatSearch, ownerSearch, arrears]);
+    setFilteredArrears(filtered);
+  }, [flatSearch, ownerSearch, arrears]);
 
   const loadGlMapping = async () => {
     try {
@@ -136,8 +135,7 @@ const [ownerSearch, setOwnerSearch] = useState("");
       );
       setArrears(res.data);
       setFilteredArrears(res.data);
-      console.log("Response:",res.data);
-
+      console.log("Response:", res.data);
     } catch {
       message.error("Unable to load arrears");
     }
@@ -149,6 +147,13 @@ const [ownerSearch, setOwnerSearch] = useState("");
       return;
     }
     try {
+
+      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
+      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      if (isClosed) {
+        message.error("This financial year is closed. You cannot add or edit records.");
+        return
+      }
       const payload = {
         societyId: Number(societyId),
         flatId: values.flatId,
@@ -184,18 +189,18 @@ const [ownerSearch, setOwnerSearch] = useState("");
       dataIndex: ["ownerName"],
     },
     {
-      title:"Month",
-      dataIndex:["month"],
+      title: "Month",
+      dataIndex: ["month"],
     },
     {
       title: "Bill Type",
       dataIndex: ["billType"],
-    },    
+    },
     {
       title: "Amount",
       dataIndex: "maintenanceAmount",
       align: "right" as const,
-      render: (value: number | null) => `₹ ${(value ?? 0).toFixed(2)}`
+      render: (value: number | null) => `₹ ${(value ?? 0).toFixed(2)}`,
     },
     {
       title: "Due Date",
@@ -288,15 +293,14 @@ const [ownerSearch, setOwnerSearch] = useState("");
                     rules={[{ required: true }]}
                   >
                     <DatePicker
-  style={{ width: "100%" }}
-  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
-  placeholder="DD/MM/YYYY"
-/>
+                      style={{ width: "100%" }}
+                      format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+                      placeholder="DD/MM/YYYY"
+                    />
                   </Form.Item>
                 </Col>
 
-
-                <Col span={6} style={{ alignContent:"center"}}>
+                <Col span={6} style={{ alignContent: "center" }}>
                   <Button type="primary" htmlType="submit">
                     Save Opening Arrears
                   </Button>
@@ -304,33 +308,33 @@ const [ownerSearch, setOwnerSearch] = useState("");
               </Row>
             </Form>
 
-<div
-  style={{
-    marginTop: 5,
-    marginBottom: 15,
-    display: "flex",
-    gap: 12,
-    flexWrap: "wrap",
-  }}
->
-  <Input
-    placeholder="Search by Flat"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={flatSearch}
-    onChange={(e) => setFlatSearch(e.target.value)}
-    allowClear
-    style={{ width: 250 }}
-  />
+            <div
+              style={{
+                marginTop: 5,
+                marginBottom: 15,
+                display: "flex",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <Input
+                placeholder="Search by Flat"
+                prefix={<SearchOutlined style={{ color: "#999" }} />}
+                value={flatSearch}
+                onChange={(e) => setFlatSearch(e.target.value)}
+                allowClear
+                style={{ width: 250 }}
+              />
 
-  <Input
-    placeholder="Search by Owner"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={ownerSearch}
-    onChange={(e) => setOwnerSearch(e.target.value)}
-    allowClear
-    style={{ width: 250 }}
-  />
-</div>
+              <Input
+                placeholder="Search by Owner"
+                prefix={<SearchOutlined style={{ color: "#999" }} />}
+                value={ownerSearch}
+                onChange={(e) => setOwnerSearch(e.target.value)}
+                allowClear
+                style={{ width: 250 }}
+              />
+            </div>
 
             <Table
               style={{ marginTop: 20 }}
