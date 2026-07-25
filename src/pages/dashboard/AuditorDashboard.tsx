@@ -488,7 +488,7 @@ const paidIconStyle: React.CSSProperties = {
               marginBottom: 0,
             }}
           >
-            {sinkingPending} Bills
+            {sinkingPending} Fund
           </Title>
 
           <Text
@@ -527,7 +527,7 @@ const paidIconStyle: React.CSSProperties = {
               marginBottom: 0,
             }}
           >
-            {contributionPending} Bills
+            {contributionPending} Contribution
           </Title>
 
           <Text
@@ -607,7 +607,7 @@ const paidIconStyle: React.CSSProperties = {
               marginBottom: 0,
             }}
           >
-            {sinkingPaid} Bills
+            {sinkingPaid} Fund
           </Title>
 
           <Text
@@ -646,7 +646,7 @@ const paidIconStyle: React.CSSProperties = {
               marginBottom: 0,
             }}
           >
-            {contributionPaid} Bills
+            {contributionPaid} Contribution
           </Title>
 
           <Text
