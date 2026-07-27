@@ -110,9 +110,11 @@ const ContributionPage: React.FC = () => {
         x.accountName?.toLowerCase().includes("receivable"),
       );
       setGlAccounts(filteredgl);
-      const filteredglcredit = glres.data.filter((x: any) =>
-        x.groupName?.toLowerCase().includes("equity"),
-      );
+const filteredglcredit = glres.data.filter((x: any) =>
+  ["equity", "income"].some(group =>
+    x.groupName?.toLowerCase().includes(group)
+  )
+);
       setCreditAccounts(filteredglcredit);
     } catch (err) {
       console.error("Error fetching Gl Accounts", err);

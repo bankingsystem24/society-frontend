@@ -1,0 +1,58 @@
+.screen-only {
+  display: block;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .screen-only {
+    display: none;
+  }
+
+  .print-only {
+    display: block;
+  }
+
+  .balance-sheet-print {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .balance-sheet-print th,
+  .balance-sheet-print td {
+    border: 1px solid #000;
+    padding: 6px;
+    vertical-align: top;
+  }
+
+  .balance-sheet-print th {
+    text-align: center;
+  }
+
+  .total {
+    font-weight: bold;
+  }
+}
+.screen-only {
+  display: block;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

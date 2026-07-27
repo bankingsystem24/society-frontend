@@ -80,6 +80,7 @@ import MaintenanceRegister from "./pages/reports/MaintenanceRegister";
 import SinkingFundRegister from "./pages/reports/SinkingFundRegister";
 import ContributionRegister from "./pages/reports/ContributionRegister";
 import ProtectedRoute from "./pages/auth/ProtectedRoute";
+import BalanceSheet from "./pages/accounting/BalanceSheet";
 
 export default function App() {
   return (
@@ -156,6 +157,7 @@ export default function App() {
           <Route index element={ <div style={{ textAlign: "center", padding: "80px 0" }}><Typography.Title level={4}> Select a report from the menu </Typography.Title> </div>}/>
           <Route path="daybook" element={<DayBook />} />
           <Route path="trial-balance" element={<TrialBalance />} />
+          <Route path="balance-sheet" element={<BalanceSheet />} />
           <Route path="profit-and-loss" element={<ProfitAndLoss />} />
           <Route path="cashbook" element={<CashBookReport />} />
           <Route path="flat-wise-members" element={<FlatWiseMembers />} />

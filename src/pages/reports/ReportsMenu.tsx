@@ -98,10 +98,9 @@ const ReportsMenu = () => {
                     // { key: "/reports/member-ledger", label: "Member Ledger" },
                     { key: "/reports/trial-balance", label: "Trial Balance" },
                     // { key: "/reports/journal", label: "Journal Register" },
-                    // {
-                    //   key: "/reports/chart-of-accounts",
-                    //   label: "Chart Of Accounts (GL Master)",
-                    // },
+                    // { key: "/reports/chart-of-accounts", label: "Chart Of Accounts (GL Master)",},
+                    { key: "/reports/balance-sheet", label: "Balance Sheet" },
+
                   ],
                 },
                 {
