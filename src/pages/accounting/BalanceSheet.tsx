@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Typography, Row, Col, Spin, message, Button } from "antd";
+import {
+  Card,
+  Table,
+  Typography,
+  Row,
+  Col,
+  Spin,
+  message,
+  Button,
+  DatePicker,
+} from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
 import { PrinterOutlined } from "@ant-design/icons";
 import "./BalanceSheet.css";
@@ -35,10 +46,11 @@ const formatAmount = (value: number) =>
   });
 
 const BalanceSheet: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
+  const [asOnDate, setAsOnDate] = useState<Dayjs | null>(null);
+  const societyName = sessionStorage.getItem("societyName");
   const [data, setData] = useState<BalanceSheetResponse>({
     assets: [],
     liabilities: [],
@@ -48,18 +60,38 @@ const BalanceSheet: React.FC = () => {
     totalEquity: 0,
   });
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
-    loadBalanceSheet();
+    const financialYear = sessionStorage.getItem("financialYear");
+
+    if (financialYear) {
+      const years = financialYear.split("-");
+      if (years.length === 2) {
+        const endYear = years[1].length === 2 ? `20${years[1]}` : years[1];
+
+        setAsOnDate(dayjs(`${endYear}-03-31`));
+      }
+    }
   }, []);
 
   const loadBalanceSheet = async () => {
+    if (!asOnDate) {
+      message.warning("Please select As On Date.");
+      return;
+    }
+
     try {
       setLoading(true);
-      const asOnDate = "2027-03-31"
 
       const response = await axios.get(`${BASE_URL}/reports/balance-sheet`, {
-        params: { societyId, financialYearId,asOnDate },
+        params: {
+          societyId,
+          financialYearId,
+          asOnDate: asOnDate.format("YYYY-MM-DD"),
+        },
       });
+
       setData(response.data);
     } catch (err) {
       message.error("Unable to load balance sheet.");
@@ -100,15 +132,29 @@ const BalanceSheet: React.FC = () => {
             Balance Sheet
           </Title>
 
-          <Button
-            type="primary"
-            icon={<PrinterOutlined />}
-            onClick={() => window.print()}
-          >
-            Print
-          </Button>
-        </Row>
+          <div style={{ display: "flex", gap: 10 }}>
+            <DatePicker
+              value={asOnDate}
+              onChange={setAsOnDate}
+              format="DD-MM-YYYY"
+              placeholder="As On Date"
+              allowClear={false}
+              disabledDate={(current) => current && current > dayjs()}
+            />
 
+            <Button type="primary" onClick={loadBalanceSheet}>
+              Load
+            </Button>
+
+            <Button
+              icon={<PrinterOutlined />}
+              onClick={() => window.print()}
+              disabled={data.assets.length === 0}
+            >
+              Print
+            </Button>
+          </div>
+        </Row>
         {/* ================= SCREEN VIEW ================= */}
         <div className="screen-only">
           <Row gutter={16}>
@@ -120,6 +166,16 @@ const BalanceSheet: React.FC = () => {
                   dataSource={data.assets}
                   pagination={false}
                   size="small"
+                  summary={() => (
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={2}>
+                        <Text strong>Total Assets</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={2} align="right">
+                        <Text strong>{formatAmount(data.totalAssets)}</Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  )}
                 />
               </Card>
             </Col>
@@ -132,6 +188,18 @@ const BalanceSheet: React.FC = () => {
                   dataSource={data.liabilities}
                   pagination={false}
                   size="small"
+                  summary={() => (
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={2}>
+                        <Text strong>Total Liabilities</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={2} align="right">
+                        <Text strong>
+                          {formatAmount(data.totalLiabilities)}
+                        </Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  )}
                 />
               </Card>
 
@@ -142,7 +210,25 @@ const BalanceSheet: React.FC = () => {
                   dataSource={data.equity}
                   pagination={false}
                   size="small"
+                  summary={() => (
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={2}>
+                        <Text strong>Total Equity</Text>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={2} align="right">
+                        <Text strong>{formatAmount(data.totalEquity)}</Text>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  )}
                 />
+              </Card>
+              <Card style={{ marginTop: 0 }}>
+                <Row justify="space-between">
+                  <Text strong>Total Liabilities + Equity</Text>
+                  <Text strong>
+                    {formatAmount(data.totalLiabilities + data.totalEquity)}
+                  </Text>
+                </Row>
               </Card>
             </Col>
           </Row>
@@ -150,9 +236,14 @@ const BalanceSheet: React.FC = () => {
 
         {/* ================= PRINT VIEW ================= */}
         <div className="print-only">
-          <Title level={2} style={{ textAlign: "center" }}>
-            Balance Sheet
+          <Title level={4} style={{ textAlign: "center" }}>
+            {societyName} (Balance Sheet)
           </Title>
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+                <Text strong>
+                    As on : {asOnDate ? asOnDate.format("DD-MM-YYYY") : ""}
+                </Text>
+            </div>
 
           <table className="balance-sheet-table">
             <thead>
