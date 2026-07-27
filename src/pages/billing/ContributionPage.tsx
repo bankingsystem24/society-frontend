@@ -66,9 +66,13 @@ const ContributionPage: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const [glAccounts, setGlAccounts] = useState<any[]>([]);
-  const [selectedGlReceivable, setSelectedGlReceivable] = useState<number | null  >(null);
+  const [selectedGlReceivable, setSelectedGlReceivable] = useState<
+    number | null
+  >(null);
   const [creditAccounts, setCreditAccounts] = useState<any[]>([]);
-  const [selectedGlCreditAccount, setSelectedGlCreditAccount] = useState<number | null  >(null);
+  const [selectedGlCreditAccount, setSelectedGlCreditAccount] = useState<
+    number | null
+  >(null);
   const [voluntaryContributions, setVoluntaryContributions] = useState([]);
 
   useEffect(() => {
@@ -110,11 +114,11 @@ const ContributionPage: React.FC = () => {
         x.accountName?.toLowerCase().includes("receivable"),
       );
       setGlAccounts(filteredgl);
-const filteredglcredit = glres.data.filter((x: any) =>
-  ["equity", "income"].some(group =>
-    x.groupName?.toLowerCase().includes(group)
-  )
-);
+      const filteredglcredit = glres.data.filter((x: any) =>
+        ["equity", "income"].some((group) =>
+          x.groupName?.toLowerCase().includes(group),
+        ),
+      );
       setCreditAccounts(filteredglcredit);
     } catch (err) {
       console.error("Error fetching Gl Accounts", err);
@@ -154,12 +158,17 @@ const filteredglcredit = glres.data.filter((x: any) =>
     };
 
     try {
-
-      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
-      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      setLoading(true);
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+      );
+      const isClosed =
+        response.data === "Closed" || response.data?.status === "Closed";
       if (isClosed) {
-        message.error("This financial year is closed. You cannot add or edit records.");
-        return
+        message.error(
+          "This financial year is closed. You cannot add or edit records.",
+        );
+        return;
       }
       if (type === "COMPULSORY") {
         await axios.post(
@@ -181,251 +190,273 @@ const filteredglcredit = glres.data.filter((x: any) =>
       message.error(
         error?.response?.data?.message || "Failed to generate contribution",
       );
+    } finally {
+      setLoading(false);
     }
 
     clearForm();
   };
 
+
   return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <div style={{ padding: 10 }}>
+            {/* FORM SECTION */}
+            {/* <Card title="Create Contribution" style={{ marginBottom: 20 }}> */}
+            <Form layout="vertical">
+              {/* ROW 1 - TYPE ONLY */}
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    >
+                      <span style={{ fontWeight: 500 }}>
+                        Contribution Type:
+                      </span>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
+                      <Radio.Group
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                      >
+                        <Radio value="COMPULSORY">Compulsory</Radio>
+                        <Radio value="VOLUNTARY">Voluntary</Radio>
+                      </Radio.Group>
+                    </div>
+                  </Form.Item>
+                </Col>
+              </Row>
 
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <div style={{ padding: 10 }}>
-      {/* FORM SECTION */}
-      {/* <Card title="Create Contribution" style={{ marginBottom: 20 }}> */}
-      <Form layout="vertical">
-        {/* ROW 1 - TYPE ONLY */}
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Form.Item style={{ marginBottom: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontWeight: 500 }}>Contribution Type:</span>
-
-                <Radio.Group
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                >
-                  <Radio value="COMPULSORY">Compulsory</Radio>
-                  <Radio value="VOLUNTARY">Voluntary</Radio>
-                </Radio.Group>
-              </div>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* ROW 2 - MAIN FIELDS */}
-        <Row gutter={[16, 16]} style={{ marginBottom: "-5px" }}>
-          <Col xs={24} md={8}>
-            <Form.Item label="Receivable GL">
-              <Select
-                placeholder="Select Receivable GL"
-                value={selectedGlReceivable}
-                onChange={(value) => setSelectedGlReceivable(value)}
-                options={glAccounts.map((gl: any) => ({
-                  value: gl.glCode,
-                  label: `${gl.glCode} - ${gl.accountName}`,
-                }))}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Form.Item label="Credit Account">
-              <Select
-                placeholder="Select Credit A/c GL"
-                value={selectedGlCreditAccount}
-                onChange={(value) => setSelectedGlCreditAccount(value)}
-                options={creditAccounts.map((gl: any) => ({
-                  value: gl.glCode,
-                  label: `${gl.glCode} - ${gl.accountName}`,
-                }))}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Form.Item label="Contribution For">
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Painting Fund"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={[16, 16]} style={{ marginBottom: "-5px" }}>
-          <Col xs={24} md={8}>
-            <Form.Item label="Generation Date">
-              <DatePicker
-  style={{ width: "100%" }}
-  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
-  placeholder="DD/MM/YYYY"
-/>
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Form.Item label="Due Date">
-              <DatePicker
-  style={{ width: "100%" }}
-  format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
-  placeholder="DD/MM/YYYY"
-/>
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={8}>
-            {type === "COMPULSORY" && (
-              <Form.Item label="Mode">
-                <Select
-                  value={mode}
-                  onChange={(v) => setMode(v)}
-                  options={[
-                    { value: "FLAT", label: "Flat Amount" },
-                    { value: "AREA", label: "Area Based (per sqft)" },
-                  ]}
-                />
-              </Form.Item>
-            )}
-          </Col>
-        </Row>
-        <Row gutter={[16, 16]}>
-          {type === "COMPULSORY" ? (
-            <>
-              <Col xs={24} md={8}>
-                {mode === "FLAT" ? (
-                  <Form.Item label="Flat Amount">
-                    <InputNumber
-                      style={{ width: "100%" }}
-                      value={flatAmount}
-                      onChange={(v) => setFlatAmount(v || 0)}
+              {/* ROW 2 - MAIN FIELDS */}
+              <Row gutter={[16, 16]} style={{ marginBottom: "-5px" }}>
+                <Col xs={24} md={8}>
+                  <Form.Item label="Receivable GL">
+                    <Select
+                      placeholder="Select Receivable GL"
+                      value={selectedGlReceivable}
+                      onChange={(value) => setSelectedGlReceivable(value)}
+                      options={glAccounts.map((gl: any) => ({
+                        value: gl.glCode,
+                        label: `${gl.glCode} - ${gl.accountName}`,
+                      }))}
                     />
                   </Form.Item>
+                </Col>
+
+                <Col xs={24} md={8}>
+                  <Form.Item label="Credit Account">
+                    <Select
+                      placeholder="Select Credit A/c GL"
+                      value={selectedGlCreditAccount}
+                      onChange={(value) => setSelectedGlCreditAccount(value)}
+                      options={creditAccounts.map((gl: any) => ({
+                        value: gl.glCode,
+                        label: `${gl.glCode} - ${gl.accountName}`,
+                      }))}
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={8}>
+                  <Form.Item label="Contribution For">
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Painting Fund"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]} style={{ marginBottom: "-5px" }}>
+                <Col xs={24} md={8}>
+                  <Form.Item label="Generation Date">
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+                      placeholder="DD/MM/YYYY"
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={8}>
+                  <Form.Item label="Due Date">
+                    <DatePicker
+                      style={{ width: "100%" }}
+                      format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
+                      placeholder="DD/MM/YYYY"
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={8}>
+                  {type === "COMPULSORY" && (
+                    <Form.Item label="Mode">
+                      <Select
+                        value={mode}
+                        onChange={(v) => setMode(v)}
+                        options={[
+                          { value: "FLAT", label: "Flat Amount" },
+                          { value: "AREA", label: "Area Based (per sqft)" },
+                        ]}
+                      />
+                    </Form.Item>
+                  )}
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]}>
+                {type === "COMPULSORY" ? (
+                  <>
+                    <Col xs={24} md={8}>
+                      {mode === "FLAT" ? (
+                        <Form.Item label="Flat Amount">
+                          <InputNumber
+                            style={{ width: "100%" }}
+                            value={flatAmount}
+                            onChange={(v) => setFlatAmount(v || 0)}
+                          />
+                        </Form.Item>
+                      ) : (
+                        <Form.Item label="Rate per Sqft">
+                          <InputNumber
+                            style={{ width: "100%" }}
+                            value={rate}
+                            onChange={(v) => setRate(v || 0)}
+                          />
+                        </Form.Item>
+                      )}
+                    </Col>
+
+                    <Col xs={24} md={8} />
+
+                    <Col xs={24} md={8}>
+                      <Button
+                        type="primary"
+                        block
+                        size="large"
+                        onClick={handleGenerate}
+                        style={{ marginTop: 30 }}
+                        loading={loading}
+                      >
+                        Generate Contribution
+                      </Button>
+                    </Col>
+                  </>
                 ) : (
-                  <Form.Item label="Rate per Sqft">
-                    <InputNumber
-                      style={{ width: "100%" }}
-                      value={rate}
-                      onChange={(v) => setRate(v || 0)}
-                    />
-                  </Form.Item>
+                  <>
+                    <Col xs={24} md={8}>
+                      <Form.Item label="Description">
+                        <Input.TextArea
+                          rows={1}
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} md={8}>
+                      <Form.Item label="Minimum Amount">
+                        <InputNumber
+                          style={{ width: "100%" }}
+                          value={minAmount}
+                          onChange={(v) => setMinAmount(v || 0)}
+                        />
+                      </Form.Item>
+                    </Col>
+
+                    <Col xs={24} md={8}>
+                      <Button
+                        type="primary"
+                        block
+                        size="large"
+                        onClick={handleGenerate}
+                        style={{ marginTop: 30 }}
+                      >
+                        Generate Contribution
+                      </Button>
+                    </Col>
+                  </>
                 )}
-              </Col>
+              </Row>
+            </Form>
+            {/* </Card> */}
 
-              <Col xs={24} md={8} />
+            {/* PREVIEW SECTION BELOW FORM */}
+            <div style={{ marginTop: 20 }}>
+              <Card
+                title={
+                  <>
+                    Preview{" "}
+                    {type === "COMPULSORY" ? (
+                      <Tag color="red">Compulsory</Tag>
+                    ) : (
+                      <Tag color="green">Voluntary</Tag>
+                    )}
+                  </>
+                }
+              >
+                <>
+                  <Title level={5}>Member-wise Calculation</Title>
 
-              <Col xs={24} md={8}>
-                <Button
-                  type="primary"
-                  block
-                  size="large"
-                  onClick={handleGenerate}
-                  style={{ marginTop: 30 }}
-                >
-                  Generate Contribution
-                </Button>
-              </Col>
-            </>
-          ) : (
-            <>
-              <Col xs={24} md={8}>
-                <Form.Item label="Description">
-                  <Input.TextArea
-                    rows={1}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                  <Text>Total Estimated Collection: </Text>
+                  <Text strong>₹{total}</Text>
+
+                  <Divider />
+
+                  <Table
+                    dataSource={filteredContributions}
+                    rowKey="id"
+                    size="small"
+                    scroll={{ x: "max-content" }}
+                    columns={[
+                      { title: "Name", dataIndex: "name" },
+                      { title: "Flat No", dataIndex: "flatNo" },
+                      { title: "Area", dataIndex: "areaSqFt" },
+                      { title: "Amount", dataIndex: "amount" },
+                      { title: "Status", dataIndex: "status" },
+                      { title: "Due Date", dataIndex: "dueDate" },
+                    ]}
                   />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={8}>
-                <Form.Item label="Minimum Amount">
-                  <InputNumber
-                    style={{ width: "100%" }}
-                    value={minAmount}
-                    onChange={(v) => setMinAmount(v || 0)}
-                  />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={8}>
-                <Button
-                  type="primary"
-                  block
-                  size="large"
-                  onClick={handleGenerate}
-                  style={{ marginTop: 30 }}
-                >
-                  Generate Contribution
-                </Button>
-              </Col>
-            </>
-          )}
-        </Row>
-      </Form>
-      {/* </Card> */}
-
-      {/* PREVIEW SECTION BELOW FORM */}
-      <div style={{ marginTop: 20 }}>
-        <Card
-          title={
-            <>
-              Preview{" "}
-              {type === "COMPULSORY" ? (
-                <Tag color="red">Compulsory</Tag>
-              ) : (
-                <Tag color="green">Voluntary</Tag>
-              )}
-            </>
-          }
-        >
-          <>
-            <Title level={5}>Member-wise Calculation</Title>
-
-            <Text>Total Estimated Collection: </Text>
-            <Text strong>₹{total}</Text>
-
-            <Divider />
-
-            <Table
-              dataSource={filteredContributions}
-              rowKey="id"
-              size="small"
-              scroll={{ x: "max-content" }}
-              columns={[
-                { title: "Name", dataIndex: "name" },
-                { title: "Flat No", dataIndex: "flatNo" },
-                { title: "Area", dataIndex: "areaSqFt" },
-                { title: "Amount", dataIndex: "amount" },
-                { title: "Status", dataIndex: "status" },
-                { title: "Due Date", dataIndex: "dueDate" },
-              ]}
-            />
-          </>
-        </Card>
-      </div>
-    </div>
-    </Content>
-    </Layout>
+                </>
+              </Card>
+            </div>
+          </div>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

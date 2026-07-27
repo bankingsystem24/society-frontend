@@ -118,16 +118,6 @@ export default function ViewBills() {
     glDiscount,
   ]);
 
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`${BASE_URL}/billing/${id}`);
-      message.success("Bill deleted successfully.");
-      loadBills();
-    } catch (err) {
-      message.error("Unable to delete bill.");
-    }
-  };
-
   const loadGlMapping = async () => {
     try {
       const res = await axios.get(
@@ -320,23 +310,6 @@ export default function ViewBills() {
       title: "Due Date",
       dataIndex: "dueDate",
       render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
-    },
-    {
-      title: "Action",
-      key: "action",
-      width: 90,
-      align: "center",
-      render: (_: any, record: Bill) => (
-        <Popconfirm
-          title="Delete Bill"
-          description="Are you sure you want to delete this bill?"
-          okText="Yes"
-          cancelText="No"
-          onConfirm={() => handleDelete(record.id)}
-        >
-          <Button danger type="text" icon={<DeleteOutlined />} />
-        </Popconfirm>
-      ),
     },
   ];
 
@@ -584,6 +557,12 @@ export default function ViewBills() {
                 }}
               >
                 Payment Received by Admin ({selectedRowKeys.length})
+              </Button>
+
+              <Button
+                danger
+                style={{ marginLeft:40 }}>
+                  Delete All Pending Bills
               </Button>
             </div>
 

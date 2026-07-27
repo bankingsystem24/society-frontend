@@ -267,6 +267,60 @@ const ViewContribution: React.FC = () => {
 
   const statusOptions = [...new Set(data.map((d) => d.status))];
 
+  const handleDeletePendingCompulsory = async () => {
+    try {
+      const pendingIds = filteredData
+        .filter(
+          (item) => item.status === "PENDING" && item.type === "COMPULSORY",
+        )
+        .map((item) => item.id);
+      if (pendingIds.length === 0) {
+        message.warning("No pending compulsory contributions found.");
+        return;
+      }
+
+      console.log(pendingIds);
+      await axios.post(
+        `${BASE_URL}/contribution/delete-pending?contributionType=COMPULSORY`,
+        pendingIds,
+      );
+
+      message.success("Pending compulsory contributions deleted successfully.");
+      fetchData();
+      setSelectedRowKeys([]);
+    } catch (error) {
+      message.error("Failed to delete pending compulsory contributions.");
+    }
+  };
+
+  const handleDeletePendingVoluntary = async () => {
+    try {
+      const pendingIds = filteredData
+        .filter(
+          (item) => item.status === "PENDING" && item.type === "VOLUNTARY",
+        )
+        .map((item) => item.id);
+      if (pendingIds.length === 0) {
+        message.warning("No pending compulsory contributions found.");
+        return;
+      }
+
+      console.log(pendingIds);
+      await axios.post(
+        `${BASE_URL}/contribution/delete-pending?contributionType=VOLUNTARY`,
+        pendingIds,
+      );
+
+      message.success("Pending compulsory contributions deleted successfully.");
+      fetchData();
+      setSelectedRowKeys([]);
+    } catch (error) {
+      message.error("Failed to delete pending compulsory contributions.");
+    }
+  };
+
+
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
@@ -374,6 +428,23 @@ const ViewContribution: React.FC = () => {
                   }}
                 >
                   Payment Received by Admin ({selectedRowKeys.length})
+                </Button>
+
+                <Button
+                  danger
+                  loading={loading}
+                  onClick={handleDeletePendingCompulsory}
+                  style={{ marginLeft: 40 }}
+                >
+                  Delete Pending (Compulsory)
+                </Button>
+                <Button
+                  danger
+                  loading={loading}
+                  onClick={handleDeletePendingVoluntary}
+                  style={{ marginLeft: 40 }}
+                >
+                  Delete Pending (Voluntary)
                 </Button>
               </div>
 

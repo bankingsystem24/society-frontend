@@ -10,7 +10,7 @@ import {
   Form,
   Modal,
   Input,
-  Layout
+  Layout,
 } from "antd";
 import axios from "axios";
 import Header from "../../components/layout/Header";
@@ -36,9 +36,8 @@ interface SinkingFund {
   createdBy: number;
   status: string;
   memberName: string;
-  transactionId : String;
+  transactionId: String;
 }
-
 
 const ViewSinkingFund: React.FC = () => {
   const [data, setData] = useState<SinkingFund[]>([]);
@@ -55,8 +54,9 @@ const ViewSinkingFund: React.FC = () => {
   const [transactionId, setTransactionId] = useState<string>("");
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
-  
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
+
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
 
@@ -64,18 +64,32 @@ const ViewSinkingFund: React.FC = () => {
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
-  
-  useEffect(() => { loadGlMapping(); }, []);
-  useEffect(() => {}, [ glCashInHand, glBankAccount, glInterestIncome, glDiscount, glReceivable,glCreditAccount ]);
-  const selectedFunds = filteredData.filter((f) =>selectedRowKeys.includes(f.id),);
-  const selectedFlatNo = selectedFunds.length > 0 ? selectedFunds[0].flatNo : null;
+
+  useEffect(() => {
+    loadGlMapping();
+  }, []);
+  useEffect(() => {}, [
+    glCashInHand,
+    glBankAccount,
+    glInterestIncome,
+    glDiscount,
+    glReceivable,
+    glCreditAccount,
+  ]);
+  const selectedFunds = filteredData.filter((f) =>
+    selectedRowKeys.includes(f.id),
+  );
+  const selectedFlatNo =
+    selectedFunds.length > 0 ? selectedFunds[0].flatNo : null;
 
   // ================= FETCH DATA =================
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${BASE_URL}/sinking-fund?societyId=${societyId}`,);
+      const res = await axios.get(
+        `${BASE_URL}/sinking-fund?societyId=${societyId}`,
+      );
 
       setData(res.data || []);
       setFilteredData(res.data || []);
@@ -168,12 +182,10 @@ const ViewSinkingFund: React.FC = () => {
 
   const handlePay = async () => {
     try {
-
-
-    if (!glReceivable || !glCreditAccount) {
-      message.error("Monthly Maintenance GL Mapping not configured");
-      return;
-    }
+      if (!glReceivable || !glCreditAccount) {
+        message.error("Monthly Maintenance GL Mapping not configured");
+        return;
+      }
       const sinkingFundIds = selectedRowKeys.map(Number);
 
       const payload = {
@@ -187,7 +199,7 @@ const ViewSinkingFund: React.FC = () => {
         glBankAccount,
         glInterestIncome,
         glDiscount,
-      }
+      };
 
       const res = await axios.put(`${BASE_URL}/sinking-fund/pay`, payload);
 
@@ -197,6 +209,27 @@ const ViewSinkingFund: React.FC = () => {
       fetchData();
     } catch {
       message.error("Payment failed");
+    }
+  };
+
+  const handleDeletePending = async () => {
+    try {
+      const pendingIds = filteredData
+        .filter((item) => item.status === "PENDING")
+        .map((item) => item.id);
+
+      if (pendingIds.length === 0) {
+        message.warning("No pending records found.");
+        return;
+      }
+
+      await axios.post(`${BASE_URL}/sinking-fund/delete-pending`, pendingIds);
+
+      message.success("Pending records deleted successfully.");
+      fetchData();
+      setSelectedRowKeys([]);
+    } catch (error) {
+      message.error("Failed to delete pending records.");
     }
   };
 
@@ -244,197 +277,253 @@ const ViewSinkingFund: React.FC = () => {
   const statusOptions = [...new Set(data.map((item) => item.status))];
 
   return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <div style={{ padding: 16 }}>
+            <Card title="View Sinking Fund">
+              {/* FILTER SECTION */}
+              <Space style={{ marginBottom: 16 }} wrap>
+                <Select
+                  placeholder="Month"
+                  style={{ width: 150 }}
+                  // onChange={(value) => setMonth(value)}
+                  onChange={(value) => {
+                    setMonth(value || undefined);
+                  }}
+                  allowClear
+                >
+                  {[
+                    "JANUARY",
+                    "FEBRUARY",
+                    "MARCH",
+                    "APRIL",
+                    "MAY",
+                    "JUNE",
+                    "JULY",
+                    "AUGUST",
+                    "SEPTEMBER",
+                    "OCTOBER",
+                    "NOVEMBER",
+                    "DECEMBER",
+                  ].map((m) => (
+                    <Select.Option key={m} value={m}>
+                      {m}
+                    </Select.Option>
+                  ))}
+                </Select>
 
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <div style={{ padding: 16 }}>
-      <Card title="View Sinking Fund">
-        {/* FILTER SECTION */}
-        <Space style={{ marginBottom: 16 }} wrap>
-          <Select
-            placeholder="Month"
-            style={{ width: 150 }}
-            // onChange={(value) => setMonth(value)}
-            onChange={(value) => {
-              setMonth(value || undefined);
-            }}
-            allowClear
-          >
-            {[
-              "JANUARY",
-              "FEBRUARY",
-              "MARCH",
-              "APRIL",
-              "MAY",
-              "JUNE",
-              "JULY",
-              "AUGUST",
-              "SEPTEMBER",
-              "OCTOBER",
-              "NOVEMBER",
-              "DECEMBER",
-            ].map((m) => (
-              <Select.Option key={m} value={m}>
-                {m}
-              </Select.Option>
-            ))}
-          </Select>
+                <InputNumber
+                  placeholder="Year"
+                  onChange={(value) => {
+                    setYear(typeof value === "number" ? value : undefined);
+                  }}
+                />
 
-          <InputNumber
-            placeholder="Year"
-            onChange={(value) => {
-              setYear(typeof value === "number" ? value : undefined);
-            }}
-          />
+                <Select
+                  placeholder="Flat"
+                  style={{ width: 140 }}
+                  allowClear
+                  onChange={(value) => setFlatNo(value || undefined)}
+                >
+                  {flatOptions.map((flat) => (
+                    <Select.Option key={flat} value={flat}>
+                      {flat}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  placeholder="Member"
+                  style={{ width: 220 }}
+                  allowClear
+                  showSearch
+                  optionFilterProp="children"
+                  onChange={(value) => setMemberName(value || undefined)}
+                >
+                  {memberOptions.map((member) => (
+                    <Select.Option key={member} value={member}>
+                      {member}
+                    </Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  placeholder="Status"
+                  style={{ width: 140 }}
+                  allowClear
+                  onChange={(value) => setStatus(value || undefined)}
+                >
+                  {statusOptions.map((sts) => (
+                    <Select.Option key={sts} value={sts}>
+                      {sts}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Space>
 
-          <Select
-            placeholder="Flat"
-            style={{ width: 140 }}
-            allowClear
-            onChange={(value) => setFlatNo(value || undefined)}
-          >
-            {flatOptions.map((flat) => (
-              <Select.Option key={flat} value={flat}>
-                {flat}
-              </Select.Option>
-            ))}
-          </Select>
-          <Select
-            placeholder="Member"
-            style={{ width: 220 }}
-            allowClear
-            showSearch
-            optionFilterProp="children"
-            onChange={(value) => setMemberName(value || undefined)}
-          >
-            {memberOptions.map((member) => (
-              <Select.Option key={member} value={member}>
-                {member}
-              </Select.Option>
-            ))}
-          </Select>
-          <Select
-            placeholder="Status"
-            style={{ width: 140 }}
-            allowClear
-            onChange={(value) => setStatus(value || undefined)}
-          >
-            {statusOptions.map((sts) => (
-              <Select.Option key={sts} value={sts}>
-                {sts}
-              </Select.Option>
-            ))}
-          </Select>
-        </Space>
+              {/* ================= BUTTON ================= */}
+              <div style={{ marginBottom: 12 }}>
+                <Button
+                  type="primary"
+                  disabled={selectedRowKeys.length === 0}
+                  onClick={async () => {
+                    const response = await axios.get(
+                      `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+                    );
+                    const isClosed =
+                      response.data === "Closed" ||
+                      response.data?.status === "Closed";
+                    if (isClosed) {
+                      message.error(
+                        "This financial year is closed. You cannot add or edit records.",
+                      );
+                      return;
+                    }
+                    setPaymentModalOpen(true);
+                  }}
+                >
+                  Payment Received by Admin ({selectedRowKeys.length})
+                </Button>
 
-        {/* ================= BUTTON ================= */}
-        <div style={{ marginBottom: 12 }}>
-          <Button
-            type="primary"
-            disabled={selectedRowKeys.length === 0}
-            onClick={  async () => {
-              const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
-              const isClosed = response.data === "Closed" || response.data?.status === "Closed";
-              if (isClosed) {
-                message.error("This financial year is closed. You cannot add or edit records.");
-                return
-              }
-              setPaymentModalOpen(true)
-            }}
-          >
-            Payment Received by Admin ({selectedRowKeys.length})
-          </Button>
-        </div>
+                <Button
+                  danger
+                  style={{ marginLeft: 8 }}
+                  disabled={
+                    filteredData.filter((item) => item.status === "PENDING")
+                      .length === 0
+                  }
+                  onClick={async () => {
+                    const response = await axios.get(
+                      `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+                    );
 
-        {/* TABLE */}
-        <Table
-          dataSource={filteredData}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              responsive: true,
-            }}
-          size="small"
-          rowSelection={{
-            selectedRowKeys,
-            hideSelectAll: true,
-            onChange: setSelectedRowKeys,
-            getCheckboxProps: (record) => ({
-              disabled:
-                record.status !== "PENDING" ||
-                (selectedFlatNo !== null &&
-                  record.flatNo !== selectedFlatNo &&
-                  !selectedRowKeys.includes(record.id)),
-            }),
-          }}
-        />
-        {/* ================= PAYMENT MODAL ================= */}
-        <Modal
-          title="Select Payment Method"
-          open={paymentModalOpen}
-          onCancel={() => setPaymentModalOpen(false)}
-          onOk={handlePay}
-          okText="Pay Now"
-        >
-          <Form layout="vertical">
-            <Form.Item label="Payment Method">
-              <Select
-                value={paymentMode}
-                onChange={setPaymentMode}
-                options={[
-                  { label: "CASH", value: "CASH" },
-                  { label: "UPI", value: "UPI" },
-                  { label: "CARD", value: "CARD" },
-                  { label: "NETBANKING", value: "NETBANKING" },
-                ]}
+                    const isClosed =
+                      response.data === "Closed" ||
+                      response.data?.status === "Closed";
+
+                    if (isClosed) {
+                      message.error(
+                        "This financial year is closed. You cannot delete records.",
+                      );
+                      return;
+                    }
+
+                    Modal.confirm({
+                      title: "Delete Pending Records",
+                      content:
+                        "Are you sure you want to delete all Unpaid sinking fund records?",
+                      okText: "Delete",
+                      okType: "danger",
+                      onOk: handleDeletePending,
+                    });
+                  }}
+                >
+                  Delete All Unpaid Records
+                </Button>
+              </div>
+
+              {/* TABLE */}
+              <Table
+                dataSource={filteredData}
+                columns={columns}
+                rowKey="id"
+                loading={loading}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  responsive: true,
+                }}
+                size="small"
+                rowSelection={{
+                  selectedRowKeys,
+                  hideSelectAll: true,
+                  onChange: setSelectedRowKeys,
+                  getCheckboxProps: (record) => ({
+                    disabled:
+                      record.status !== "PENDING" ||
+                      (selectedFlatNo !== null &&
+                        record.flatNo !== selectedFlatNo &&
+                        !selectedRowKeys.includes(record.id)),
+                  }),
+                }}
               />
-            </Form.Item>
-          {paymentMode !== "CASH" && (
-            <Form.Item
-              label="Transaction Id"
-              required
-              rules={[
-                {
-                  required: true,
-                  message: "Please enter Transaction Id",
-                },
-              ]}
-            >
-              <Input
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
-                placeholder="Enter transaction id"
-              />
-            </Form.Item>
-          )}
-
-          </Form>
-        </Modal>
-      </Card>
-    </div>
-    </Content>
-    </Layout>
+              {/* ================= PAYMENT MODAL ================= */}
+              <Modal
+                title="Select Payment Method"
+                open={paymentModalOpen}
+                onCancel={() => setPaymentModalOpen(false)}
+                onOk={handlePay}
+                okText="Pay Now"
+              >
+                <Form layout="vertical">
+                  <Form.Item label="Payment Method">
+                    <Select
+                      value={paymentMode}
+                      onChange={setPaymentMode}
+                      options={[
+                        { label: "CASH", value: "CASH" },
+                        { label: "UPI", value: "UPI" },
+                        { label: "CARD", value: "CARD" },
+                        { label: "NETBANKING", value: "NETBANKING" },
+                      ]}
+                    />
+                  </Form.Item>
+                  {paymentMode !== "CASH" && (
+                    <Form.Item
+                      label="Transaction Id"
+                      required
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter Transaction Id",
+                        },
+                      ]}
+                    >
+                      <Input
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        placeholder="Enter transaction id"
+                      />
+                    </Form.Item>
+                  )}
+                </Form>
+              </Modal>
+            </Card>
+          </div>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

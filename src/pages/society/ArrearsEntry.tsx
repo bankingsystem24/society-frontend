@@ -12,6 +12,7 @@ import {
   message,
   Layout,
   Table,
+  Popconfirm,
 } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -147,12 +148,16 @@ const ArrearsEntry: React.FC = () => {
       return;
     }
     try {
-
-      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
-      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+      );
+      const isClosed =
+        response.data === "Closed" || response.data?.status === "Closed";
       if (isClosed) {
-        message.error("This financial year is closed. You cannot add or edit records.");
-        return
+        message.error(
+          "This financial year is closed. You cannot add or edit records.",
+        );
+        return;
       }
       const payload = {
         societyId: Number(societyId),
@@ -178,6 +183,27 @@ const ArrearsEntry: React.FC = () => {
       message.error("Failed to save arrears");
     }
   };
+ const handleDeleteUnpaidRecords = async () => {
+  try {
+    console.log("FilteredData:",filteredArrears);
+
+    const pendingIds = filteredArrears
+      .filter((item) => item.status === "PENDING")
+      .map((item) => item.id);
+
+    if (pendingIds.length === 0) {
+      message.warning("No Unpaid records found.");
+      return;
+    }
+    await axios.post(`${BASE_URL}/billing/delete-unpaid`,pendingIds);
+    message.success("Pending/Unpaid records deleted successfully.");
+    loadArrears();
+  } catch (error: any) {
+    message.error(
+      error.response?.data || "Failed to delete unpaid records."
+    );
+  }
+};
 
   const columns = [
     {
@@ -334,6 +360,24 @@ const ArrearsEntry: React.FC = () => {
                 allowClear
                 style={{ width: 250 }}
               />
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginBottom: 16,
+                }}
+              >
+                <Popconfirm
+                  title="Delete unpaid records?"
+                  description="This action cannot be undone."
+                  okText="Delete"
+                  cancelText="Cancel"
+                  onConfirm={handleDeleteUnpaidRecords}
+                >
+                  <Button danger>Delete All Pending Records</Button>
+                </Popconfirm>
+              </div>
             </div>
 
             <Table
