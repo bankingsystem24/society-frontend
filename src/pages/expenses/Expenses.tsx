@@ -300,7 +300,8 @@ const Expenses: React.FC = () => {
                     <Form.Item
                       name="expenseGlCode"
                       label="Expense Account"
-                      rules={[{ required: true }]}
+                      rules={[{ required: true  }]}
+                      
                     >
                       <Select
                         showSearch
@@ -333,13 +334,36 @@ const Expenses: React.FC = () => {
 
                 <Row gutter={16} style={{ marginTop: -10 }}>
                   <Col xs={24} md={8}>
-                    <Form.Item
-                      name="amount"
-                      label="Amount"
-                      rules={[{ required: true }]}
-                    >
-                      <InputNumber style={{ width: "100%" }} controls={false} />
-                    </Form.Item>
+                  <Form.Item
+  name="amount"
+  label="Amount"
+  rules={[{ required: true, message: "Please enter amount" }]}
+>
+  <InputNumber
+    style={{ width: "100%" }}
+    controls={false}
+    min={0}
+    precision={2}
+    placeholder="Enter amount"
+    onKeyDown={(e) => {
+      const allowedKeys = [
+        "Backspace",
+        "Delete",
+        "Tab",
+        "ArrowLeft",
+        "ArrowRight",
+        ".",
+      ];
+
+      if (
+        !/[0-9]/.test(e.key) &&
+        !allowedKeys.includes(e.key)
+      ) {
+        e.preventDefault();
+      }
+    }}
+  />
+</Form.Item>
                   </Col>
 
                   <Col xs={24} md={8}>
@@ -392,6 +416,7 @@ const Expenses: React.FC = () => {
                   allowClear
                   style={{ width: 260 }}
                 />
+                
               </div>
               <Table
                 dataSource={filteredExpenses}
