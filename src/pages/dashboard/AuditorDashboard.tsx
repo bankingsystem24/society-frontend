@@ -117,20 +117,37 @@ const [contributionPaidAmount, setContributionPaidAmount] = useState(0);
   };
 const loadPaymentSummary = async (societyId: number) => {
   try {
-    const res = await apiGet(`/billing/pending/${societyId}`);
-    setMaintenancePending(res.length);
+    // Pending
+    const pendingRes = await apiGet(`/billing/pending/${societyId}`);
+    console.log("Pending Bills:", pendingRes);
 
-    const totalAmount = res.reduce(
-      (sum: number, item: any) => sum + Number(item.totalAmount || item.amount || 0),
-      0
+    setMaintenancePending(pendingRes.length);
+
+    setMaintenancePendingAmount(
+      pendingRes.reduce(
+        (sum: number, item: any) =>
+          sum + Number(item.totalAmount || item.amount || 0),
+        0
+      )
     );
 
-    setMaintenancePendingAmount(totalAmount);
+    // Paid
+    const paidRes = await apiGet(`/billing/paid/${societyId}`);
+    console.log("Paid Bills:", paidRes);
+
+    setMaintenancePaid(paidRes.length);
+
+    setMaintenancePaidAmount(
+      paidRes.reduce(
+        (sum: number, item: any) =>
+          sum + Number(item.totalAmount || item.amount || 0),
+        0
+      )
+    );
   } catch (err) {
     console.log(err);
   }
 };
-
 
 const loadContributionSummary = async (societyId: number) => {
   try {
