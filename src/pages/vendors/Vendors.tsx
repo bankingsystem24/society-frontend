@@ -304,7 +304,11 @@ setFilteredData(res.data || []);
             </Col>
 
             <Col xs={24} md={12}>
-              <Form.Item name="mobileNo" label="Mobile No">
+              <Form.Item name="mobileNo" label="Mobile No" 
+               rules={[{
+               pattern: /^[0-9]{10}$/,
+               message: "Invalid mobile number",},
+    ]} >
                 <Input />
               </Form.Item>
             </Col>
@@ -312,7 +316,12 @@ setFilteredData(res.data || []);
 
           <Row gutter={16}>
             <Col xs={24} md={12}>
-              <Form.Item name="gstNo" label="GST No">
+              <Form.Item name="gstNo" label="GST No"
+                rules={[
+              {pattern: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+               message: "Please enter a valid GST number",
+              },
+  ]} >
                 <Input />
               </Form.Item>
             </Col>

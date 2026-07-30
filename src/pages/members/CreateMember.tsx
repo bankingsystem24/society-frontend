@@ -143,7 +143,10 @@ const CreateMember: React.FC = () => {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="Email" name="email">
+            <Form.Item label="Email" name="email"
+            rules={[
+            {type: "email", message: "Invalid email address"},
+            ]}>
               <Input placeholder="Enter email" onPressEnter={focusNext} />
             </Form.Item>
           </Col>
