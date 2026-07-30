@@ -80,7 +80,7 @@ setFilteredData(res.data || []);
       const filtered = (res.data || []).filter(
         (gl: any) =>
           gl.groupName === "LIABILITY" ||
-          gl.accountName?.toLowerCase().includes("payable") ||
+          gl.accountName?.toLowerCase().includes("expense") ||
           gl.accountName?.toLowerCase().includes("creditor"),
       );
 
@@ -320,16 +320,16 @@ setFilteredData(res.data || []);
             <Col xs={24} md={12}>
               <Form.Item
                 name="payableGlCode"
-                label="Payable GL Code"
+                label="Expense GL Code"
                 rules={[
                   {
                     required: true,
-                    message: "Payable GL is required",
+                    message: "Expense GL is required",
                   },
                 ]}
               >
                 <Select
-                  placeholder="Select Payable GL Code"
+                  placeholder="Select Expense GL Code"
                   showSearch
                   optionFilterProp="children"
                 >
