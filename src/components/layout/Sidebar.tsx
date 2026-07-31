@@ -129,8 +129,12 @@ const Sidebar: React.FC = () => {
       label: "Policies",
       children: [
         {
+          key: "/maintenance-policy",
+          label: "Maintenance Policy",
+        },
+        {
           key: "/billing-policy",
-          label: "Billing Policy",
+          label: "Interest Policy",
         },
         {
           key: "/discount-policy",

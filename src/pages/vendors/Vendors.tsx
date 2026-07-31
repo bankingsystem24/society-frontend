@@ -82,7 +82,7 @@ const Vendors: React.FC = () => {
       const filtered = (res.data || []).filter(
         (gl: any) =>
           gl.groupName === "LIABILITY" ||
-          gl.accountName?.toLowerCase().includes("payable") ||
+          gl.accountName?.toLowerCase().includes("expense") ||
           gl.accountName?.toLowerCase().includes("creditor"),
       );
 

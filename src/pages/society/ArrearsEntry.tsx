@@ -70,7 +70,8 @@ const ArrearsEntry: React.FC = () => {
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
   const [maintenanceMappingExists, setMaintenanceMappingExists] =
     useState(false);
-
+  const role = sessionStorage.getItem("role");
+  const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   useEffect(() => {
     loadFlats();
     loadArrears();
@@ -274,11 +275,20 @@ const ArrearsEntry: React.FC = () => {
         ) : (
           <AuditorHeader />
         )}
-        <Content>
-          <Card title="Opening Arrears Entry">
+        <Content
+          style={{
+            padding: 16,
+          }}
+        >
+          <Card
+            title="Opening Arrears Entry"
+            style={{
+              width: "100%",
+            }}
+          >
             <Form layout="vertical" form={form} onFinish={onFinish}>
               <Row gutter={16}>
-                <Col span={6}>
+                <Col xs={24} sm={12} md={12} lg={6} xl={6}>
                   <Form.Item
                     label="Flat"
                     name="flatId"
@@ -308,9 +318,9 @@ const ArrearsEntry: React.FC = () => {
                   </Form.Item>
                 </Col>
 
-                <Col span={6}>
+                <Col xs={24} sm={12} md={12} lg={6} xl={6}>
                   <Form.Item
-                    label="Opening Arrears Amount"
+                    label="Opening Amount"
                     name="amount"
                     rules={[{ required: true }]}
                   >
@@ -347,7 +357,7 @@ const ArrearsEntry: React.FC = () => {
                   </Form.Item>
                 </Col>
 
-                <Col span={6}>
+                <Col xs={24} sm={12} md={12} lg={6} xl={6}>
                   <Form.Item
                     label="Due Date"
                     name="dueDate"
@@ -384,8 +394,10 @@ const ArrearsEntry: React.FC = () => {
                 marginTop: 5,
                 marginBottom: 15,
                 display: "flex",
-                gap: 12,
                 flexWrap: "wrap",
+                gap: 12,
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
               <Input
@@ -394,7 +406,10 @@ const ArrearsEntry: React.FC = () => {
                 value={flatSearch}
                 onChange={(e) => setFlatSearch(e.target.value)}
                 allowClear
-                style={{ width: 250 }}
+                style={{
+                  width: "100%",
+                  maxWidth: 300,
+                }}
               />
 
               <Input
@@ -403,13 +418,18 @@ const ArrearsEntry: React.FC = () => {
                 value={ownerSearch}
                 onChange={(e) => setOwnerSearch(e.target.value)}
                 allowClear
-                style={{ width: 250 }}
+                style={{
+                  width: "100%",
+                  maxWidth: 300,
+                }}
               />
 
               <div
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
+                  flex: 1,
+                  minWidth: 220,
                   marginBottom: 16,
                 }}
               >
@@ -420,18 +440,27 @@ const ArrearsEntry: React.FC = () => {
                   cancelText="Cancel"
                   onConfirm={handleDeleteUnpaidRecords}
                 >
-                  <Button danger>Delete All Pending Records</Button>
+                  <Button
+                    danger
+                    style={{
+                      width: "100%",
+                      maxWidth: 250,
+                    }}
+                  >
+                    Delete All Pending Records
+                  </Button>
                 </Popconfirm>
               </div>
             </div>
 
             <Table
+              scroll={{ x: 900 }}
               style={{ marginTop: 20 }}
               rowKey="id"
               columns={columns}
               dataSource={filteredArrears}
               bordered
-              pagination={{ pageSize: 10 }}
+              pagination={{ pageSize: 10, responsive: true, }}
             />
           </Card>
         </Content>

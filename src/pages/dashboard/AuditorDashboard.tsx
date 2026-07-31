@@ -200,8 +200,6 @@ const loadSinkingFundSummary = async (societyId: number) => {
 
 const data = res.data || [];
 
-console.log(data);
-
 // Pending
 const pending = data.filter((x: any) => x.status === "PENDING");
 
