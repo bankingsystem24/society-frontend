@@ -42,6 +42,7 @@ const MaintenancePolicy: React.FC = () => {
   const societyId = Number(sessionStorage.getItem("societyId"));
   const societyName = sessionStorage.getItem("societyName");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+const dueDateType = Form.useWatch("dueDateType", form);
 
   useEffect(() => {
     form.setFieldsValue({
@@ -49,6 +50,7 @@ const MaintenancePolicy: React.FC = () => {
       calculationBasis: "FLAT_AREA",
       rate: 2.25,
       billingFrequency: "QUARTERLY",
+      dueDateType: "END_OF_PERIOD"
     });
 
     loadPolicy();
@@ -103,6 +105,9 @@ const MaintenancePolicy: React.FC = () => {
         calculationBasis: values.calculationBasis,
         rate: values.rate,
         billingFrequency: values.billingFrequency,
+        dueDateType: values.dueDateType,
+        dueAfterDays: values.dueAfterDays,
+        dueDay: values.dueDay,
       };
 
       await apiPost("/maintenance-policy", payload);
@@ -256,7 +261,58 @@ const deletePolicy = async (id: number) => {
                     </Select>
                 </Form.Item>
                 </Col>
+
+                <Col span={8}>
+  <Form.Item
+    label="Due Date Type"
+    name="dueDateType"
+    rules={[
+      {
+        required: true,
+        message: "Please select Due Date Type",
+      },
+    ]}
+  >
+    <Select>
+      <Option value="END_OF_PERIOD">End Of Period</Option>
+      <Option value="DAYS_AFTER_BILL">Days After Bill</Option>
+      <Option value="FIXED_DAY_OF_MONTH">Fixed Day Of Month</Option>
+    </Select>
+  </Form.Item>
+</Col>
               </Row>
+              <Row gutter={16}>
+  {dueDateType === "DAYS_AFTER_BILL" && (
+    <Col span={8}>
+      <Form.Item
+        label="Due After Days"
+        name="dueAfterDays"
+        rules={[{ required: true }]}
+      >
+        <InputNumber
+          min={1}
+          style={{ width: "100%" }}
+        />
+      </Form.Item>
+    </Col>
+  )}
+
+  {dueDateType === "FIXED_DAY_OF_MONTH" && (
+    <Col span={8}>
+      <Form.Item
+        label="Due Day"
+        name="dueDay"
+        rules={[{ required: true }]}
+      >
+        <InputNumber
+          min={1}
+          max={31}
+          style={{ width: "100%" }}
+        />
+      </Form.Item>
+    </Col>
+  )}
+</Row>
 
               <Button
                 type="primary"
