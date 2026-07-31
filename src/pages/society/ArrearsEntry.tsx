@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   Form,
@@ -52,6 +52,10 @@ interface Arrears {
 
 const ArrearsEntry: React.FC = () => {
   const [form] = Form.useForm();
+  const flatRef = useRef<any>(null);
+  const amountRef = useRef<any>(null);
+  const dueDateRef = useRef<any>(null);
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   const [flats, setFlats] = useState<Flat[]>([]);
   const [financialYears, setFinancialYears] = useState<FinancialYear[]>([]);
@@ -185,6 +189,7 @@ const ArrearsEntry: React.FC = () => {
   };
   const handleDeleteUnpaidRecords = async () => {
     try {
+
       const pendingIds = filteredArrears
         .filter((item) => item.status === "PENDING")
         .map((item) => item.id);
@@ -290,9 +295,19 @@ const ArrearsEntry: React.FC = () => {
                     rules={[{ required: true }]}
                   >
                     <Select
+                      ref={flatRef}
                       showSearch
                       optionFilterProp="children"
                       placeholder="Select Flat"
+                      onChange={() => {
+                        amountRef.current?.focus();
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          amountRef.current?.focus();
+                        }
+                      }}
                     >
                       {flats.map((f) => (
                         <Select.Option key={f.id} value={f.id}>
@@ -310,9 +325,34 @@ const ArrearsEntry: React.FC = () => {
                     rules={[{ required: true }]}
                   >
                     <InputNumber
+                      ref={amountRef}
                       style={{ width: "100%" }}
                       min={0}
                       precision={2}
+                      controls={false}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          dueDateRef.current?.focus();
+                          return;
+                        }
+
+                        const allowedKeys = [
+                          "Backspace",
+                          "Delete",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          ".",
+                        ];
+
+                        if (
+                          !/[0-9]/.test(e.key) &&
+                          !allowedKeys.includes(e.key)
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -324,22 +364,25 @@ const ArrearsEntry: React.FC = () => {
                     rules={[{ required: true }]}
                   >
                     <DatePicker
+                      ref={dueDateRef}
                       style={{ width: "100%" }}
                       format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
                       placeholder="DD/MM/YYYY"
+                      onChange={() => {
+                        saveButtonRef.current?.focus();
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          saveButtonRef.current?.focus();
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Col>
 
-                <Col xs={24} sm={24} md={12} lg={6}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{
-                      width: "100%",
-                      marginTop: 30,
-                    }}
-                  >
+                <Col span={6} style={{ alignContent: "center" }}>
+                  <Button ref={saveButtonRef} type="primary" htmlType="submit">
                     Save Opening Arrears
                   </Button>
                 </Col>
