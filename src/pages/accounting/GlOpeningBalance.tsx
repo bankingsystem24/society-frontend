@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Table,
   Button,
@@ -16,7 +16,7 @@ import {
   Layout,
   DatePicker,
 } from "antd";
-import  { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import axios from "axios";
 import Header from "../../components/layout/Header";
 import Sidebar from "../../components/layout/Sidebar";
@@ -27,6 +27,7 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 import dayjs from "dayjs";
+import { focusNext } from "../../utils/FocusNext";
 
 const { Content } = Layout;
 const role = sessionStorage.getItem("role");
@@ -64,12 +65,14 @@ const GlOpeningBalance: React.FC = () => {
 
   const debit = Form.useWatch("openingDebit", form);
   const credit = Form.useWatch("openingCredit", form);
+  const creditRef = useRef<any>(null);
+  const debitRef = useRef<any>(null);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const financialYear = sessionStorage.getItem("financialYear");
   const userId = Number(sessionStorage.getItem("userId"));
-  
+
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
 
@@ -90,7 +93,9 @@ const GlOpeningBalance: React.FC = () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(`${BASE_URL}/gl/opening-balance?societyId=${societyId}&financialYearId=${financialYearId}`,);
+      const res = await axios.get(
+        `${BASE_URL}/gl/opening-balance?societyId=${societyId}&financialYearId=${financialYearId}`,
+      );
       const sortedData = res.data.sort((a: any, b: any) => a.glCode - b.glCode);
       setData(sortedData || []);
     } catch {
@@ -119,14 +124,12 @@ const GlOpeningBalance: React.FC = () => {
     if (!open) return;
     if (editing) {
       form.setFieldsValue({
-          financialYearId: editing.financialYearId,
-          glCode: editing.glCode,
-          openingDebit: editing.openingDebit,
-          openingCredit: editing.openingCredit,
-          openingBalance: editing.openingBalance,
-          openingAsOn: editing.openingAsOn
-              ? dayjs(editing.openingAsOn)
-              : null,
+        financialYearId: editing.financialYearId,
+        glCode: editing.glCode,
+        openingDebit: editing.openingDebit,
+        openingCredit: editing.openingCredit,
+        openingBalance: editing.openingBalance,
+        openingAsOn: editing.openingAsOn ? dayjs(editing.openingAsOn) : null,
       });
     } else {
       form.resetFields();
@@ -135,7 +138,7 @@ const GlOpeningBalance: React.FC = () => {
         openingDebit: 0,
         openingCredit: 0,
         openingBalance: null,
-        openingAsOn:null
+        openingAsOn: null,
       });
     }
   }, [open, editing, financialYearId, form]);
@@ -143,21 +146,26 @@ const GlOpeningBalance: React.FC = () => {
   // ================= OPEN MODAL =================
   const openModal = async (record?: GlOpeningBalanceRecord) => {
     try {
-      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
-      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+      );
+      const isClosed =
+        response.data === "Closed" || response.data?.status === "Closed";
       if (isClosed) {
         // Option A: Block opening the modal entirely
-        message.error("This financial year is closed. You cannot add or edit records.");
-        return; 
+        message.error(
+          "This financial year is closed. You cannot add or edit records.",
+        );
+        return;
       }
       setEditing(record || null);
       setOpen(true);
     } catch (error) {
       console.error("Failed to verify accounting year status", error);
-      message.error("Unable to verify financial year status. Please try again.");
+      message.error(
+        "Unable to verify financial year status. Please try again.",
+      );
     }
-
-
   };
 
   // ================= SAVE =================
@@ -171,12 +179,10 @@ const GlOpeningBalance: React.FC = () => {
         openingDebit: Number(values.openingDebit || 0),
         openingCredit: Number(values.openingCredit || 0),
         openingBalance: null,
-        createdBy : userId,
-            openingAsOn: values.openingAsOn
-      ? values.openingAsOn.format("YYYY-MM-DD")
-      : null,
-
-
+        createdBy: userId,
+        openingAsOn: values.openingAsOn
+          ? values.openingAsOn.format("YYYY-MM-DD")
+          : null,
       };
 
       if (editing?.id) {
@@ -186,7 +192,11 @@ const GlOpeningBalance: React.FC = () => {
         );
 
         message.success("Updated successfully");
-      } else { await axios.post(`${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,payload,);
+      } else {
+        await axios.post(
+          `${BASE_URL}/gl/opening-balance/save?societyId=${societyId}`,
+          payload,
+        );
 
         message.success("Created successfully");
       }
@@ -201,7 +211,7 @@ const GlOpeningBalance: React.FC = () => {
       message.error("Save failed");
     }
   };
- 
+
   // ================= DELETE =================
   const handleDelete = async (id: number) => {
     try {
@@ -311,7 +321,7 @@ const GlOpeningBalance: React.FC = () => {
             </Button>
 
             <Table
-            className="compact-table"
+              className="compact-table"
               dataSource={data}
               columns={columns}
               rowKey="id"
@@ -363,6 +373,20 @@ const GlOpeningBalance: React.FC = () => {
                     showSearch
                     placeholder="Select GL Account"
                     optionFilterProp="children"
+                    onChange={() => {
+                      setTimeout(() => {
+                        const dateInput = document.querySelector(
+                          'input[placeholder*="Select date"]',
+                        ) as HTMLInputElement;
+
+                        dateInput?.focus();
+                      }, 100);
+                    }}
+                    onInputKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        focusNext(e);
+                      }
+                    }}
                   >
                     {glList.map((gl) => (
                       <Select.Option key={gl.glCode} value={gl.glCode}>
@@ -371,11 +395,30 @@ const GlOpeningBalance: React.FC = () => {
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item
-                  label="Opening As On"
-                  name="openingAsOn"
-                >
-                  <DatePicker style={{ width: "100%" }} />
+                <Form.Item label="Opening As On" name="openingAsOn">
+                  <DatePicker
+                    style={{ width: "100%" }}
+                    onChange={() => {
+                      setTimeout(() => {
+                        const creditInput = document.getElementById(
+                          "openingCredit",
+                        ) as HTMLInputElement;
+
+                        creditInput?.focus();
+                      }, 200);
+                    }}
+                    onOpenChange={(open) => {
+                      if (!open) {
+                        setTimeout(() => {
+                          const creditInput = document.getElementById(
+                            "openingCredit",
+                          ) as HTMLInputElement;
+
+                          creditInput?.focus();
+                        }, 200);
+                      }
+                    }}
+                  />
                 </Form.Item>
                 <Row gutter={16}>
                   <Col xs={24} md={12}>
@@ -384,6 +427,13 @@ const GlOpeningBalance: React.FC = () => {
                         style={{ width: "100%" }}
                         controls={false}
                         min={0}
+                        ref={creditRef}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            debitRef.current?.focus();
+                          }
+                        }}
                       />
                     </Form.Item>
                   </Col>
@@ -393,6 +443,18 @@ const GlOpeningBalance: React.FC = () => {
                         style={{ width: "100%" }}
                         controls={false}
                         min={0}
+                        ref={debitRef}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+
+                            const okBtn = document.querySelector(
+                              ".ant-modal-footer .ant-btn-primary",
+                            ) as HTMLButtonElement;
+
+                            okBtn?.focus();
+                          }
+                        }}
                       />
                     </Form.Item>
                   </Col>

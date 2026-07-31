@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   Form,
@@ -28,6 +28,9 @@ const role = sessionStorage.getItem("role");
 
 const CreateUser: React.FC = () => {
   const [form] = Form.useForm();
+  const usernameRef = useRef<any>(null);
+  const passwordRef = useRef<any>(null);
+  const saveButtonRef = useRef<any>(null);
   const [members, setMembers] = useState<any[]>([]);
   const navigate = useNavigate();
 
@@ -108,7 +111,7 @@ const CreateUser: React.FC = () => {
       role: "MEMBER",
       name: member?.name,
       email: member?.email,
-      mobile:  member?.mobile,
+      mobile: member?.mobile,
     });
   };
 
@@ -152,56 +155,72 @@ const CreateUser: React.FC = () => {
           <Card title="Create User">
             <Form layout="vertical" form={form} onFinish={onFinish}>
               <Row gutter={16}>
-  {/* Member First */}
-  <Col span={8}>
-    <Form.Item label="Member" name="memberId">
-      <Select
-        placeholder="Select Member"
-        allowClear
-        options={members.map((m) => ({
-          label: m.name,
-          value: m.id,
-        }))}
-        onChange={handleMemberChange}
-        onKeyDown={handleSelectEnter}
-      />
-    </Form.Item>
-  </Col>
+                {/* Member First */}
+                <Col span={8}>
+                  <Form.Item label="Member" name="memberId">
+                    <Select
+                      placeholder="Select Member"
+                      allowClear
+                      options={members.map((m) => ({
+                        label: m.name,
+                        value: m.id,
+                      }))}
+                      onChange={(value) => {
+                        handleMemberChange(value);
+                        usernameRef.current?.focus();
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          usernameRef.current?.focus();
+                        }
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
 
-  {/* Username Second */}
-  <Col span={8}>
-    <Form.Item
-      label="Username"
-      name="username"
-      rules={[{ required: true }]}
-    >
-      <Input onPressEnter={focusNext} />
-    </Form.Item>
-  </Col>
+                {/* Username Second */}
+                <Col span={8}>
+                  <Form.Item
+                    label="Username"
+                    name="username"
+                    rules={[{ required: true }]}
+                  >
+                    <Input
+                      ref={usernameRef}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          passwordRef.current?.focus();
+                        }
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
 
-  {/* Role Third */}
-  <Col span={8}>
-    <Form.Item
-      label="Role"
-      name="role"
-      rules={[{ required: true }]}
-    >
-      <Select
-        placeholder="Select Role"
-        options={[
-          { label: "Admin", value: "ADMIN" },
-          { label: "Security", value: "SECURITY" },
-          { label: "Treasurer", value: "TREASURER" },
-          { label: "Secretary", value: "SECRETARY" },
-          { label: "Member", value: "MEMBER" },
-          { label: "Manager", value: "MANAGER" },
-          { label: "Auditor", value: "AUDITOR" },
-        ]}
-        onKeyDown={handleSelectEnter}
-      />
-    </Form.Item>
-  </Col>
-</Row>
+                {/* Role Third */}
+                <Col span={8}>
+                  <Form.Item
+                    label="Role"
+                    name="role"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      placeholder="Select Role"
+                      options={[
+                        { label: "Admin", value: "ADMIN" },
+                        { label: "Security", value: "SECURITY" },
+                        { label: "Treasurer", value: "TREASURER" },
+                        { label: "Secretary", value: "SECRETARY" },
+                        { label: "Member", value: "MEMBER" },
+                        { label: "Manager", value: "MANAGER" },
+                        { label: "Auditor", value: "AUDITOR" },
+                      ]}
+                      onKeyDown={handleSelectEnter}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
               <Row gutter={16}>
                 <Col span={8}>
                   <Form.Item
@@ -240,12 +259,29 @@ const CreateUser: React.FC = () => {
                     name="password"
                     rules={[{ required: true }]}
                   >
-                    <Input.Password />
+                    <Input.Password
+                      ref={passwordRef}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          saveButtonRef.current?.focus();
+                        }
+                      }}
+                    />
                   </Form.Item>
                 </Col>
               </Row>
 
-              <Button type="primary" htmlType="submit">
+              <Button
+                ref={saveButtonRef}
+                type="primary"
+                htmlType="submit"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    form.submit();
+                  }
+                }}
+              >
                 Save User
               </Button>
               <Button

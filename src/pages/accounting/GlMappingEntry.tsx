@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Form,
   Table,
@@ -58,8 +58,10 @@ const GlMappingEntry: React.FC = () => {
   const role = sessionStorage.getItem("role");
   const [mappings, setMappings] = useState<GlMapping[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [isBank,setIsBank] = useState<Boolean>(false);
-
+  const [isBank, setIsBank] = useState<Boolean>(false);
+  const receivableRef = useRef<any>(null);
+  const creditRef = useRef<any>(null);
+  const saveRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     loadGLAccounts();
     loadGlMapping();
@@ -103,11 +105,13 @@ const GlMappingEntry: React.FC = () => {
           ...values,
           societyId,
         });
-        if(isBank){
-          sessionStorage.setItem("GlBankAccount", values.gl_receivable.toString());
+        if (isBank) {
+          sessionStorage.setItem(
+            "GlBankAccount",
+            values.gl_receivable.toString(),
+          );
         }
         message.success("GL Mapping Updated");
-
       } else {
         await axios.post(`${BASE_URL}/gl/master/mapping`, {
           ...values,
@@ -151,12 +155,16 @@ const GlMappingEntry: React.FC = () => {
       title: "Action",
       render: (_: any, record: GlMapping) => (
         <>
-        <Space size="middle">
-          <Button  type="primary" size="small" onClick={() => handleEdit(record)}>
-            Edit
-          </Button>
+          <Space size="middle">
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => handleEdit(record)}
+            >
+              Edit
+            </Button>
 
-          {/* <Popconfirm
+            {/* <Popconfirm
             title="Delete Mapping"
             description="Are you sure you want to delete this mapping?"
             okText="Yes"
@@ -192,10 +200,9 @@ const GlMappingEntry: React.FC = () => {
 
   const handleEdit = (record: GlMapping) => {
     setEditingId(record.id);
-    if(record.description.toLowerCase().includes("bank account")){
+    if (record.description.toLowerCase().includes("bank account")) {
       setIsBank(true);
-    } else
-    {
+    } else {
       setIsBank(false);
     }
 
@@ -273,7 +280,7 @@ const GlMappingEntry: React.FC = () => {
                         },
                       ]}
                     >
-                      <Input disabled/>
+                      <Input disabled />
                     </Form.Item>
                   </Col>
 
@@ -289,9 +296,13 @@ const GlMappingEntry: React.FC = () => {
                       ]}
                     >
                       <Select
-                        showSearch
-                        placeholder="Select Receivable Account"
-                        optionFilterProp="children"
+                        ref={receivableRef}
+                        id="receivable"
+                        onChange={() => {
+                          setTimeout(() => {
+                            creditRef.current?.focus();
+                          }, 100);
+                        }}
                       >
                         {receivableAccounts.map((item) => (
                           <Option key={item.glCode} value={item.glCode}>
@@ -314,9 +325,13 @@ const GlMappingEntry: React.FC = () => {
                       ]}
                     >
                       <Select
-                        showSearch
-                        placeholder="Select Credit Account"
-                        optionFilterProp="children"
+                        id="credit"
+                        ref={creditRef}
+                        onChange={() => {
+                          setTimeout(() => {
+                            saveRef.current?.focus();
+                          }, 100);
+                        }}
                       >
                         {creditAccounts.map((item) => (
                           <Option key={item.glCode} value={item.glCode}>
@@ -331,7 +346,7 @@ const GlMappingEntry: React.FC = () => {
                 <Row>
                   <Col xs={24}>
                     <Form.Item>
-                      <Button type="primary" htmlType="submit">
+                      <Button ref={saveRef} type="primary" htmlType="submit">
                         {editingId ? "Update" : "Save"}
                       </Button>
 

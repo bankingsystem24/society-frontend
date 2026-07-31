@@ -119,6 +119,7 @@ const loadPaymentSummary = async (societyId: number) => {
   try {
     // Pending
     const pendingRes = await apiGet(`/billing/pending/${societyId}`);
+
     setMaintenancePending(pendingRes.length);
 
     setMaintenancePendingAmount(
@@ -131,6 +132,7 @@ const loadPaymentSummary = async (societyId: number) => {
 
     // Paid
     const paidRes = await apiGet(`/billing/paid/${societyId}`);
+
     setMaintenancePaid(paidRes.length);
 
     setMaintenancePaidAmount(
@@ -156,6 +158,8 @@ const loadContributionSummary = async (societyId: number) => {
     );
 
     const data = res.data || [];
+
+
     // Pending
     const pending = data.filter(
       (x: any) => x.status?.toUpperCase() === "PENDING"

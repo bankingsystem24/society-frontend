@@ -394,9 +394,16 @@ export default function ViewBills() {
                 <div style={{ flex: "1 1 100px", minWidth: 100 }}>
                   <Form.Item label="Flat" name="flatId">
                     <Select
+                      showSearch
                       allowClear
                       placeholder="Select Flat"
+                      optionFilterProp="label"
                       onChange={filterBills}
+                      filterOption={(input, option) =>
+                        (option?.label as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
                       options={flats.map((f) => ({
                         label: f.flatNo,
                         value: f.id,
@@ -404,7 +411,6 @@ export default function ViewBills() {
                     />
                   </Form.Item>
                 </div>
-
                 {/* Status */}
                 <div style={{ flex: "1 1 100px", minWidth: 100 }}>
                   <Form.Item label="Status" name="status">
@@ -559,10 +565,8 @@ export default function ViewBills() {
                 Payment Received by Admin ({selectedRowKeys.length})
               </Button>
 
-              <Button
-                danger
-                style={{ marginLeft:40 }}>
-                  Delete All Pending Bills
+              <Button danger style={{ marginLeft: 40 }}>
+                Delete All Pending Bills
               </Button>
             </div>
 

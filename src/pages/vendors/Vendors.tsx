@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   Table,
@@ -13,12 +13,9 @@ import {
   Col,
   InputNumber,
   Select,
-  Layout
+  Layout,
 } from "antd";
-import {
-  DeleteOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
 import Header from "../../components/layout/Header";
 import Sidebar from "../../components/layout/Sidebar";
@@ -46,12 +43,17 @@ interface Vendor {
 const Vendors: React.FC = () => {
   const [data, setData] = useState<Vendor[]>([]);
   const [filteredData, setFilteredData] = useState<Vendor[]>([]);
-const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Vendor | null>(null);
   const [glList, setGlList] = useState<any[]>([]);
   const [form] = Form.useForm();
+  const vendorRef = useRef<any>(null);
+  const mobileRef = useRef<any>(null);
+  const gstRef = useRef<any>(null);
+  const payableRef = useRef<any>(null);
+  const addressRef = useRef<any>(null);
 
   const societyId = Number(sessionStorage.getItem("societyId"));
 
@@ -62,7 +64,7 @@ const [searchText, setSearchText] = useState("");
       setLoading(true);
       const res = await axios.get(`${BASE_URL}/vendors/${societyId}`);
       setData(res.data || []);
-setFilteredData(res.data || []);
+      setFilteredData(res.data || []);
     } catch {
       message.error("Failed to load vendors");
     } finally {
@@ -98,14 +100,12 @@ setFilteredData(res.data || []);
   }, [societyId]);
 
   useEffect(() => {
-  const filtered = data.filter((item) =>
-    item.vendorName
-      ?.toLowerCase()
-      .includes(searchText.toLowerCase())
-  );
+    const filtered = data.filter((item) =>
+      item.vendorName?.toLowerCase().includes(searchText.toLowerCase()),
+    );
 
-  setFilteredData(filtered);
-}, [searchText, data]);
+    setFilteredData(filtered);
+  }, [searchText, data]);
 
   const getGlName = (glCode: number) => {
     const gl = glList.find((g) => g.glCode === glCode);
@@ -199,7 +199,7 @@ setFilteredData(res.data || []);
       title: "Action",
       render: (_: any, record: Vendor) => (
         <Space>
-          <Button type="primary" size="small"  onClick={() => openModal(record)}>
+          <Button type="primary" size="small" onClick={() => openModal(record)}>
             Edit
           </Button>
 
@@ -217,149 +217,230 @@ setFilteredData(res.data || []);
   ];
 
   return (
-
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <div style={{ padding: 16 }}>
-      <Card
-        title="Vendor Master"
-        extra={
-          <Button type="primary" onClick={() => openModal()}>
-            Add Vendor
-          </Button>
-        }
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
       >
-        <div
-  style={{
-    marginBottom: 15,
-    display: "flex",
-    justifyContent: "flex-start",
-  }}
->
-  <Input
-    placeholder="Search Vendor Name"
-    prefix={<SearchOutlined style={{ color: "#999" }} />}
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-    allowClear
-    style={{ width: 300 }}
-  />
-</div>
-        <Table
-          dataSource={filteredData}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          scroll={{ x: 1000 }}
-          pagination={{
-              pageSize: 14,
-              showSizeChanger: true,
-              responsive: true,
-            }}
-        />
-      </Card>
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-      <Modal
-        title={editing ? "Edit Vendor" : "Create Vendor"}
-        open={open}
-        onCancel={() => setOpen(false)}
-        onOk={() => form.submit()}
-        destroyOnHidden
-        width={700}
-      >
-        <Form form={form} layout="vertical" onFinish={handleSave}>
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item
-                name="vendorName"
-                label="Vendor Name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vendor Name is required",
-                  },
-                ]}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <div style={{ padding: 16 }}>
+            <Card
+              title="Vendor Master"
+              extra={
+                <Button type="primary" onClick={() => openModal()}>
+                  Add Vendor
+                </Button>
+              }
+            >
+              <div
+                style={{
+                  marginBottom: 15,
+                  display: "flex",
+                  justifyContent: "flex-start",
+                }}
               >
-                <Input />
-              </Form.Item>
-            </Col>
+                <Input
+                  placeholder="Search Vendor Name"
+                  prefix={<SearchOutlined style={{ color: "#999" }} />}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  allowClear
+                  style={{ width: 300 }}
+                />
+              </div>
+              <Table
+                dataSource={filteredData}
+                columns={columns}
+                rowKey="id"
+                loading={loading}
+                scroll={{ x: 1000 }}
+                pagination={{
+                  pageSize: 14,
+                  showSizeChanger: true,
+                  responsive: true,
+                }}
+              />
+            </Card>
 
-            <Col xs={24} md={12}>
-              <Form.Item name="mobileNo" label="Mobile No" 
-               rules={[{
-               pattern: /^[0-9]{10}$/,
-               message: "Invalid mobile number",},
-    ]} >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
+            <Modal
+              title={editing ? "Edit Vendor" : "Create Vendor"}
+              open={open}
+              onCancel={() => setOpen(false)}
+              onOk={() => form.submit()}
+              destroyOnHidden
+              width={700}
+            >
+              <Form form={form} layout="vertical" onFinish={handleSave}>
+                <Row gutter={16}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="vendorName"
+                      label="Vendor Name"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Vendor Name is required",
+                        },
+                      ]}
+                    >
+                      <Input
+                        ref={vendorRef}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            mobileRef.current?.focus();
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
 
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item name="gstNo" label="GST No"
-                rules={[
-              {pattern: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
-               message: "Please enter a valid GST number",
-              },
-  ]} >
-                <Input />
-              </Form.Item>
-            </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="mobileNo"
+                      label="Mobile No"
+                      rules={[
+                        {
+                          pattern: /^[6-9]\d{9}$/,
+                          message: "Invalid mobile number",
+                        },
+                      ]}
+                    >
+                      <Input
+                        ref={mobileRef}
+                        maxLength={10}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            gstRef.current?.focus();
+                            return;
+                          }
 
-            <Col xs={24} md={12}>
-              <Form.Item
-                name="payableGlCode"
-                label="Expense GL Code"
-                rules={[
-                  {
-                    required: true,
-                    message: "Expense GL is required",
-                  },
-                ]}
-              >
-                <Select
-                  placeholder="Select Expense GL Code"
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {glList.map((gl) => (
-                    <Select.Option key={gl.glCode} value={gl.glCode}>
-                      {gl.glCode} - {gl.accountName}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
+                          const allowedKeys = [
+                            "Backspace",
+                            "Delete",
+                            "Tab",
+                            "ArrowLeft",
+                            "ArrowRight",
+                          ];
 
-          <Form.Item name="address" label="Address">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-    </Content>
-    </Layout>
+                          if (
+                            !/[0-9]/.test(e.key) &&
+                            !allowedKeys.includes(e.key)
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                <Row gutter={16}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="gstNo"
+                      label="GST No"
+                      rules={[
+                        {
+                          pattern:
+                            /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+                          message: "Please enter a valid GST number",
+                        },
+                      ]}
+                    >
+                      <Input
+                        ref={gstRef}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            payableRef.current?.focus();
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="payableGlCode"
+                      label="Payable GL Code"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Payable GL is required",
+                        },
+                      ]}
+                    >
+                      <Select
+                        ref={payableRef}
+                        placeholder="Select Payable GL Code"
+                        showSearch
+                        optionFilterProp="children"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addressRef.current?.focus();
+                          }
+                        }}
+                      >
+                        {glList.map((gl) => (
+                          <Select.Option key={gl.glCode} value={gl.glCode}>
+                            {gl.glCode} - {gl.accountName}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                <Form.Item name="address" label="Address">
+                  <Input.TextArea
+                    ref={addressRef}
+                    rows={3}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        form.submit();
+                      }
+                    }}
+                  />
+                </Form.Item>
+              </Form>
+            </Modal>
+          </div>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   Table,
@@ -63,6 +63,12 @@ const Expenses: React.FC = () => {
   const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
 
+  const expenseRef = useRef<any>(null);
+  const vendorRef = useRef<any>(null);
+  const amountRef = useRef<any>(null);
+  const paymentRef = useRef<any>(null);
+  const narrationRef = useRef<any>(null);
+  const saveButtonRef = useRef<any>(null);
   useEffect(() => {
     fetchVendors();
   }, []);
@@ -139,12 +145,16 @@ const Expenses: React.FC = () => {
 
   const onFinish = async (values: any) => {
     try {
-
-      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
-      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+      );
+      const isClosed =
+        response.data === "Closed" || response.data?.status === "Closed";
       if (isClosed) {
-        message.error("This financial year is closed. You cannot add or edit records.");
-        return
+        message.error(
+          "This financial year is closed. You cannot add or edit records.",
+        );
+        return;
       }
 
       const payload = {
@@ -292,6 +302,15 @@ const Expenses: React.FC = () => {
                         style={{ width: "100%" }}
                         format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
                         placeholder="DD/MM/YYYY"
+                        onChange={() => {
+                          expenseRef.current?.focus();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            expenseRef.current?.focus();
+                          }
+                        }}
                       />
                     </Form.Item>
                   </Col>
@@ -300,13 +319,22 @@ const Expenses: React.FC = () => {
                     <Form.Item
                       name="expenseGlCode"
                       label="Expense Account"
-                      rules={[{ required: true  }]}
-                      
+                      rules={[{ required: true }]}
                     >
                       <Select
+                        ref={expenseRef}
                         showSearch
                         placeholder="Select Expense Account"
                         optionFilterProp="label"
+                        onChange={() => {
+                          vendorRef.current?.focus();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            vendorRef.current?.focus();
+                          }
+                        }}
                       >
                         {glList.map((gl) => (
                           <Select.Option
@@ -324,9 +352,19 @@ const Expenses: React.FC = () => {
                   <Col xs={24} md={8}>
                     <Form.Item name="vendorId" label="Vendor">
                       <Select
+                        ref={vendorRef}
                         options={vendors}
                         placeholder="Select Vendor"
                         allowClear
+                        onChange={() => {
+                          amountRef.current?.focus();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            amountRef.current?.focus();
+                          }
+                        }}
                       />
                     </Form.Item>
                   </Col>
@@ -334,41 +372,55 @@ const Expenses: React.FC = () => {
 
                 <Row gutter={16} style={{ marginTop: -10 }}>
                   <Col xs={24} md={8}>
-                  <Form.Item
-  name="amount"
-  label="Amount"
-  rules={[{ required: true, message: "Please enter amount" }]}
->
-  <InputNumber
-    style={{ width: "100%" }}
-    controls={false}
-    min={0}
-    precision={2}
-    placeholder="Enter amount"
-    onKeyDown={(e) => {
-      const allowedKeys = [
-        "Backspace",
-        "Delete",
-        "Tab",
-        "ArrowLeft",
-        "ArrowRight",
-        ".",
-      ];
+                    <Form.Item
+                      name="amount"
+                      label="Amount"
+                      rules={[
+                        { required: true, message: "Please enter amount" },
+                      ]}
+                    >
+                      <InputNumber
+                        ref={amountRef}
+                        style={{ width: "100%" }}
+                        controls={false}
+                        min={0}
+                        precision={2}
+                        placeholder="Enter amount"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            paymentRef.current?.focus();
+                            return;
+                          }
 
-      if (
-        !/[0-9]/.test(e.key) &&
-        !allowedKeys.includes(e.key)
-      ) {
-        e.preventDefault();
-      }
-    }}
-  />
-</Form.Item>
+                          const allowedKeys = [
+                            "Backspace",
+                            "Delete",
+                            "Tab",
+                            "ArrowLeft",
+                            "ArrowRight",
+                            ".",
+                          ];
+
+                          if (
+                            !/[0-9]/.test(e.key) &&
+                            !allowedKeys.includes(e.key)
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                    </Form.Item>
                   </Col>
 
                   <Col xs={24} md={8}>
                     <Form.Item name="paymentMode" label="Payment Mode">
-                      <Select>
+                      <Select
+                        ref={paymentRef}
+                        onChange={() => {
+                          narrationRef.current?.focus();
+                        }}
+                      >
                         <Select.Option value="CASH">Cash</Select.Option>
                         <Select.Option value="BANK">Bank</Select.Option>
                         <Select.Option value="UPI">UPI</Select.Option>
@@ -378,12 +430,20 @@ const Expenses: React.FC = () => {
 
                   <Col xs={24} md={8}>
                     <Form.Item name="narration" label="Narration">
-                      <Input />
+                      <Input
+                        ref={narrationRef}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            saveButtonRef.current?.focus();
+                          }
+                        }}
+                      />
                     </Form.Item>
                   </Col>
                 </Row>
 
-                <Button type="primary" htmlType="submit">
+                <Button ref={saveButtonRef} type="primary" htmlType="submit">
                   Save Expense
                 </Button>
               </Form>
@@ -416,7 +476,6 @@ const Expenses: React.FC = () => {
                   allowClear
                   style={{ width: 260 }}
                 />
-                
               </div>
               <Table
                 dataSource={filteredExpenses}
