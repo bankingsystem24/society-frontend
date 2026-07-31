@@ -137,7 +137,6 @@ const ArrearsEntry: React.FC = () => {
       );
       setArrears(res.data);
       setFilteredArrears(res.data);
-      console.log("Response:", res.data);
     } catch {
       message.error("Unable to load arrears");
     }
@@ -186,8 +185,6 @@ const ArrearsEntry: React.FC = () => {
   };
   const handleDeleteUnpaidRecords = async () => {
     try {
-      console.log("FilteredData:", filteredArrears);
-
       const pendingIds = filteredArrears
         .filter((item) => item.status === "PENDING")
         .map((item) => item.id);

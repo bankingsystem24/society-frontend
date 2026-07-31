@@ -279,7 +279,6 @@ const ViewContribution: React.FC = () => {
         return;
       }
 
-      console.log(pendingIds);
       await axios.post(
         `${BASE_URL}/contribution/delete-pending?contributionType=COMPULSORY`,
         pendingIds,
@@ -305,7 +304,6 @@ const ViewContribution: React.FC = () => {
         return;
       }
 
-      console.log(pendingIds);
       await axios.post(
         `${BASE_URL}/contribution/delete-pending?contributionType=VOLUNTARY`,
         pendingIds,
