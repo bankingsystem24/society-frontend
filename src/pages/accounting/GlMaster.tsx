@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import {
   Table,
@@ -22,6 +22,7 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import { focusNext } from "../../utils/FocusNext";
 import "../../App.css";
 
 const { Content } = Layout;
@@ -146,7 +147,7 @@ const GlMaster: React.FC = () => {
       title: "GL Code",
       dataIndex: "glCode",
       key: "glCode",
-      width:80
+      width: 80,
     },
     {
       title: "Account Name",
@@ -157,19 +158,19 @@ const GlMaster: React.FC = () => {
       title: "Group Name",
       dataIndex: "groupName",
       key: "groupName",
-      width:120
+      width: 120,
     },
     {
       title: "Parent GL",
       dataIndex: "parentGlCode",
       key: "parentGlCode",
-      width:80
+      width: 80,
     },
     {
       title: "Active",
       dataIndex: "isActive",
       key: "isActive",
-      width:80,
+      width: 80,
       render: (value: boolean) => (value ? "Yes" : "No"),
     },
     {
@@ -177,7 +178,11 @@ const GlMaster: React.FC = () => {
       key: "action",
       render: (_: any, record: GlMaster) => (
         <Space>
-          <Button type="primary" size="small"  onClick={() => handleEdit(record)}>
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => handleEdit(record)}
+          >
             Edit
           </Button>
 
@@ -288,7 +293,11 @@ const GlMaster: React.FC = () => {
                     },
                   ]}
                 >
-                  <Input type="number" disabled={!!editing} />
+                  <Input
+                    type="number"
+                    disabled={!!editing}
+                    onPressEnter={focusNext}
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -301,7 +310,7 @@ const GlMaster: React.FC = () => {
                     },
                   ]}
                 >
-                  <Input />
+                  <Input onPressEnter={focusNext} />
                 </Form.Item>
 
                 <Form.Item
@@ -314,11 +323,11 @@ const GlMaster: React.FC = () => {
                     },
                   ]}
                 >
-                  <Input />
+                  <Input onPressEnter={focusNext} />
                 </Form.Item>
 
                 <Form.Item label="Parent GL Code" name="parentGlCode">
-                  <Input type="number" />
+                  <Input type="number" onPressEnter={focusNext} />
                 </Form.Item>
 
                 <Form.Item label="Society Id" name="societyId" hidden>
@@ -330,7 +339,22 @@ const GlMaster: React.FC = () => {
                   name="isActive"
                   valuePropName="checked"
                 >
-                  <Switch />
+                  <div
+                    tabIndex={0}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+
+                        const okBtn = document.querySelector(
+                          ".ant-modal-footer .ant-btn-primary",
+                        ) as HTMLButtonElement;
+
+                        okBtn?.focus();
+                      }
+                    }}
+                  >
+                    <Switch />
+                  </div>
                 </Form.Item>
               </Form>
             </Modal>

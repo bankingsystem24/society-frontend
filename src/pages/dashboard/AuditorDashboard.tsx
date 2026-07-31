@@ -119,7 +119,6 @@ const loadPaymentSummary = async (societyId: number) => {
   try {
     // Pending
     const pendingRes = await apiGet(`/billing/pending/${societyId}`);
-    console.log("Pending Bills:", pendingRes);
 
     setMaintenancePending(pendingRes.length);
 
@@ -133,7 +132,6 @@ const loadPaymentSummary = async (societyId: number) => {
 
     // Paid
     const paidRes = await apiGet(`/billing/paid/${societyId}`);
-    console.log("Paid Bills:", paidRes);
 
     setMaintenancePaid(paidRes.length);
 
@@ -161,7 +159,6 @@ const loadContributionSummary = async (societyId: number) => {
 
     const data = res.data || [];
 
-    console.log("Contribution Data", data);
 
     // Pending
     const pending = data.filter(

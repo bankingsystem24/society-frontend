@@ -1,4 +1,14 @@
-import { Button, Card, Col, Form, Input, message, Row, Select, Layout } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  message,
+  Row,
+  Select,
+  Layout,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
@@ -83,141 +93,236 @@ const CreateFlat: React.FC = () => {
   };
 
   return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
-
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
-
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <Card title="Create Flat" style={{ marginBottom: 20 }}>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        initialValues={{
-          status: true,
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
         }}
       >
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
-              label="Wing"
-              name="wingId"
-              rules={[{ required: true }]}
-            >
-              <Select placeholder="Select wing">
-                {wings.map((w) => (
-                  <Select.Option key={w.id} value={w.id}>
-                    {w.wingName}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-          <Col span={8}>
-            <Form.Item
-              label="Flat No"
-              name="flatNo"
-              rules={[{ required: true }]}
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card title="Create Flat" style={{ marginBottom: 20 }}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onFinish}
+              initialValues={{
+                status: true,
+              }}
             >
-              <Input placeholder="Enter flat no" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item
+                    label="Wing"
+                    name="wingId"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      placeholder="Select wing"
+                      onInputKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          focusNext(e);
+                        }
+                      }}
+                      onChange={() => {
+                        setTimeout(() => {
+                          const inputs = Array.from(
+                            document.querySelectorAll(
+                              "input, textarea, .ant-select-selector",
+                            ),
+                          ) as HTMLElement[];
 
-          <Col span={8}>
-            <Form.Item
-              label="Floor No"
-              name="floorNo"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter floor no" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-        </Row>
+                          const activeIndex = inputs.findIndex(
+                            (el) =>
+                              el === document.activeElement ||
+                              el.contains(document.activeElement),
+                          );
 
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
-              label="Area (Sq Ft)"
-              name="areaSqFt"
-            >
-              <Input type="number" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
+                          if (
+                            activeIndex >= 0 &&
+                            activeIndex < inputs.length - 1
+                          ) {
+                            inputs[activeIndex + 1].focus();
+                          }
+                        }, 100);
+                      }}
+                    >
+                      {wings.map((w) => (
+                        <Select.Option key={w.id} value={w.id}>
+                          {w.wingName}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
 
-          <Col span={8}>
-            <Form.Item
-              label="Bedrooms"
-              name="bedrooms"
-            >
-              <Input type="number" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              label="Maintenance Amount"
-              name="maintenanceAmount"
-            >
-              <Input type="number" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-        </Row>
+                <Col span={8}>
+                  <Form.Item
+                    label="Flat No"
+                    name="flatNo"
+                    rules={[{ required: true }]}
+                  >
+                    <Input
+                      placeholder="Enter flat no"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
 
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
-              label="Status"
-              name="status"
-            >
-              <Select onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}>
-                <Select.Option value={true}>Active</Select.Option>
-                <Select.Option value={false}>Inactive</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              label="Owner"
-              name="ownerId"
-              rules={[{ required: false }]}
-            >
-              <Select placeholder="Select owner">
-                {members.map((m) => (
-                  <Select.Option key={m.id} value={m.id}>
-                    {m.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                <Col span={8}>
+                  <Form.Item
+                    label="Floor No"
+                    name="floorNo"
+                    rules={[
+                      { required: true, message: "Enter floor number" },
+                      {
+                        pattern: /^[0-9]+$/,
+                        message: "Only numbers are allowed",
+                      },
+                    ]}
+                  >
+                    <Input
+                      placeholder="Enter floor no"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-        <Button type="primary" htmlType="submit">
-          Save Flat
-        </Button>
-        <Button type="default" style={{ marginLeft: 8 }} onClick={() => navigate("/flats")}>
-          Cancel
-        </Button>
-      </Form>
-    </Card>
-    </Content>
-    </Layout>
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item label="Area (Sq Ft)" name="areaSqFt">
+                    <Input type="number" onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
+
+                <Col span={8}>
+                  <Form.Item label="Bedrooms" name="bedrooms">
+                    <Input type="number" onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Maintenance Amount"
+                    name="maintenanceAmount"
+                  >
+                    <Input type="number" onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col span={8}>
+                  <Form.Item label="Status" name="status">
+                    <Select
+                      onInputKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          focusNext(e);
+                        }
+                      }}
+                      onChange={() => {
+                        setTimeout(() => {
+                          const inputs = Array.from(
+                            document.querySelectorAll(
+                              "input, textarea, .ant-select-selector",
+                            ),
+                          ) as HTMLElement[];
+
+                          const activeIndex = inputs.findIndex(
+                            (el) =>
+                              el === document.activeElement ||
+                              el.contains(document.activeElement),
+                          );
+
+                          if (
+                            activeIndex >= 0 &&
+                            activeIndex < inputs.length - 1
+                          ) {
+                            inputs[activeIndex + 1].focus();
+                          }
+                        }, 100);
+                      }}
+                    >
+                      <Select.Option value={true}>Active</Select.Option>
+                      <Select.Option value={false}>Inactive</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item
+                    label="Owner"
+                    name="ownerId"
+                    rules={[{ required: false }]}
+                  >
+                    <Select
+                      placeholder="Select owner"
+                      onInputKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          focusNext(e);
+                        }
+                      }}
+                      onChange={() => {
+                        setTimeout(() => {
+                          const saveButton = document.querySelector(
+                            'button[type="submit"]',
+                          ) as HTMLButtonElement;
+
+                          saveButton?.focus();
+                        }, 100);
+                      }}
+                    >
+                      {members.map((m) => (
+                        <Select.Option key={m.id} value={m.id}>
+                          {m.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Button type="primary" htmlType="submit" tabIndex={0}>
+                Save Flat
+              </Button>
+              <Button
+                type="default"
+                style={{ marginLeft: 8 }}
+                onClick={() => navigate("/flats")}
+              >
+                Cancel
+              </Button>
+            </Form>
+          </Card>
+        </Content>
+      </Layout>
     </Layout>
   );
 };

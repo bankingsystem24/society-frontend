@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Row, Col, message, Select, Card, Layout } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  message,
+  Select,
+  Card,
+  Layout,
+} from "antd";
 import { apiGet, apiPost } from "../../api/axios";
 import { focusNext } from "../../utils/FocusNext";
 import { useNavigate } from "react-router-dom";
@@ -46,19 +56,19 @@ const CreateMember: React.FC = () => {
   };
 
   const handleSelectEnter = (e: any) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const form = e.target.form;
-    const elements = Array.from(form.elements) as HTMLElement[];
+      const form = e.target.form;
+      const elements = Array.from(form.elements) as HTMLElement[];
 
-    const index = elements.indexOf(e.target);
-    const next = elements[index + 1];
+      const index = elements.indexOf(e.target);
+      const next = elements[index + 1];
 
-    if (next) next.focus();
-  }
-};
+      if (next) next.focus();
+    }
+  };
 
   const onFinish = async (values: MemberFormValues) => {
     try {
@@ -78,7 +88,7 @@ const CreateMember: React.FC = () => {
         active: true,
 
         societyId: societyId,
-        flatId: values.flatId ? values.flatId  : null,
+        flatId: values.flatId ? values.flatId : null,
       };
 
       await apiPost("/members", payload);
@@ -92,66 +102,113 @@ const CreateMember: React.FC = () => {
   };
 
   return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-      width={role === "MEMBER" ? 200 : 250}
-      breakpoint="lg"
-      collapsedWidth="0"
-      style={{
-        height: "100vh",
-        position: "sticky",
-        top: 0,
-        overflowY: "auto",
-      }}
-    >
-      {role === "ADMIN" ? <Sidebar /> : role === "MEMBER" ? <MemberSidebar /> : role=== "SUPER_ADMIN" ? <SuperAdminSidebar/> : <AuditorSidebar />}
-    </Layout.Sider>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        width={role === "MEMBER" ? 200 : 250}
+        breakpoint="lg"
+        collapsedWidth="0"
+        style={{
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowY: "auto",
+        }}
+      >
+        {role === "ADMIN" ? (
+          <Sidebar />
+        ) : role === "MEMBER" ? (
+          <MemberSidebar />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminSidebar />
+        ) : (
+          <AuditorSidebar />
+        )}
+      </Layout.Sider>
 
-    {/* MAIN AREA */}
-    <Layout style={{ minWidth: 0 }}>
+      {/* MAIN AREA */}
+      <Layout style={{ minWidth: 0 }}>
+        {/* HEADER (NO EXTRA DIV) */}
+        {role === "ADMIN" ? (
+          <Header />
+        ) : role === "MEMBER" ? (
+          <MemberHeader />
+        ) : role === "SUPER_ADMIN" ? (
+          <SuperAdminHeader />
+        ) : (
+          <AuditorHeader />
+        )}
+        <Content>
+          <Card title="Create Member" style={{ marginBottom: 20 }}>
+            <Form form={form} layout="vertical" onFinish={onFinish}>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Full Name"
+                    name="name"
+                    rules={[
+                      { required: true, message: "Enter name" },
+                      {
+                        pattern: /^[A-Za-z ]+$/,
+                        message: "Only alphabets are allowed",
+                      },
+                    ]}
+                  >
+                    <Input
+                      placeholder="Enter full name"
+                      onPressEnter={focusNext}
+                      onKeyDown={(e) => {
+                        const allowedKeys = [
+                          "Backspace",
+                          "Delete",
+                          "Tab",
+                          "ArrowLeft",
+                          "ArrowRight",
+                          " ",
+                        ];
 
-      {/* HEADER (NO EXTRA DIV) */}
-      {role === "ADMIN" ? <Header /> : role === "MEMBER" ? <MemberHeader /> : role=== "SUPER_ADMIN" ? <SuperAdminHeader/> : <AuditorHeader />}
-      <Content >
-    <Card title="Create Member" style={{ marginBottom: 20 }}>
+                        if (
+                          !/[A-Za-z]/.test(e.key) &&
+                          !allowedKeys.includes(e.key)
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                    />
+                  </Form.Item>
+                </Col>
 
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Full Name"
-              name="name"
-              rules={[{ required: true, message: "Enter name" }]}
-            >
-              <Input placeholder="Enter full name" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="Mobile"
+                    name="mobile"
+                    rules={[
+                      { required: true, message: "Enter mobile" },
+                      { pattern: /^[6-9]\d{9}$/, message: "Invalid mobile" },
+                    ]}
+                  >
+                    <Input
+                      maxLength={10}
+                      placeholder="Enter mobile"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-          <Col span={12}>
-            <Form.Item
-              label="Mobile"
-              name="mobile"
-              rules={[
-                { required: true, message: "Enter mobile" },
-                { pattern: /^[0-9]{10}$/, message: "Invalid mobile" },
-              ]}
-            >
-              <Input maxLength={10} placeholder="Enter mobile" onPressEnter={focusNext}/>
-            </Form.Item>
-          </Col>
-        </Row>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[
+                      { type: "email", message: "Invalid email address" },
+                    ]}
+                  >
+                    <Input placeholder="Enter email" onPressEnter={focusNext} />
+                  </Form.Item>
+                </Col>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Email" name="email"
-            rules={[
-            {type: "email", message: "Invalid email address"},
-            ]}>
-              <Input placeholder="Enter email" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-
-          {/* <Col span={12}>
+                {/* <Col span={12}>
             <Form.Item label="Flat" name="flatId">
               <Select placeholder="Select flat" onKeyDown={handleSelectEnter}>
                 {flats.map((f) => (
@@ -162,59 +219,72 @@ const CreateMember: React.FC = () => {
               </Select>
             </Form.Item>
           </Col> */}
-        </Row>
+              </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Gender" name="gender">
-              <Select placeholder="Select gender" onKeyDown={handleSelectEnter}>
-                <Select.Option value="Male">Male</Select.Option>
-                <Select.Option value="Female">Female</Select.Option>
-                <Select.Option value="Other">Other</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item label="Gender" name="gender">
+                    <Select
+                      placeholder="Select gender"
+                      onKeyDown={handleSelectEnter}
+                    >
+                      <Select.Option value="Male">Male</Select.Option>
+                      <Select.Option value="Female">Female</Select.Option>
+                      <Select.Option value="Other">Other</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
 
-          <Col span={12}>
-            <Form.Item label="Occupation" name="occupation">
-              <Input placeholder="Enter occupation" onPressEnter={focusNext} />
-            </Form.Item>
-          </Col>
-        </Row>
+                <Col span={12}>
+                  <Form.Item label="Occupation" name="occupation">
+                    <Input
+                      placeholder="Enter occupation"
+                      onPressEnter={focusNext}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Member Type"
-              name="memberType"
-              rules={[{ required: true, message: "Select member type" }]}
-            >
-              <Select placeholder="Select type" onKeyDown={handleSelectEnter}>
-                <Select.Option value="OWNER">OWNER</Select.Option>
-                <Select.Option value="TENANT">TENANT</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Member Type"
+                    name="memberType"
+                    rules={[{ required: true, message: "Select member type" }]}
+                  >
+                    <Select
+                      placeholder="Select type"
+                      onKeyDown={handleSelectEnter}
+                    >
+                      <Select.Option value="OWNER">OWNER</Select.Option>
+                      <Select.Option value="TENANT">TENANT</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item label="Address" name="address">
-              <Input.TextArea rows={2} placeholder="Enter address" />
-            </Form.Item>
-          </Col>
-        </Row>
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item label="Address" name="address">
+                    <Input.TextArea rows={2} placeholder="Enter address" />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-        <Button type="primary" htmlType="submit">
-          Save Member
-        </Button>
-        <Button type="default" style={{ marginLeft: 8 }} onClick={() => navigate("/members")}>
-          Cancel
-        </Button>
-      </Form>
-    </Card>
-    </Content>
-    </Layout>
+              <Button type="primary" htmlType="submit">
+                Save Member
+              </Button>
+              <Button
+                type="default"
+                style={{ marginLeft: 8 }}
+                onClick={() => navigate("/members")}
+              >
+                Cancel
+              </Button>
+            </Form>
+          </Card>
+        </Content>
+      </Layout>
     </Layout>
   );
 };
