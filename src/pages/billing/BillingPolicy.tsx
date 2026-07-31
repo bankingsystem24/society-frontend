@@ -176,7 +176,7 @@ const BillingPolicy: React.FC = () => {
         )}
         <Content>
           <Card
-            title={policyId ? "Edit Billing Policy" : "Create Billing Policy"}
+            title={policyId ? "Edit Interest Policy" : "Create Interest Policy"}
           >
             <Form form={form} layout="horizontal" onFinish={onFinish}>
               <Form.Item name="societyId" hidden>

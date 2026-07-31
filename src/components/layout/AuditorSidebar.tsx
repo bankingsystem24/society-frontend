@@ -99,8 +99,12 @@ const AuditorSidebar: React.FC = () => {
                 label: "Maintenance Policy",
               },
               {
-                key: "/billing-policy",
+                key: "/interest-policy",
                 label: "Interest Policy",
+              },
+              {
+                key: "/billing-policy",
+                label: "Old Billing Policy",
               },
               {
                 key: "/discount-policy",

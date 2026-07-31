@@ -82,6 +82,7 @@ import ContributionRegister from "./pages/reports/ContributionRegister";
 import ProtectedRoute from "./pages/auth/ProtectedRoute";
 import BalanceSheet from "./pages/accounting/BalanceSheet";
 import MaintenancePolicy from "./pages/billing/MaintenancePolicy";
+import InterestPolicy from "./pages/billing/InterestPolicy";
 
 export default function App() {
   return (
@@ -109,6 +110,7 @@ export default function App() {
         <Route path="/gl-mapping" element={<GlMappingEntry />} />
         <Route path="/users" element={<Users />} />
         <Route path="/billing-policy" element={<BillingPolicy />} />
+        <Route path="/interest-policy" element={<InterestPolicy />} />
         <Route path="/maintenance-policy" element={<MaintenancePolicy />} />
         <Route path="/discount-policy" element={<DiscountPolicy />} />
         <Route path="/wings" element={<Wings />} />
