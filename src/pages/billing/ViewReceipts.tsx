@@ -44,7 +44,7 @@ interface Receipt {
   totalAmount: number;
   paymentMode?: string;
   status?: string;
-  transactionId?:string;
+  transactionId?: string;
 }
 
 interface ReceiptBill {
@@ -60,6 +60,9 @@ interface ReceiptBill {
   receiptType: String;
   name: string;
   transactionId: string;
+  maintenancePaid?: number; // NEW — from ReceiptBill
+  interestPaid?: number; // NEW — from ReceiptBill
+  penaltyPaid?: number; // NEW — from ReceiptBill
 }
 
 export default function ViewReceipts() {
@@ -142,8 +145,10 @@ export default function ViewReceipts() {
   const loadReceiptDetails = async (receiptId: number) => {
     try {
       setLoading(true);
-
-      const detailsres = await axios.get(`${BASE_URL}/receipts/details/${receiptId}`,);
+     
+      const detailsres = await axios.get(
+        `${BASE_URL}/receipts/details/${receiptId}`,
+      );
 
       const selected = receipts.find((r) => r.id === receiptId) || null;
 
@@ -152,6 +157,8 @@ export default function ViewReceipts() {
         interestAmount: selected?.interestAmount ?? 0,
         discountAmount: selected?.discountAmount ?? 0,
       }));
+
+           console.log("data",data);
 
       setReceiptBills(data);
       setSelectedReceipt(selected);
@@ -177,13 +184,16 @@ export default function ViewReceipts() {
     const rows = receiptBills
       .map(
         (b) => `
-        <tr>
-          <td>${b.month}</td>
-          <td>${b.year}</td>
-          <td>${b.totalAmount}</td>
-          <td>${b.status}</td>
-        </tr>
-      `,
+    <tr>
+      <td>${b.month}</td>
+      <td>${b.year}</td>
+      <td>₹ ${b.maintenancePaid ?? 0}</td>
+      <td>₹ ${b.interestPaid ?? 0}</td>
+      <td>₹ ${b.penaltyPaid ?? 0}</td>
+      <td>₹ ${(b.maintenancePaid ?? 0) + (b.interestPaid ?? 0) + (b.penaltyPaid ?? 0)}</td>
+      <td>${b.status}</td>
+    </tr>
+  `,
       )
       .join("");
 
@@ -320,26 +330,29 @@ export default function ViewReceipts() {
                 Transaction Id
             </td>
             <td style="padding:6px;">
-                ${receipt.transactionId }
+                ${receipt.transactionId}
             </td>
             </tr>
         </tbody>
         </table>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Year</th>
-                <th>Net Paid</th>
-                <th>Status</th>
-              </tr>
-            </thead>
+<table>
+  <thead>
+    <tr>
+      <th>Month</th>
+      <th>Year</th>
+      <th>Maintenance Paid</th>
+      <th>Interest Paid</th>
+      <th>Penalty Paid</th>
+      <th>Total Paid</th>
+      <th>Status</th>
+    </tr>
+  </thead>
 
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
+  <tbody>
+    ${rows}
+  </tbody>
+</table>
 
           <br/><br/>
 
@@ -637,7 +650,7 @@ export default function ViewReceipts() {
                 Transaction Id
             </td>
             <td style="padding:6px;">
-                ${receipt.transactionId }
+                ${receipt.transactionId}
             </td>
             </tr>
 
@@ -694,21 +707,19 @@ export default function ViewReceipts() {
       title: "Maintenance",
       dataIndex: "maintenanceAmount",
       render: (value) => `₹ ${value}`,
-      hidden:true
+      hidden: true,
     },
     {
       title: "Interest",
       dataIndex: "interestAmount",
       render: (value) => `₹ ${value}`,
-      hidden:true
-
+      hidden: true,
     },
     {
       title: "Discount",
       dataIndex: "discountAmount",
       render: (value) => `₹ ${value}`,
-      hidden:true
-
+      hidden: true,
     },
     {
       title: "Net Paid",
@@ -887,8 +898,25 @@ export default function ViewReceipts() {
                     dataIndex: "year",
                   },
                   {
-                    title: "Maintenance",
-                    dataIndex: "totalAmount",
+                    title: "Maintenance Paid",
+                    dataIndex: "maintenancePaid",
+                    render: (value) => `₹ ${value ?? 0}`,
+                  },
+                  {
+                    title: "Interest Paid",
+                    dataIndex: "interestPaid",
+                    render: (value) => `₹ ${value ?? 0}`,
+                  },
+                  {
+                    title: "Penalty Paid",
+                    dataIndex: "penaltyPaid",
+                    render: (value) => `₹ ${value ?? 0}`,
+                  },
+                  {
+                    title: "Total Paid",
+                    key: "totalPaid",
+                    render: (_, record) =>
+                      `₹ ${(record.maintenancePaid ?? 0) + (record.interestPaid ?? 0) + (record.penaltyPaid ?? 0)}`,
                   },
                   {
                     title: "Status",

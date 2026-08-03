@@ -108,7 +108,7 @@ export default function ViewBills() {
   const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
   const [paidAmount, setPaidAmount] = useState<number>(0);
 
-  const pendingAmount = paymentMaintenance - (paidAmount - paymentInterest);
+const pendingAmount = Math.max(0, paymentTotal - paidAmount);
 
   const defaultAmountSelection = {
     maintenance: true,
@@ -720,7 +720,7 @@ export default function ViewBills() {
                     setPaymentMaintenance(maintenance);
                     setPaymentInterest(interest);
                     setPaymentDiscount(discount);
-                    setPaidAmount(0);
+                    setPaidAmount(maintenance+interest-discount);
                     setPaymentModalOpen(true);
                     calculateInterest(paymentDate);
                   } catch (error) {
