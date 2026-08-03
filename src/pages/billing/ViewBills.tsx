@@ -10,6 +10,10 @@ import {
   Layout,
   DatePicker,
   Popconfirm,
+  Row,
+  Col,
+  Checkbox,
+  Space,
 } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
@@ -102,6 +106,28 @@ export default function ViewBills() {
   const [paymentDiscount, setPaymentDiscount] = useState(0);
   const [discountPolicy, setDiscountPolicy] = useState<any>(null);
   const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
+  const [paidAmount, setPaidAmount] = useState<number>(0);
+
+  const pendingAmount = paymentMaintenance - (paidAmount - paymentInterest);
+
+  const defaultAmountSelection = {
+    maintenance: true,
+    interest: true, // always true, compulsory
+    penalty: true,
+    discount: true,
+  };
+
+  const [amountSelections, setAmountSelections] = useState<
+    Record<
+      number,
+      {
+        maintenance: boolean;
+        interest: boolean;
+        penalty: boolean;
+        discount: boolean;
+      }
+    >
+  >({});
 
   useEffect(() => {
     loadFlats();
@@ -214,8 +240,35 @@ export default function ViewBills() {
     try {
       const billIds = selectedRowKeys.map(Number);
 
+      if (!paidAmount || paidAmount <= 0) {
+        message.error("Please enter a valid Paid Amount");
+        return;
+      }
+
+      const billsPayload = selectedBills.map((b) => {
+        const sel = amountSelections[b.id] ?? defaultAmountSelection;
+
+        const maintenance =
+          sel.maintenance !== false ? b.maintenanceAmount || 0 : 0;
+        const interest = b.interestAmount || 0; // always included, compulsory
+        const penalty = sel.penalty !== false ? b.penaltyAmount || 0 : 0;
+        const discount = sel.discount !== false ? b.discountAmount || 0 : 0;
+
+        const billTotal = maintenance + interest + penalty - discount;
+
+        return {
+          billId: b.id,
+          maintenanceAmount: maintenance,
+          interestAmount: interest,
+          penaltyAmount: penalty,
+          discountAmount: discount,
+          totalAmount: billTotal,
+        };
+      });
+
       const payload = {
         billIds,
+        bills: billsPayload, // NEW — id-wise breakdown
         paymentMode,
         paymentDate: paymentDate.format("YYYY-MM-DD"),
         financialYearId,
@@ -223,6 +276,8 @@ export default function ViewBills() {
         maintenanceAmount: paymentMaintenance,
         interestAmount: paymentInterest,
         discountAmount: paymentDiscount,
+        paidAmount,
+        pendingAmount,
         totalAmount: paymentTotal,
         glReceivable,
         glCreditAccount,
@@ -232,13 +287,13 @@ export default function ViewBills() {
         glDiscount,
         selectedCount: selectedRowKeys.length,
       };
-
+      console.log("Payload", payload);
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
-
-      // message.success(res.data);
+      message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
       setPaymentDate(dayjs());
+      setPaidAmount(0);
       loadBills();
     } catch {
       message.error("Payment failed");
@@ -285,11 +340,102 @@ export default function ViewBills() {
     { title: "BillType", dataIndex: "billType" },
     { title: "Month", dataIndex: "month" },
     { title: "Year", dataIndex: "year" },
-    { title: "Maintenance", dataIndex: "maintenanceAmount" },
-    { title: "Interest", dataIndex: "interestAmount" },
-    { title: "Penalty", dataIndex: "penaltyAmount" },
-    { title: "Discount", dataIndex: "discountAmount" },
-
+    {
+      title: "Due Date",
+      dataIndex: "dueDate",
+      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
+    },
+    {
+      title: "Maintenance",
+      dataIndex: "maintenanceAmount",
+      render: (value: number, record: Bill) => {
+        const isRowSelected = selectedRowKeys.includes(record.id);
+        const checked = amountSelections[record.id]?.maintenance ?? true;
+        return (
+          <Space>
+            <Checkbox
+              checked={checked}
+              disabled={!isRowSelected}
+              onChange={(e) =>
+                setAmountSelections((prev) => ({
+                  ...prev,
+                  [record.id]: {
+                    ...(prev[record.id] ?? defaultAmountSelection),
+                    maintenance: e.target.checked,
+                  },
+                }))
+              }
+            />
+            {value}
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Interest",
+      dataIndex: "interestAmount",
+      render: (value: number, record: Bill) => {
+        const isRowSelected = selectedRowKeys.includes(record.id);
+        return (
+          <Space>
+            <Checkbox checked disabled title="Interest is compulsory" />
+            {value}
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Penalty",
+      dataIndex: "penaltyAmount",
+      render: (value: number, record: Bill) => {
+        const isRowSelected = selectedRowKeys.includes(record.id);
+        const checked = amountSelections[record.id]?.penalty ?? true;
+        return (
+          <Space>
+            <Checkbox
+              checked={checked}
+              disabled={!isRowSelected}
+              onChange={(e) =>
+                setAmountSelections((prev) => ({
+                  ...prev,
+                  [record.id]: {
+                    ...(prev[record.id] ?? defaultAmountSelection),
+                    penalty: e.target.checked,
+                  },
+                }))
+              }
+            />
+            {value}
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Discount",
+      dataIndex: "discountAmount",
+      render: (value: number, record: Bill) => {
+        const isRowSelected = selectedRowKeys.includes(record.id);
+        const checked = amountSelections[record.id]?.discount ?? true;
+        return (
+          <Space>
+            <Checkbox
+              checked={checked}
+              disabled={!isRowSelected}
+              onChange={(e) =>
+                setAmountSelections((prev) => ({
+                  ...prev,
+                  [record.id]: {
+                    ...(prev[record.id] ?? defaultAmountSelection),
+                    discount: e.target.checked,
+                  },
+                }))
+              }
+            />
+            {value}
+          </Space>
+        );
+      },
+    },
     { title: "Total", dataIndex: "totalAmount" },
     { title: "Trans.Id", dataIndex: "transactionId" },
     {
@@ -305,11 +451,6 @@ export default function ViewBills() {
           {text}
         </span>
       ),
-    },
-    {
-      title: "Due Date",
-      dataIndex: "dueDate",
-      render: (text: string) => new Date(text).toLocaleDateString("en-GB"),
     },
   ];
 
@@ -331,16 +472,26 @@ export default function ViewBills() {
     }
   };
 
-  const totalMaintenance = bills.reduce(
+  const totalsSource = selectedRowKeys.length > 0 ? selectedBills : bills;
+
+  const totalMaintenance = totalsSource.reduce(
     (s, b) => s + (b.maintenanceAmount || 0),
     0,
   );
-  const totalPenalty = bills.reduce((s, b) => s + (b.penaltyAmount || 0), 0);
-  const totalInterest = bills.reduce((s, b) => s + (b.interestAmount || 0), 0);
-  const totalDiscount = bills.reduce((s, b) => s + (b.discountAmount || 0), 0);
+  const totalPenalty = totalsSource.reduce(
+    (s, b) => s + (b.penaltyAmount || 0),
+    0,
+  );
+  const totalInterest = totalsSource.reduce(
+    (s, b) => s + (b.interestAmount || 0),
+    0,
+  );
+  const totalDiscount = totalsSource.reduce(
+    (s, b) => s + (b.discountAmount || 0),
+    0,
+  );
 
-  const grandTotal = bills.reduce((s, b) => s + (b.totalAmount || 0), 0);
-
+  const grandTotal = totalsSource.reduce((s, b) => s + (b.totalAmount || 0), 0);
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
@@ -526,13 +677,28 @@ export default function ViewBills() {
                       );
                       return;
                     }
+
                     const maintenance = selectedBills.reduce(
-                      (s, b) => s + (b.maintenanceAmount || 0),
+                      (s, b) =>
+                        s +
+                        (amountSelections[b.id]?.maintenance !== false
+                          ? b.maintenanceAmount || 0
+                          : 0),
                       0,
                     );
 
+                    // Interest always included, per row — checkbox is disabled/compulsory
                     const interest = selectedBills.reduce(
                       (s, b) => s + (b.interestAmount || 0),
+                      0,
+                    );
+
+                    const penalty = selectedBills.reduce(
+                      (s, b) =>
+                        s +
+                        (amountSelections[b.id]?.penalty !== false
+                          ? b.penaltyAmount || 0
+                          : 0),
                       0,
                     );
 
@@ -554,7 +720,7 @@ export default function ViewBills() {
                     setPaymentMaintenance(maintenance);
                     setPaymentInterest(interest);
                     setPaymentDiscount(discount);
-
+                    setPaidAmount(0);
                     setPaymentModalOpen(true);
                     calculateInterest(paymentDate);
                   } catch (error) {
@@ -586,10 +752,22 @@ export default function ViewBills() {
               rowSelection={{
                 selectedRowKeys,
                 hideSelectAll: true,
-                onChange: setSelectedRowKeys,
+                onChange: (keys) => {
+                  setSelectedRowKeys(keys);
+
+                  setAmountSelections((prev) => {
+                    const updated: typeof prev = {};
+                    keys.forEach((key) => {
+                      const id = Number(key);
+                      // keep existing choice if row was already selected, else default all-on
+                      updated[id] = prev[id] ?? { ...defaultAmountSelection };
+                    });
+                    return updated;
+                  });
+                },
                 getCheckboxProps: (record) => ({
                   disabled:
-                    record.status !== "PENDING" ||
+                    record.status !== "PENDING" && record.status !== "PARTIAL" ||
                     (selectedFlatNo !== null &&
                       record.flatNo !== selectedFlatNo &&
                       !selectedRowKeys.includes(record.id)),
@@ -604,85 +782,120 @@ export default function ViewBills() {
               onCancel={() => setPaymentModalOpen(false)}
               onOk={handlePay}
               okText="Pay Now"
+              okButtonProps={{ disabled: !paidAmount || paidAmount <= 0 }} // NEW
             >
               <Form layout="vertical">
-                <Form.Item label="Payment Method">
-                  <Select
-                    value={paymentMode}
-                    onChange={setPaymentMode}
-                    options={[
-                      { label: "CASH", value: "CASH" },
-                      { label: "UPI", value: "UPI" },
-                      { label: "CARD", value: "CARD" },
-                      { label: "NETBANKING", value: "NETBANKING" },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item label="Payment Date" required>
-                  <DatePicker
-                    style={{ width: "100%" }}
-                    value={paymentDate}
-                    format="DD-MM-YYYY"
-                    onChange={(date) => {
-                      if (date) {
-                        setPaymentDate(date);
-                        calculateInterest(date);
-                      }
-                    }}
-                  />
-                </Form.Item>
-                <Form.Item label="Maintenance">
-                  <Input
-                    type="number"
-                    value={paymentMaintenance}
-                    onChange={(e) =>
-                      setPaymentMaintenance(Number(e.target.value) || 0)
-                    }
-                  />
-                </Form.Item>
+                <Row gutter={16}>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Payment Method">
+                      <Select
+                        value={paymentMode}
+                        onChange={setPaymentMode}
+                        options={[
+                          { label: "CASH", value: "CASH" },
+                          { label: "UPI", value: "UPI" },
+                          { label: "CARD", value: "CARD" },
+                          { label: "NETBANKING", value: "NETBANKING" },
+                        ]}
+                      />
+                    </Form.Item>
+                  </Col>
 
-                <Form.Item label="Interest">
-                  <Input
-                    type="number"
-                    value={paymentInterest}
-                    onChange={(e) =>
-                      setPaymentInterest(Number(e.target.value) || 0)
-                    }
-                  />
-                </Form.Item>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Payment Date" required>
+                      <DatePicker
+                        style={{ width: "100%" }}
+                        value={paymentDate}
+                        format="DD-MM-YYYY"
+                        onChange={(date) => {
+                          if (date) {
+                            setPaymentDate(date);
+                            calculateInterest(date);
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
 
-                <Form.Item label="Discount">
-                  <Input
-                    type="number"
-                    value={paymentDiscount}
-                    onChange={(e) =>
-                      setPaymentDiscount(Number(e.target.value) || 0)
-                    }
-                  />
-                </Form.Item>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Maintenance">
+                      <Input
+                        type="number"
+                        value={paymentMaintenance}
+                        onChange={(e) =>
+                          setPaymentMaintenance(Number(e.target.value) || 0)
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
 
-                <Form.Item label="Total">
-                  <Input value={paymentTotal.toFixed(2)} readOnly />
-                </Form.Item>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Interest">
+                      <Input
+                        type="number"
+                        value={paymentInterest}
+                        onChange={(e) =>
+                          setPaymentInterest(Number(e.target.value) || 0)
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
 
-                {paymentMode !== "CASH" && (
-                  <Form.Item
-                    label="Transaction Id"
-                    required
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter Transaction Id",
-                      },
-                    ]}
-                  >
-                    <Input
-                      value={transactionId}
-                      onChange={(e) => setTransactionId(e.target.value)}
-                      placeholder="Enter transaction id"
-                    />
-                  </Form.Item>
-                )}
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Discount">
+                      <Input
+                        type="number"
+                        value={paymentDiscount}
+                        onChange={(e) =>
+                          setPaymentDiscount(Number(e.target.value) || 0)
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Total">
+                      <Input value={paymentTotal.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Paid Amount">
+                      <Input
+                        type="number"
+                        value={paidAmount}
+                        onChange={(e) =>
+                          setPaidAmount(Number(e.target.value) || 0)
+                        }
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Pending Amount">
+                      <Input value={pendingAmount.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
+                  {paymentMode !== "CASH" && (
+                    <Col xs={24} sm={12}>
+                      <Form.Item
+                        label="Transaction Id"
+                        required
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter Transaction Id",
+                          },
+                        ]}
+                      >
+                        <Input
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          placeholder="Enter transaction id"
+                        />
+                      </Form.Item>
+                    </Col>
+                  )}
+                </Row>
               </Form>
             </Modal>
           </Card>
