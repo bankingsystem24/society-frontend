@@ -8,7 +8,8 @@ import {
   Statistic,
   Spin,
   message,
-  Layout
+  Layout,
+  DatePicker,
 } from "antd";
 import { apiGet } from "../../api/axios";
 import Header from "../../components/layout/Header";
@@ -19,9 +20,10 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
-const { Content }= Layout;
+const { Content } = Layout;
 
 interface PnlItem {
   glCode: number;
@@ -35,20 +37,23 @@ interface PnlResponse {
   totalIncome: number;
   totalExpense: number;
   surplus: number;
-} 
+}
 
 const ProfitAndLoss: React.FC = () => {
   const [data, setData] = useState<PnlResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const role = sessionStorage.getItem("role");
+  const [asonDate, setAsonDate] = useState(dayjs());
 
-  const fetchPnl = async () => {
+  const fetchPnl = async (date = asonDate) => {
     try {
       setLoading(true);
       const societyId = Number(sessionStorage.getItem("societyId"));
       const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-      const res = await apiGet(`/reports/profit-loss?societyId=${societyId}&financialYearId=${financialYearId}`);
 
+      const res = await apiGet(
+        `/reports/profit-loss?societyId=${societyId}&financialYearId=${financialYearId}&asonDate=${date.format("YYYY-MM-DD")}`,
+      );
       setData(res);
     } catch (error) {
       console.error(error);
@@ -115,6 +120,20 @@ const ProfitAndLoss: React.FC = () => {
     <div style={{ padding: 20 }}>
       <Title level={3}>Income & Expenditure Account</Title>
 
+      <div style={{ marginBottom: 20 }}>
+        <span style={{ marginRight: 8 }}>As on Date:</span>
+        <DatePicker
+          value={asonDate}
+          format="DD-MM-YYYY"
+          onChange={(date) => {
+            if (date) {
+              setAsonDate(date);
+              fetchPnl(date);
+            }
+          }}
+        />
+      </div>
+
       <Row gutter={16} style={{ marginBottom: 20 }}>
         <Col span={8}>
           <Statistic
@@ -122,9 +141,11 @@ const ProfitAndLoss: React.FC = () => {
             value={data?.totalIncome || 0}
             precision={2}
             prefix="₹"
-            styles={{ content : {
-              fontSize: "18px",
-              fontWeight: 600,}
+            styles={{
+              content: {
+                fontSize: "18px",
+                fontWeight: 600,
+              },
             }}
           />
         </Col>
@@ -135,9 +156,11 @@ const ProfitAndLoss: React.FC = () => {
             value={data?.totalExpense || 0}
             precision={2}
             prefix="₹"
-            styles={{ content:{
-              fontSize: "18px",
-              fontWeight: 600,}
+            styles={{
+              content: {
+                fontSize: "18px",
+                fontWeight: 600,
+              },
             }}
           />
         </Col>
@@ -148,9 +171,11 @@ const ProfitAndLoss: React.FC = () => {
             value={Math.abs(data?.surplus || 0)}
             precision={2}
             prefix="₹"
-            styles={{ content: {
-              fontSize: "18px",
-              fontWeight: 600,}
+            styles={{
+              content: {
+                fontSize: "18px",
+                fontWeight: 600,
+              },
             }}
           />
         </Col>
@@ -194,7 +219,7 @@ const ProfitAndLoss: React.FC = () => {
                 rowKey="glCode"
                 dataSource={data?.expense}
                 columns={columns}
-                pagination={{pageSize: 8,}}
+                pagination={{ pageSize: 8 }}
                 summary={() => (
                   <Table.Summary.Row>
                     <Table.Summary.Cell index={0} />
