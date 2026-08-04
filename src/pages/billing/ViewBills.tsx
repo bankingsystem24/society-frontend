@@ -507,9 +507,9 @@ export default function ViewBills() {
       DISCOUNT_ELIGIBLE_MONTHS.every((m) => selectedMonths.includes(m));
 
     const requiredCount =
-      maintenancePolicy?.billing_frequency === "MONTHLY"
+      maintenancePolicy?.billingFrequency === "MONTHLY"
         ? 12
-        : maintenancePolicy?.billing_frequency === "QUARTERLY"
+        : maintenancePolicy?.billingFrequency === "QUARTERLY"
           ? 4
           : null;
 
@@ -524,7 +524,7 @@ export default function ViewBills() {
     const eligible =
       isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
     setDiscountEligible(eligible);
-
+    console.log("Eligible:",eligible);
     if (eligible) {
       return (maintenanceAmount * discountPolicy.discountPercent) / 100;
     }
