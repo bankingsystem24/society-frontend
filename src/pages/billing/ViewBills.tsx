@@ -107,9 +107,9 @@ export default function ViewBills() {
   const [discountPolicy, setDiscountPolicy] = useState<any>(null);
   const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
   const [paidAmount, setPaidAmount] = useState<number>(0);
-
-const pendingAmount = Math.max(0, paymentTotal - paidAmount);
-
+  const [maintenancePolicy, setMaintenancePolicy] = useState<any>(null);
+  const pendingAmount = Math.max(0, paymentTotal - paidAmount);
+  const [discountEligible, setDiscountEligible] = useState(false);
   const defaultAmountSelection = {
     maintenance: true,
     interest: true, // always true, compulsory
@@ -135,6 +135,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
     loadMembers();
     loadGlMapping();
     loadDiscountPolicy();
+    loadMaintenancePolicy();
   }, []);
 
   useEffect(() => {}, [
@@ -143,6 +144,20 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
     glInterestIncome,
     glDiscount,
   ]);
+
+  const loadMaintenancePolicy = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/maintenance-policy/society/${societyId}/financial-year/${financialYearId}`,
+      );
+      const activePolicy = Array.isArray(res.data)
+        ? res.data.find((p: any) => p.active)
+        : res.data;
+      setMaintenancePolicy(activePolicy || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const loadGlMapping = async () => {
     try {
@@ -287,7 +302,6 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
         glDiscount,
         selectedCount: selectedRowKeys.length,
       };
-      console.log("Payload", payload);
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
       message.success(res.data);
       setSelectedRowKeys([]);
@@ -353,7 +367,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
         const checked = amountSelections[record.id]?.maintenance ?? true;
         return (
           <Space>
-            <Checkbox
+            {/* <Checkbox
               checked={checked}
               disabled={!isRowSelected}
               onChange={(e) =>
@@ -365,7 +379,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                   },
                 }))
               }
-            />
+            /> */}
             {value}
           </Space>
         );
@@ -378,7 +392,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
         const isRowSelected = selectedRowKeys.includes(record.id);
         return (
           <Space>
-            <Checkbox checked disabled title="Interest is compulsory" />
+            {/* <Checkbox checked disabled title="Interest is compulsory" /> */}
             {value}
           </Space>
         );
@@ -392,7 +406,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
         const checked = amountSelections[record.id]?.penalty ?? true;
         return (
           <Space>
-            <Checkbox
+            {/* <Checkbox
               checked={checked}
               disabled={!isRowSelected}
               onChange={(e) =>
@@ -404,7 +418,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                   },
                 }))
               }
-            />
+            /> */}
             {value}
           </Space>
         );
@@ -418,7 +432,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
         const checked = amountSelections[record.id]?.discount ?? true;
         return (
           <Space>
-            <Checkbox
+            {/* <Checkbox
               checked={checked}
               disabled={!isRowSelected}
               onChange={(e) =>
@@ -430,7 +444,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                   },
                 }))
               }
-            />
+            /> */}
             {value}
           </Space>
         );
@@ -465,13 +479,58 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
       });
 
       setPaymentInterest(res.data.interestAmount);
-      setPaymentDiscount(res.data.discountAmount);
       setPaymentMaintenance(res.data.maintenanceAmount);
+
+      const discount = Math.round(
+        computeDiscount(date, res.data.maintenanceAmount),
+      );
+      setPaymentDiscount(discount);
+      setPaidAmount(
+        res.data.maintenanceAmount + res.data.interestAmount - discount,
+      );
     } catch (err) {
       message.error("Unable to calculate interest.");
     }
   };
 
+  const DISCOUNT_ELIGIBLE_MONTHS = ["APRIL", "JULY", "OCTOBER", "JANUARY"];
+
+  const computeDiscount = (date: dayjs.Dayjs, maintenanceAmount: number) => {
+    if (!discountPolicy || !discountPolicy.active) {
+      setDiscountEligible(false);
+      return 0;
+    }
+
+    const selectedMonths = selectedBills.map((b) => b.month);
+    const isEligibleMonthCombo =
+      selectedMonths.length === DISCOUNT_ELIGIBLE_MONTHS.length &&
+      DISCOUNT_ELIGIBLE_MONTHS.every((m) => selectedMonths.includes(m));
+
+    const requiredCount =
+      maintenancePolicy?.billing_frequency === "MONTHLY"
+        ? 12
+        : maintenancePolicy?.billing_frequency === "QUARTERLY"
+          ? 4
+          : null;
+
+    const isEligibleCount =
+      requiredCount !== null && selectedRowKeys.length === requiredCount;
+
+    const isWithinDeadline = date.isSameOrBefore(
+      dayjs(discountPolicy.paidBeforeDate),
+      "day",
+    );
+
+    const eligible =
+      isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
+    setDiscountEligible(eligible);
+
+    if (eligible) {
+      return (maintenanceAmount * discountPolicy.discountPercent) / 100;
+    }
+
+    return 0;
+  };
   const totalsSource = selectedRowKeys.length > 0 ? selectedBills : bills;
 
   const totalMaintenance = totalsSource.reduce(
@@ -687,7 +746,6 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                       0,
                     );
 
-                    // Interest always included, per row — checkbox is disabled/compulsory
                     const interest = selectedBills.reduce(
                       (s, b) => s + (b.interestAmount || 0),
                       0,
@@ -702,25 +760,12 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                       0,
                     );
 
-                    let discount = 0;
-
-                    if (
-                      discountPolicy &&
-                      discountPolicy.active &&
-                      selectedRowKeys.length === 12 &&
-                      dayjs().isSameOrBefore(
-                        dayjs(discountPolicy.paidBeforeDate),
-                        "day",
-                      )
-                    ) {
-                      discount =
-                        (maintenance * discountPolicy.discountPercent) / 100;
-                    }
+                    const discount = computeDiscount(paymentDate, maintenance);
 
                     setPaymentMaintenance(maintenance);
                     setPaymentInterest(interest);
                     setPaymentDiscount(discount);
-                    setPaidAmount(maintenance+interest-discount);
+                    setPaidAmount(maintenance + interest - discount);
                     setPaymentModalOpen(true);
                     calculateInterest(paymentDate);
                   } catch (error) {
@@ -730,7 +775,6 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
               >
                 Payment Received by Admin ({selectedRowKeys.length})
               </Button>
-
               <Button danger style={{ marginLeft: 40 }}>
                 Delete All Pending Bills
               </Button>
@@ -759,7 +803,6 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                     const updated: typeof prev = {};
                     keys.forEach((key) => {
                       const id = Number(key);
-                      // keep existing choice if row was already selected, else default all-on
                       updated[id] = prev[id] ?? { ...defaultAmountSelection };
                     });
                     return updated;
@@ -767,7 +810,8 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                 },
                 getCheckboxProps: (record) => ({
                   disabled:
-                    record.status !== "PENDING" && record.status !== "PARTIAL" ||
+                    (record.status !== "PENDING" &&
+                      record.status !== "PARTIAL") ||
                     (selectedFlatNo !== null &&
                       record.flatNo !== selectedFlatNo &&
                       !selectedRowKeys.includes(record.id)),
@@ -810,7 +854,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                         onChange={(date) => {
                           if (date) {
                             setPaymentDate(date);
-                            calculateInterest(date);
+                            calculateInterest(date); // now also recalculates discount
                           }
                         }}
                       />
@@ -822,6 +866,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                       <Input
                         type="number"
                         value={paymentMaintenance}
+                        readOnly
                         onChange={(e) =>
                           setPaymentMaintenance(Number(e.target.value) || 0)
                         }
@@ -834,6 +879,7 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                       <Input
                         type="number"
                         value={paymentInterest}
+                        readOnly
                         onChange={(e) =>
                           setPaymentInterest(Number(e.target.value) || 0)
                         }
@@ -846,7 +892,9 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                       <Input
                         type="number"
                         value={paymentDiscount}
+                        readOnly
                         onChange={(e) =>
+                          
                           setPaymentDiscount(Number(e.target.value) || 0)
                         }
                       />
@@ -863,7 +911,9 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
                       <Input
                         type="number"
                         value={paidAmount}
+                        readOnly
                         onChange={(e) =>
+                          
                           setPaidAmount(Number(e.target.value) || 0)
                         }
                       />
@@ -872,7 +922,9 @@ const pendingAmount = Math.max(0, paymentTotal - paidAmount);
 
                   <Col xs={24} sm={12}>
                     <Form.Item label="Pending Amount">
-                      <Input value={pendingAmount.toFixed(2)} readOnly />
+                      <Input 
+                      value={pendingAmount.toFixed(2)} 
+                      readOnly />
                     </Form.Item>
                   </Col>
                   {paymentMode !== "CASH" && (
