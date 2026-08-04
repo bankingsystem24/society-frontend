@@ -485,9 +485,7 @@ export default function ViewBills() {
         computeDiscount(date, res.data.maintenanceAmount),
       );
       setPaymentDiscount(discount);
-      setPaidAmount(
-        res.data.maintenanceAmount + res.data.interestAmount - discount,
-      );
+      setPaidAmount(res.data.maintenanceAmount + res.data.interestAmount - discount,);
     } catch (err) {
       message.error("Unable to calculate interest.");
     }
@@ -521,16 +519,15 @@ export default function ViewBills() {
       "day",
     );
 
-    const eligible =
-      isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
+    const eligible = isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
     setDiscountEligible(eligible);
-    console.log("Eligible:",eligible);
     if (eligible) {
       return (maintenanceAmount * discountPolicy.discountPercent) / 100;
     }
 
     return 0;
   };
+
   const totalsSource = selectedRowKeys.length > 0 ? selectedBills : bills;
 
   const totalMaintenance = totalsSource.reduce(
@@ -887,19 +884,21 @@ export default function ViewBills() {
                     </Form.Item>
                   </Col>
 
-                  <Col xs={24} sm={12}>
-                    <Form.Item label="Discount">
-                      <Input
-                        type="number"
-                        value={paymentDiscount}
-                        readOnly
-                        onChange={(e) =>
-                          
-                          setPaymentDiscount(Number(e.target.value) || 0)
-                        }
-                      />
-                    </Form.Item>
-                  </Col>
+<Col xs={24} sm={12}>
+  <Form.Item label="Discount">
+    <Input
+      type="number"
+      value={paymentDiscount}
+      onChange={(e) => {
+        const newDiscount = Number(e.target.value) || 0;
+        setPaymentDiscount(newDiscount);
+        // Keep Paid Amount in sync with the manually edited discount
+        setPaidAmount(paymentMaintenance + paymentInterest - newDiscount);
+      }}
+    />
+  </Form.Item>
+</Col>
+
                   <Col xs={24} sm={12}>
                     <Form.Item label="Total">
                       <Input value={paymentTotal.toFixed(2)} readOnly />
