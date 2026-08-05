@@ -87,7 +87,7 @@ export default function ViewBills() {
   const [members, setMembers] = useState<Members[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [paymentMode, setPaymentMode] = useState<string>("CASH");
+  const [paymentMode, setPaymentMode] = useState<string>("UPI");
   const [transactionId, setTransactionId] = useState<string>("");
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
@@ -485,7 +485,9 @@ export default function ViewBills() {
         computeDiscount(date, res.data.maintenanceAmount),
       );
       setPaymentDiscount(discount);
-      setPaidAmount(res.data.maintenanceAmount + res.data.interestAmount - discount,);
+      setPaidAmount(
+        res.data.maintenanceAmount + res.data.interestAmount - discount,
+      );
     } catch (err) {
       message.error("Unable to calculate interest.");
     }
@@ -519,7 +521,8 @@ export default function ViewBills() {
       "day",
     );
 
-    const eligible = isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
+    const eligible =
+      isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
     setDiscountEligible(eligible);
     if (eligible) {
       return (maintenanceAmount * discountPolicy.discountPercent) / 100;
@@ -765,6 +768,7 @@ export default function ViewBills() {
                     setPaidAmount(maintenance + interest - discount);
                     setPaymentModalOpen(true);
                     calculateInterest(paymentDate);
+                    setTransactionId(selectedFlatNo || "");
                   } catch (error) {
                     message.error("Unable to verify accounting year status.");
                   }
@@ -884,20 +888,22 @@ export default function ViewBills() {
                     </Form.Item>
                   </Col>
 
-<Col xs={24} sm={12}>
-  <Form.Item label="Discount">
-    <Input
-      type="number"
-      value={paymentDiscount}
-      onChange={(e) => {
-        const newDiscount = Number(e.target.value) || 0;
-        setPaymentDiscount(newDiscount);
-        // Keep Paid Amount in sync with the manually edited discount
-        setPaidAmount(paymentMaintenance + paymentInterest - newDiscount);
-      }}
-    />
-  </Form.Item>
-</Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Discount">
+                      <Input
+                        type="number"
+                        value={paymentDiscount}
+                        onChange={(e) => {
+                          const newDiscount = Number(e.target.value) || 0;
+                          setPaymentDiscount(newDiscount);
+                          // Keep Paid Amount in sync with the manually edited discount
+                          setPaidAmount(
+                            paymentMaintenance + paymentInterest - newDiscount,
+                          );
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
 
                   <Col xs={24} sm={12}>
                     <Form.Item label="Total">
@@ -912,7 +918,6 @@ export default function ViewBills() {
                         value={paidAmount}
                         readOnly
                         onChange={(e) =>
-                          
                           setPaidAmount(Number(e.target.value) || 0)
                         }
                       />
@@ -921,15 +926,14 @@ export default function ViewBills() {
 
                   <Col xs={24} sm={12}>
                     <Form.Item label="Pending Amount">
-                      <Input 
-                      value={pendingAmount.toFixed(2)} 
-                      readOnly />
+                      <Input value={pendingAmount.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
                   {paymentMode !== "CASH" && (
                     <Col xs={24} sm={12}>
                       <Form.Item
                         label="Transaction Id"
+                        initialValue={"flatNo"}
                         required
                         rules={[
                           {

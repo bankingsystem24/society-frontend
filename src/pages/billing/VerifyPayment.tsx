@@ -170,7 +170,6 @@ export default function VerifyPayemnt() {
         setReceipts(res.data);
         return;
       }
-
       const [startYear, endYear] = financialYear.split("-").map(Number);
 
       const filtered = res.data.filter((r: any) => {
@@ -203,7 +202,6 @@ export default function VerifyPayemnt() {
       const data = detailsres.data;
 
       setReceiptBills(data);
-
       const receiptType = detailsres.data?.[0]?.receiptType;
 
       const selected = receipts.find((r) => r.id === receiptId) || null;

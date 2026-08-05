@@ -33,9 +33,11 @@ const CashBookReport: React.FC = () => {
   const [reportTitle, setReportTitle] = useState("");
   const reportRef = useRef<HTMLDivElement>(null);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [fyRange, setFyRange] = useState<{ start: string; end: string } | null>(null);
 
   useEffect(() => {
     loadAccounts();
+    loadFinancialYear();
   }, []);
 
   const loadAccounts = async () => {
@@ -49,6 +51,28 @@ const CashBookReport: React.FC = () => {
       setAccounts(response.data);
     } catch (error) {
       console.error("Error loading accounts:", error);
+    }
+  };
+
+  const loadFinancialYear = async () => {
+    try {
+      const societyId = Number(sessionStorage.getItem("societyId"));
+      const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/active`,
+        {
+          params: { societyId },
+        },
+      );
+
+      setFyRange({ start: response.data.startDate, end: response.data.endDate });
+
+      form.setFieldsValue({
+        dateRange: [dayjs(response.data.startDate), dayjs()],
+      });
+    } catch (error) {
+      console.error("Error loading financial year:", error);
     }
   };
 
@@ -198,7 +222,6 @@ const CashBookReport: React.FC = () => {
         initialValues={{
           openingBalance: true,
           showNarration: true,
-          dateRange: [dayjs().startOf("month"), dayjs()],
         }}
       >
         <Row gutter={16}>
