@@ -62,7 +62,7 @@ const Expenses: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [glList, setGlList] = useState<any[]>([]);
-
+  const dateRef = useRef<any>(null);
   const expenseRef = useRef<any>(null);
   const vendorRef = useRef<any>(null);
   const amountRef = useRef<any>(null);
@@ -173,7 +173,8 @@ const Expenses: React.FC = () => {
       await axios.post(`${BASE_URL}/expenses`, payload);
       message.success("Expense added successfully");
       form.resetFields();
-      fetchExpenses();
+      await fetchExpenses();
+      dateRef.current?.focus();
     } catch (err) {
       message.error("Failed to save expense");
     }
@@ -192,7 +193,7 @@ const Expenses: React.FC = () => {
   const columns = [
     {
       title: "Date",
-      dataIndex: "expenseDate",
+      dataIndex: "voucherDate",
       render: (d: string) => dayjs(d).format("DD-MMM-YYYY"),
     },
     {
@@ -287,11 +288,11 @@ const Expenses: React.FC = () => {
           <AuditorHeader />
         )}
         <Content>
-          <div style={{ padding: 16 }}>
+          <div style={{ padding: 5 }}>
             {/* ENTRY FORM */}
-            <Card title="Add Expenses" style={{ marginBottom: 16 }}>
+            <Card title="Add Expenses" style={{ marginBottom: 0 }}>
               <Form form={form} layout="vertical" onFinish={onFinish}>
-                <Row gutter={16} style={{ marginTop: -10 }}>
+                <Row gutter={16} style={{ marginTop: 0 }}>
                   <Col xs={24} md={8}>
                     <Form.Item
                       name="expenseDate"
@@ -302,6 +303,7 @@ const Expenses: React.FC = () => {
                         style={{ width: "100%" }}
                         format={["DD/MM/YYYY", "DD-MM-YYYY", "YYYY-MM-DD"]}
                         placeholder="DD/MM/YYYY"
+                        ref={dateRef}
                         onChange={() => {
                           expenseRef.current?.focus();
                         }}
@@ -443,17 +445,21 @@ const Expenses: React.FC = () => {
                   </Col>
                 </Row>
 
-                <Button ref={saveButtonRef} type="primary" htmlType="submit">
+                <Button ref={saveButtonRef} 
+                  type="primary" 
+                  htmlType="submit"
+
+                >
                   Save Expense
                 </Button>
               </Form>
             </Card>
 
             {/* EXPENSE LIST */}
-            <Card title="Expense List">
+            <Card >
               <div
                 style={{
-                  marginBottom: 15,
+                  marginBottom: 10,
                   display: "flex",
                   gap: 12,
                   flexWrap: "wrap",
@@ -484,7 +490,7 @@ const Expenses: React.FC = () => {
                 loading={loading}
                 scroll={{ x: 1000 }}
                 size="small"
-                pagination={{ pageSize: 8 }}
+                pagination={{ pageSize: 7 }}
               />
             </Card>
           </div>

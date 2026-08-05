@@ -232,11 +232,11 @@ const Transfer: React.FC = () => {
         )}
 
         <Content>
-          <div style={{ padding: 16 }}>
+          <div style={{ padding: 5 }}>
             {/* Entry Form */}
-            <Card title="Transfer Entry" style={{ marginBottom: 16 }}>
+            <Card title="Transfer Entry" style={{ marginBottom: 5 }}>
               <Form form={form} layout="vertical" onFinish={onFinish}>
-                <Row gutter={16} style={{ marginTop: -10 }}>
+                <Row gutter={16} style={{ marginTop: 0 }}>
                   <Col xs={24} md={6}>
                     <Form.Item
                       name="voucherDate"
@@ -408,10 +408,10 @@ const Transfer: React.FC = () => {
             </Card>
 
             {/* Transfer List */}
-            <Card title="Transfer List">
+            <Card >
               <div
                 style={{
-                  marginBottom: 15,
+                  marginBottom: 5,
                   display: "flex",
                   justifyContent: "flex-start",
                 }}
@@ -432,7 +432,7 @@ const Transfer: React.FC = () => {
                 rowKey="id"
                 loading={loading}
                 pagination={{
-                  pageSize: 10,
+                  pageSize: 8,
                 }}
                 scroll={{ x: 1000 }}
                 size="small"

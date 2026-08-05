@@ -38,7 +38,6 @@ const CashBookReport: React.FC = () => {
     loadAccounts();
   }, []);
 
-
   const loadAccounts = async () => {
     try {
       const societyId = Number(sessionStorage.getItem("societyId"));
@@ -48,7 +47,6 @@ const CashBookReport: React.FC = () => {
       });
 
       setAccounts(response.data);
-
     } catch (error) {
       console.error("Error loading accounts:", error);
     }
@@ -83,7 +81,6 @@ const CashBookReport: React.FC = () => {
         `${BASE_URL}/cash-book/report`,
         payload,
       );
-
       setData(response.data);
     } catch (error) {
       console.error(error);
@@ -107,6 +104,11 @@ const CashBookReport: React.FC = () => {
       title: "Particulars",
       dataIndex: "particulars",
       key: "particulars",
+    },
+      {
+      title: "Narration",
+      dataIndex: "narration",
+      key: "narration",
     },
     {
       title: "Receipt",
@@ -217,33 +219,28 @@ const CashBookReport: React.FC = () => {
               </Form.Item>
             </Space>
           </Col>
-<Col span={12}>
-  <Space align="center">
-    <Text strong>Cash / Bank Account :</Text>
+          <Col span={12}>
+            <Space align="center">
+              <Text strong>Cash / Bank Account :</Text>
 
-    <Form.Item
-      name="accountId"
-      rules={[{ required: true, message: "Please select account" }]}
-      style={{ marginBottom: 0, width: 300 }}
-    >
-      <Select placeholder="Select Account">
-        {accounts.map((account) => (
-          <Select.Option
-            key={account.glCode}
-            value={account.glCode}
-          >
-            {account.accountName}
-          </Select.Option>
-        ))}
-      </Select>
-    </Form.Item>
-  </Space>
-</Col>
+              <Form.Item
+                name="accountId"
+                rules={[{ required: true, message: "Please select account" }]}
+                style={{ marginBottom: 0, width: 300 }}
+              >
+                <Select placeholder="Select Account">
+                  {accounts.map((account) => (
+                    <Select.Option key={account.glCode} value={account.glCode}>
+                      {account.accountName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Space>
+          </Col>
         </Row>
 
         <Row gutter={16} style={{ marginTop: 10 }}>
-
-
           {/* <Col span={6}>
             <Form.Item label="Voucher Type" name="voucherType">
               <Select allowClear placeholder="All">
