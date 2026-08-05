@@ -138,7 +138,7 @@ const loadPaymentSummary = async (societyId: number) => {
     setMaintenancePaidAmount(
       paidRes.reduce(
         (sum: number, item: any) =>
-          sum + Number(item.totalAmount || item.amount || 0),
+          sum + Number(item.paidAmount-item.discountAmount || item.amount || 0),
         0
       )
     );
