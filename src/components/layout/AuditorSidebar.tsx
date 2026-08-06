@@ -143,6 +143,10 @@ const AuditorSidebar: React.FC = () => {
             label: "Maintenance",
             children: [
               {
+                key: "/discount-entry",
+                label: "Discount Entry",
+              },              
+              {
                 key: "/bill-generate",
                 label: "Generate",
               },

@@ -83,6 +83,7 @@ import ProtectedRoute from "./pages/auth/ProtectedRoute";
 import BalanceSheet from "./pages/accounting/BalanceSheet";
 import MaintenancePolicy from "./pages/billing/MaintenancePolicy";
 import InterestPolicy from "./pages/billing/InterestPolicy";
+import MemberDiscountEntry from "./pages/billing/MemberDiscountEntry";
 
 export default function App() {
   return (
@@ -108,6 +109,7 @@ export default function App() {
         <Route path="/balance-sheet-snapshot-view" element={<BalanceSheetSnapshotView />}/>
         <Route path="/verify-payment" element={<VerifyPayemnt />} />
         <Route path="/gl-mapping" element={<GlMappingEntry />} />
+        <Route path="/discount-entry" element={<MemberDiscountEntry />} />
         <Route path="/users" element={<Users />} />
         <Route path="/billing-policy" element={<BillingPolicy />} />
         <Route path="/interest-policy" element={<InterestPolicy />} />

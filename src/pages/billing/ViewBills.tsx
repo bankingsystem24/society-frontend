@@ -108,7 +108,7 @@ export default function ViewBills() {
   const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
   const [paidAmount, setPaidAmount] = useState<number>(0);
   const [maintenancePolicy, setMaintenancePolicy] = useState<any>(null);
-  const pendingAmount = Math.max(0, paymentTotal - paidAmount);
+  const pendingAmount = Math.max(paymentTotal - paidAmount);
   const [discountEligible, setDiscountEligible] = useState(false);
   const defaultAmountSelection = {
     maintenance: true,
@@ -916,7 +916,7 @@ export default function ViewBills() {
                       <Input
                         type="number"
                         value={paidAmount}
-                        readOnly
+                        
                         onChange={(e) =>
                           setPaidAmount(Number(e.target.value) || 0)
                         }
