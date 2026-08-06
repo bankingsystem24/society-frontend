@@ -61,17 +61,13 @@ interface Discount {
 
 const MemberDiscountEntry: React.FC = () => {
   const [form] = Form.useForm();
-
   const [flats, setFlats] = useState<FlatMaster[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYear = sessionStorage.getItem("financialYear");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
-
   const role = sessionStorage.getItem("role");
-
   const flatRef = useRef<any>(null);
   const amountRef = useRef<any>(null);
   const saveRef = useRef<HTMLButtonElement>(null);
@@ -79,17 +75,16 @@ const MemberDiscountEntry: React.FC = () => {
     message.error("Financial Year not found.");
     return;
   }
-
-  if (!financialYear) {
-    throw new Error("Financial year not found in session.");
-  }
-
   const years = financialYear.split("-");
   const startYear = years[0];
+  const [glReceivable, setGlReceivable] = useState<number>(0);
+  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  const userId = Number(sessionStorage.getItem("userId"));
 
   useEffect(() => {
     loadFlats();
     loadDiscounts();
+    loadGlMapping();
 
     form.setFieldsValue({
       financialYear: "Previous Year",
@@ -99,11 +94,26 @@ const MemberDiscountEntry: React.FC = () => {
     });
   }, []);
 
+    const loadGlMapping = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
+      const mapping = res.data.find((item: any) => item.description?.trim().toLowerCase() === "discount",);
+
+      if (!mapping) {
+        message.error("MDiscount GL Mapping not configured");
+        return;
+      }
+      setGlReceivable(mapping.gl_receivable);
+      setGlCreditAccount(mapping.gl_credit_account);
+    } catch (err) {
+      console.error(err);
+      message.error("Unable to load GL Mapping");
+    }
+  };
+
   const loadFlats = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/flats?societyId=${societyId}&financialYearId=${financialYearId}`,
-      );
+      const res = await axios.get(`${BASE_URL}/flats?societyId=${societyId}&financialYearId=${financialYearId}`,);
       setFlats(res.data);
     } catch (err) {
       message.error("Unable to load Flats");
@@ -127,9 +137,10 @@ const MemberDiscountEntry: React.FC = () => {
         ...values,
         societyId,
         financialYearId,
-        approvedDate: values.approvedDate
-          ? values.approvedDate.format("YYYY-MM-DD")
-          : null,
+        approvedDate: values.approvedDate ? values.approvedDate.format("YYYY-MM-DD"): null,
+        glReceivable,
+        glCreditAccount,
+        userId
       };
 
       if (editingId) {

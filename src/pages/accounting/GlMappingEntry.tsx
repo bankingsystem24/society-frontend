@@ -79,7 +79,7 @@ const GlMappingEntry: React.FC = () => {
       // Income + Reserve Accounts
       setCreditAccounts(
         data.filter(
-          (x) => x.groupName === "INCOME" || x.groupName === "RESERVES",
+          (x) => x.groupName === "INCOME" || x.groupName === "RESERVES" || x.groupName === "ASSETS",
         ),
       );
     } catch (err) {
