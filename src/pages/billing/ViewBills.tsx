@@ -55,6 +55,7 @@ interface Bill {
   status: string;
   dueDate: string;
   createdDate: string;
+  flatId: number;
   flatNo: string;
   memberName: string;
   transactionId: string;
@@ -103,9 +104,12 @@ export default function ViewBills() {
   const [glDiscount, setGlDiscount] = useState<number>(0);
   const [paymentMaintenance, setPaymentMaintenance] = useState(0);
   const [paymentInterest, setPaymentInterest] = useState(0);
-  const [paymentDiscount, setPaymentDiscount] = useState(0);
+  const [currentDiscount, setCurrentDiscount] = useState(0);
+  const [pendingDiscount, setPendingDiscount] = useState(0);
   const [discountPolicy, setDiscountPolicy] = useState<any>(null);
-  const paymentTotal = paymentMaintenance + paymentInterest - paymentDiscount;
+  const totalPaymentDiscount = currentDiscount + pendingDiscount;
+  const paymentTotal =
+    paymentMaintenance + paymentInterest - totalPaymentDiscount;
   const [paidAmount, setPaidAmount] = useState<number>(0);
   const [maintenancePolicy, setMaintenancePolicy] = useState<any>(null);
   const pendingAmount = Math.max(paymentTotal - paidAmount);
@@ -238,9 +242,10 @@ export default function ViewBills() {
   };
 
   const selectedBills = bills.filter((b) => selectedRowKeys.includes(b.id));
-
   const selectedFlatNo =
     selectedBills.length > 0 ? selectedBills[0].flatNo : null;
+  const selectedFlatId =
+    selectedBills.length > 0 ? selectedBills[0].flatId : null;
 
   const loadMembers = async () => {
     try {
@@ -290,7 +295,9 @@ export default function ViewBills() {
         transactionId,
         maintenanceAmount: paymentMaintenance,
         interestAmount: paymentInterest,
-        discountAmount: paymentDiscount,
+        currentDiscount,
+        pendingDiscount,
+        discountAmount: totalPaymentDiscount,
         paidAmount,
         pendingAmount,
         totalAmount: paymentTotal,
@@ -302,8 +309,11 @@ export default function ViewBills() {
         glDiscount,
         selectedCount: selectedRowKeys.length,
       };
-      const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
-      message.success(res.data);
+
+      console.log("Payload:",payload);
+      
+      //const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
+      //message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
       setPaymentDate(dayjs());
@@ -365,24 +375,7 @@ export default function ViewBills() {
       render: (value: number, record: Bill) => {
         const isRowSelected = selectedRowKeys.includes(record.id);
         const checked = amountSelections[record.id]?.maintenance ?? true;
-        return (
-          <Space>
-            {/* <Checkbox
-              checked={checked}
-              disabled={!isRowSelected}
-              onChange={(e) =>
-                setAmountSelections((prev) => ({
-                  ...prev,
-                  [record.id]: {
-                    ...(prev[record.id] ?? defaultAmountSelection),
-                    maintenance: e.target.checked,
-                  },
-                }))
-              }
-            /> */}
-            {value}
-          </Space>
-        );
+        return <Space>{value}</Space>;
       },
     },
     {
@@ -404,24 +397,7 @@ export default function ViewBills() {
       render: (value: number, record: Bill) => {
         const isRowSelected = selectedRowKeys.includes(record.id);
         const checked = amountSelections[record.id]?.penalty ?? true;
-        return (
-          <Space>
-            {/* <Checkbox
-              checked={checked}
-              disabled={!isRowSelected}
-              onChange={(e) =>
-                setAmountSelections((prev) => ({
-                  ...prev,
-                  [record.id]: {
-                    ...(prev[record.id] ?? defaultAmountSelection),
-                    penalty: e.target.checked,
-                  },
-                }))
-              }
-            /> */}
-            {value}
-          </Space>
-        );
+        return <Space>{value}</Space>;
       },
     },
     {
@@ -430,24 +406,7 @@ export default function ViewBills() {
       render: (value: number, record: Bill) => {
         const isRowSelected = selectedRowKeys.includes(record.id);
         const checked = amountSelections[record.id]?.discount ?? true;
-        return (
-          <Space>
-            {/* <Checkbox
-              checked={checked}
-              disabled={!isRowSelected}
-              onChange={(e) =>
-                setAmountSelections((prev) => ({
-                  ...prev,
-                  [record.id]: {
-                    ...(prev[record.id] ?? defaultAmountSelection),
-                    discount: e.target.checked,
-                  },
-                }))
-              }
-            /> */}
-            {value}
-          </Space>
-        );
+        return <Space>{value}</Space>;
       },
     },
     { title: "Total", dataIndex: "totalAmount" },
@@ -468,6 +427,19 @@ export default function ViewBills() {
     },
   ];
 
+  const loadPendingDiscount = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/discount/pending?societyId=${societyId}&flatId=${selectedFlatId}&financialYearId=${financialYearId}`,
+      );
+
+      setPendingDiscount(res.data.pendingDiscount || 0);
+    } catch (err) {
+      console.error(err);
+      setPendingDiscount(0);
+    }
+  };
+
   const calculateInterest = async (date: dayjs.Dayjs | null) => {
     if (!date || selectedRowKeys.length === 0) return;
 
@@ -484,9 +456,11 @@ export default function ViewBills() {
       const discount = Math.round(
         computeDiscount(date, res.data.maintenanceAmount),
       );
-      setPaymentDiscount(discount);
+      setCurrentDiscount(discount);
       setPaidAmount(
-        res.data.maintenanceAmount + res.data.interestAmount - discount,
+        res.data.maintenanceAmount +
+          res.data.interestAmount -
+          (discount + pendingDiscount),
       );
     } catch (err) {
       message.error("Unable to calculate interest.");
@@ -764,8 +738,12 @@ export default function ViewBills() {
 
                     setPaymentMaintenance(maintenance);
                     setPaymentInterest(interest);
-                    setPaymentDiscount(discount);
-                    setPaidAmount(maintenance + interest - discount);
+                    setCurrentDiscount(discount);
+                    setPaidAmount(
+                      maintenance + interest - (discount + pendingDiscount),
+                    );
+                    await loadPendingDiscount();
+                    calculateInterest(paymentDate);
                     setPaymentModalOpen(true);
                     calculateInterest(paymentDate);
                     setTransactionId(selectedFlatNo || "");
@@ -827,7 +805,7 @@ export default function ViewBills() {
               onCancel={() => setPaymentModalOpen(false)}
               onOk={handlePay}
               okText="Pay Now"
-              okButtonProps={{ disabled: !paidAmount || paidAmount <= 0 }} // NEW
+              okButtonProps={{ disabled: !paidAmount || paidAmount <= 0 }}
             >
               <Form layout="vertical">
                 <Row gutter={16}>
@@ -845,7 +823,6 @@ export default function ViewBills() {
                       />
                     </Form.Item>
                   </Col>
-
                   <Col xs={24} sm={12}>
                     <Form.Item label="Payment Date" required>
                       <DatePicker
@@ -861,7 +838,6 @@ export default function ViewBills() {
                       />
                     </Form.Item>
                   </Col>
-
                   <Col xs={24} sm={12}>
                     <Form.Item label="Maintenance">
                       <Input
@@ -874,7 +850,6 @@ export default function ViewBills() {
                       />
                     </Form.Item>
                   </Col>
-
                   <Col xs={24} sm={12}>
                     <Form.Item label="Interest">
                       <Input
@@ -887,43 +862,51 @@ export default function ViewBills() {
                       />
                     </Form.Item>
                   </Col>
-
                   <Col xs={24} sm={12}>
-                    <Form.Item label="Discount">
+                    <Form.Item label="Current Discount">
                       <Input
                         type="number"
-                        value={paymentDiscount}
+                        value={currentDiscount}
                         onChange={(e) => {
-                          const newDiscount = Number(e.target.value) || 0;
-                          setPaymentDiscount(newDiscount);
-                          // Keep Paid Amount in sync with the manually edited discount
+                          const value = Number(e.target.value) || 0;
+
+                          setCurrentDiscount(value);
+
                           setPaidAmount(
-                            paymentMaintenance + paymentInterest - newDiscount,
+                            paymentMaintenance +
+                              paymentInterest -
+                              (value + pendingDiscount),
                           );
                         }}
                       />
                     </Form.Item>
                   </Col>
-
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Pending Discount">
+                      <Input value={pendingDiscount.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Total Discount">
+                      <Input value={totalPaymentDiscount.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>{" "}
                   <Col xs={24} sm={12}>
                     <Form.Item label="Total">
                       <Input value={paymentTotal.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
-
                   <Col xs={24} sm={12}>
                     <Form.Item label="Paid Amount">
                       <Input
                         type="number"
                         value={paidAmount}
-                        
                         onChange={(e) =>
                           setPaidAmount(Number(e.target.value) || 0)
                         }
                       />
                     </Form.Item>
                   </Col>
-
                   <Col xs={24} sm={12}>
                     <Form.Item label="Pending Amount">
                       <Input value={pendingAmount.toFixed(2)} readOnly />
