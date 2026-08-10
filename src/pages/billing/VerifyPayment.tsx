@@ -45,6 +45,8 @@ interface Receipt {
   totalAmount: number;
   paymentMode?: string;
   status?: string;
+  currentDiscount?: number;
+  pendingDiscount?: number;
 }
 
 interface ReceiptBill {
@@ -60,7 +62,7 @@ interface ReceiptBill {
   receiptType: String;
   name: String;
 }
- 
+
 export default function VerifyPayemnt() {
   const [form] = Form.useForm();
   const [flats, setFlats] = useState<Flat[]>([]);
@@ -75,13 +77,18 @@ export default function VerifyPayemnt() {
   const financialYear = sessionStorage.getItem("financialYear");
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
   const role = sessionStorage.getItem("role");
-  const [maintenanceMappingExists, setMaintenanceMappingExists] = useState(false);
+  const [maintenanceMappingExists, setMaintenanceMappingExists] =
+    useState(false);
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
   const [glCashInHand, setGlCashInHand] = useState<number>(0);
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
+  const [glDiscountCreditAccount, setGlDiscountCreditAccount] =
+    useState<number>(0);
+  const [currentDiscount, setCurrentDiscount] = useState(0);
+  const [pendingDiscount, setPendingDiscount] = useState(0);
   const [mappings, setMappings] = useState<any[]>([]);
 
   useEffect(() => {
@@ -113,12 +120,15 @@ export default function VerifyPayemnt() {
 
   const loadGlMapping = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/gl/master/mapping?societyId=${societyId}`,);
-
-      const mapping = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "monthly maintenance",
+      const res = await axios.get(
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
+      );
+      const mapping = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "monthly maintenance",
       );
       setMappings(res.data);
-      
+
       if (!mapping) {
         setMaintenanceMappingExists(false);
         message.error("Monthly Maintenance GL Mapping not configured");
@@ -130,16 +140,21 @@ export default function VerifyPayemnt() {
       setGlReceivable(mapping.gl_receivable);
       setGlCreditAccount(mapping.gl_credit_account);
 
-
-      const CashInHand = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "cash in hand",
+      const CashInHand = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "cash in hand",
       )?.gl_receivable;
       setGlCashInHand(Number(CashInHand));
 
-      const BankAccount = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "bank account",
+      const BankAccount = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "bank account",
       )?.gl_receivable;
       setGlBankAccount(Number(BankAccount));
 
-      const InterestIncome = res.data.find((item: any) =>item.description?.trim().toLowerCase() === "interest income",
+      const InterestIncome = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "interest income",
       )?.gl_receivable;
       setGlInterestIncome(Number(InterestIncome));
 
@@ -147,6 +162,11 @@ export default function VerifyPayemnt() {
         (item: any) => item.description?.trim().toLowerCase() === "discount",
       )?.gl_receivable;
       setGlDiscount(Number(Discount));
+
+      const DiscountCredit = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "discount",
+      )?.gl_credit_account;
+      setGlDiscountCreditAccount(Number(DiscountCredit));
     } catch (err) {
       console.error(err);
       setMaintenanceMappingExists(false);
@@ -165,7 +185,10 @@ export default function VerifyPayemnt() {
         financialYearId: Number(financialYearId),
       };
 
-      const res = await axios.post(`${BASE_URL}/receipts/viewReceipts`,payload,);
+      const res = await axios.post(
+        `${BASE_URL}/receipts/viewReceipts`,
+        payload,
+      );
       if (!financialYear) {
         setReceipts(res.data);
         return;
@@ -206,6 +229,8 @@ export default function VerifyPayemnt() {
 
       const selected = receipts.find((r) => r.id === receiptId) || null;
       setSelectedReceipt(selected);
+      setCurrentDiscount(Number(selected?.currentDiscount || 0));
+      setPendingDiscount(Number(selected?.pendingDiscount || 0));
 
       if (receiptType === "BILLING") {
         setBillingOpen(true);
@@ -694,15 +719,29 @@ export default function VerifyPayemnt() {
   };
 
   const confirmPayment = async (receiptId: number, receiptNo: string) => {
-      const response = await axios.get(`${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`);
-      const isClosed = response.data === "Closed" || response.data?.status === "Closed";
-      if (isClosed) {
-        message.error("This financial year is closed. You cannot confirm payment.");
-        return
-      }
+    const response = await axios.get(
+      `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+    );
+    const isClosed =
+      response.data === "Closed" || response.data?.status === "Closed";
+    if (isClosed) {
+      message.error(
+        "This financial year is closed. You cannot confirm payment.",
+      );
+      return;
+    }
 
     let paymentTable;
     let mapping;
+
+    const receiptResponse = await axios.get(
+      `${BASE_URL}/receipts/${receiptId}`,
+    );
+
+    const receipt = receiptResponse.data;
+
+    const currentDiscount = Number(receipt.currentDiscount || 0);
+    const pendingDiscount = Number(receipt.pendingDiscount || 0);
 
     if (receiptNo.startsWith("RCPT")) {
       paymentTable = "billing";
@@ -720,7 +759,9 @@ export default function VerifyPayemnt() {
       paymentTable = "contribution";
 
       try {
-        const { data: contribution } = await axios.get(`${BASE_URL}/contribution/${societyId}/${financialYearId}/${receiptId}`,);
+        const { data: contribution } = await axios.get(
+          `${BASE_URL}/contribution/${societyId}/${financialYearId}/${receiptId}`,
+        );
         if (contribution.length > 0) {
           mapping = {
             glReceivable: contribution[0].glReceivable,
@@ -741,23 +782,29 @@ export default function VerifyPayemnt() {
       message.error("GL Mapping not found");
       return;
     }
- 
+
     const payload = {
       receiptId,
       paymentTable,
-      glReceivable: mapping.glReceivable ? mapping.glReceivable : mapping.gl_receivable,
-      glCreditAccount: mapping.glCreditAccount ? mapping.glCreditAccount : mapping.gl_credit_account,
+      glReceivable: mapping.glReceivable
+        ? mapping.glReceivable
+        : mapping.gl_receivable,
+      glCreditAccount: mapping.glCreditAccount
+        ? mapping.glCreditAccount
+        : mapping.gl_credit_account,
       glCashInHand,
       glBankAccount,
       glInterestIncome,
       glDiscount,
+      currentDiscount,
+      pendingDiscount,
     };
 
+    console.log("Payload:", payload);
     try {
       await axios.put(`${BASE_URL}/receipts/confirm`, payload);
       message.success("Payment confirmed successfully");
-      loadReceipts(); 
-
+      loadReceipts();
     } catch (error) {
       console.error(error);
       message.error("Failed to confirm payment");

@@ -102,6 +102,8 @@ export default function ViewBills() {
   const [glBankAccount, setGlBankAccount] = useState<number>(0);
   const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
   const [glDiscount, setGlDiscount] = useState<number>(0);
+  const [glMemberAdvance, setGlMemberAdvance] = useState<number>(0);
+  const [glDiscountCreditAccount,setGlDiscountCreditAccount] = useState<number>(0);
   const [paymentMaintenance, setPaymentMaintenance] = useState(0);
   const [paymentInterest, setPaymentInterest] = useState(0);
   const [currentDiscount, setCurrentDiscount] = useState(0);
@@ -111,8 +113,9 @@ export default function ViewBills() {
   const paymentTotal =
     paymentMaintenance + paymentInterest - totalPaymentDiscount;
   const [paidAmount, setPaidAmount] = useState<number>(0);
+  const advanceAmount = Math.max(paidAmount - paymentTotal, 0);
   const [maintenancePolicy, setMaintenancePolicy] = useState<any>(null);
-  const pendingAmount = Math.max(paymentTotal - paidAmount);
+const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
   const [discountEligible, setDiscountEligible] = useState(false);
   const defaultAmountSelection = {
     maintenance: true,
@@ -198,10 +201,14 @@ export default function ViewBills() {
           item.description?.trim().toLowerCase() == "interest income",
       )?.gl_receivable;
       setGlInterestIncome(Number(InterestIncome));
-      const Discount = res.data.find(
-        (item: any) => item.description?.trim().toLowerCase() == "discount",
-      )?.gl_receivable;
+      const Discount = res.data.find((item: any) => item.description?.trim().toLowerCase() == "discount",)?.gl_receivable;
       setGlDiscount(Number(Discount));
+      const DiscountCredit = res.data.find((item: any) => item.description?.trim().toLowerCase() == "discount",)?.gl_credit_account;
+      setGlDiscountCreditAccount(Number(DiscountCredit));
+      const MemberAdvance = res.data.find((item: any) =>item.description?.trim().toLowerCase() ==="member advance / member deposit",
+          )?.gl_credit_account;
+
+      setGlMemberAdvance(Number(MemberAdvance));
     } catch (err) {
       console.error(err);
       setMaintenanceMappingExists(false);
@@ -265,12 +272,17 @@ export default function ViewBills() {
         return;
       }
 
+      if (!paidAmount || paidAmount <= 0) {
+        message.error("Please enter a valid Paid Amount");
+        return;
+      }
+
       const billsPayload = selectedBills.map((b) => {
         const sel = amountSelections[b.id] ?? defaultAmountSelection;
 
         const maintenance =
           sel.maintenance !== false ? b.maintenanceAmount || 0 : 0;
-        const interest = b.interestAmount || 0; // always included, compulsory
+        const interest = b.interestAmount || 0;
         const penalty = sel.penalty !== false ? b.penaltyAmount || 0 : 0;
         const discount = sel.discount !== false ? b.discountAmount || 0 : 0;
 
@@ -288,7 +300,7 @@ export default function ViewBills() {
 
       const payload = {
         billIds,
-        bills: billsPayload, // NEW — id-wise breakdown
+        bills: billsPayload, 
         paymentMode,
         paymentDate: paymentDate.format("YYYY-MM-DD"),
         financialYearId,
@@ -300,6 +312,7 @@ export default function ViewBills() {
         discountAmount: totalPaymentDiscount,
         paidAmount,
         pendingAmount,
+        advanceAmount,
         totalAmount: paymentTotal,
         glReceivable,
         glCreditAccount,
@@ -307,13 +320,15 @@ export default function ViewBills() {
         glBankAccount,
         glInterestIncome,
         glDiscount,
+        glMemberAdvance,
         selectedCount: selectedRowKeys.length,
+        glDiscountCreditAccount
       };
 
       console.log("Payload:",payload);
       
-      //const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
-      //message.success(res.data);
+      const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
+      message.success(res.data);
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
       setPaymentDate(dayjs());
@@ -910,6 +925,14 @@ export default function ViewBills() {
                   <Col xs={24} sm={12}>
                     <Form.Item label="Pending Amount">
                       <Input value={pendingAmount.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Advance Amount">
+                      <Input
+                        value={advanceAmount.toFixed(2)}
+                        readOnly
+                      />
                     </Form.Item>
                   </Col>
                   {paymentMode !== "CASH" && (
