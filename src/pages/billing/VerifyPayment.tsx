@@ -47,6 +47,7 @@ interface Receipt {
   status?: string;
   currentDiscount?: number;
   pendingDiscount?: number;
+  advanceAmount?: number;
 }
 
 interface ReceiptBill {
@@ -90,6 +91,7 @@ export default function VerifyPayemnt() {
   const [currentDiscount, setCurrentDiscount] = useState(0);
   const [pendingDiscount, setPendingDiscount] = useState(0);
   const [mappings, setMappings] = useState<any[]>([]);
+  const [glMemberAdvance, setGlMemberAdvance] = useState<number>(0);
 
   useEffect(() => {
     loadFlats();
@@ -167,6 +169,14 @@ export default function VerifyPayemnt() {
         (item: any) => item.description?.trim().toLowerCase() == "discount",
       )?.gl_credit_account;
       setGlDiscountCreditAccount(Number(DiscountCredit));
+
+      const MemberAdvance = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() === "member advance / member deposit",
+      )?.gl_credit_account;
+
+      setGlMemberAdvance(Number(MemberAdvance));
+
     } catch (err) {
       console.error(err);
       setMaintenanceMappingExists(false);
@@ -742,6 +752,7 @@ export default function VerifyPayemnt() {
 
     const currentDiscount = Number(receipt.currentDiscount || 0);
     const pendingDiscount = Number(receipt.pendingDiscount || 0);
+    const advanceAmount = Number(receipt.advanceAmount || 0);
 
     if (receiptNo.startsWith("RCPT")) {
       paymentTable = "billing";
@@ -798,6 +809,8 @@ export default function VerifyPayemnt() {
       glDiscount,
       currentDiscount,
       pendingDiscount,
+      advanceAmount,
+      glMemberAdvance
     };
 
     console.log("Payload:", payload);
