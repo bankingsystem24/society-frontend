@@ -57,6 +57,7 @@ interface Bill {
   createdDate: string;
   flatId: number;
   flatNo: string;
+  memberId: number;
   memberName: string;
   transactionId: string;
 }
@@ -64,6 +65,17 @@ interface Bill {
 interface Members {
   id: number;
   name: string;
+}
+interface DiscountPolicy {
+  id?: number;
+  paidBeforeDate: string;
+  discountPercent: number;
+  active: boolean;
+}
+interface MaintenancePolicy {
+  id?: number;
+  billingFrequency: "MONTHLY" | "QUARTERLY" | string;
+  active?: boolean;
 }
 
 const months = [
@@ -88,38 +100,51 @@ export default function ViewBills() {
   const [members, setMembers] = useState<Members[]>([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [paymentMode, setPaymentMode] = useState<string>("UPI");
-  const [transactionId, setTransactionId] = useState<string>("");
+  const [paymentMode, setPaymentMode] = useState("UPI");
+  const [transactionId, setTransactionId] = useState("");
   const [form] = Form.useForm();
   const societyId = Number(sessionStorage.getItem("societyId"));
   const financialYearId = Number(sessionStorage.getItem("financialYearId"));
+
   const [maintenanceMappingExists, setMaintenanceMappingExists] =
     useState(false);
   const [paymentDate, setPaymentDate] = useState(dayjs());
-  const [glReceivable, setGlReceivable] = useState<number>(0);
-  const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
-  const [glCashInHand, setGlCashInHand] = useState<number>(0);
-  const [glBankAccount, setGlBankAccount] = useState<number>(0);
-  const [glInterestIncome, setGlInterestIncome] = useState<number>(0);
-  const [glDiscount, setGlDiscount] = useState<number>(0);
-  const [glMemberAdvance, setGlMemberAdvance] = useState<number>(0);
-  const [glDiscountCreditAccount,setGlDiscountCreditAccount] = useState<number>(0);
+  const [glReceivable, setGlReceivable] = useState(0);
+  const [glCreditAccount, setGlCreditAccount] = useState(0);
+  const [glCashInHand, setGlCashInHand] = useState(0);
+  const [glBankAccount, setGlBankAccount] = useState(0);
+  const [glInterestIncome, setGlInterestIncome] = useState(0);
+  const [glDiscount, setGlDiscount] = useState(0);
+  const [glMemberAdvance, setGlMemberAdvance] = useState(0);
+  const [glDiscountCreditAccount, setGlDiscountCreditAccount] = useState(0);
   const [paymentMaintenance, setPaymentMaintenance] = useState(0);
   const [paymentInterest, setPaymentInterest] = useState(0);
+  const [paymentPenalty, setPaymentPenalty] = useState(0);
   const [currentDiscount, setCurrentDiscount] = useState(0);
   const [pendingDiscount, setPendingDiscount] = useState(0);
-  const [discountPolicy, setDiscountPolicy] = useState<any>(null);
-  const totalPaymentDiscount = currentDiscount + pendingDiscount;
-  const paymentTotal =
-    paymentMaintenance + paymentInterest - totalPaymentDiscount;
-  const [paidAmount, setPaidAmount] = useState<number>(0);
-  const advanceAmount = Math.max(paidAmount - paymentTotal, 0);
-  const [maintenancePolicy, setMaintenancePolicy] = useState<any>(null);
-const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
+  const [discountPolicy, setDiscountPolicy] = useState<DiscountPolicy | null>(
+    null,
+  );
+  const [paidAmount, setPaidAmount] = useState(0);
+  const [availableAdvance, setAvailableAdvance] = useState(0);
+  const [maintenancePolicy, setMaintenancePolicy] =
+    useState<MaintenancePolicy | null>(null);
   const [discountEligible, setDiscountEligible] = useState(false);
+  const totalPaymentDiscount = currentDiscount + pendingDiscount;
+  const billTotal = Math.max(
+    paymentMaintenance +
+      paymentInterest +
+      paymentPenalty -
+      totalPaymentDiscount,
+    0,
+  );
+  const advanceUsed = Math.min(availableAdvance, billTotal);
+  const paymentTotal = Math.max(billTotal - advanceUsed, 0);
+  const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
+  const advanceAmount = Math.max(paidAmount - paymentTotal, 0);
   const defaultAmountSelection = {
     maintenance: true,
-    interest: true, // always true, compulsory
+    interest: true, 
     penalty: true,
     discount: true,
   };
@@ -151,6 +176,27 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
     glInterestIncome,
     glDiscount,
   ]);
+
+  const loadAvailableAdvance = async (memberId: number) => {
+    try {
+      const res = await axios.get(`${BASE_URL}/billing/member-advance`, {
+        params: {
+          memberId,
+          societyId,
+          financialYearId,
+        },
+      });
+
+      const advance = Number(res.data || 0);
+      setAvailableAdvance(advance);
+
+      return advance;
+    } catch (error) {
+      console.error("Failed to load member advance:", error);
+      setAvailableAdvance(0);
+      return 0;
+    }
+  };
 
   const loadMaintenancePolicy = async () => {
     try {
@@ -201,12 +247,19 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
           item.description?.trim().toLowerCase() == "interest income",
       )?.gl_receivable;
       setGlInterestIncome(Number(InterestIncome));
-      const Discount = res.data.find((item: any) => item.description?.trim().toLowerCase() == "discount",)?.gl_receivable;
+      const Discount = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "discount",
+      )?.gl_receivable;
       setGlDiscount(Number(Discount));
-      const DiscountCredit = res.data.find((item: any) => item.description?.trim().toLowerCase() == "discount",)?.gl_credit_account;
+      const DiscountCredit = res.data.find(
+        (item: any) => item.description?.trim().toLowerCase() == "discount",
+      )?.gl_credit_account;
       setGlDiscountCreditAccount(Number(DiscountCredit));
-      const MemberAdvance = res.data.find((item: any) =>item.description?.trim().toLowerCase() ==="member advance / member deposit",
-          )?.gl_credit_account;
+      const MemberAdvance = res.data.find(
+        (item: any) =>
+          item.description?.trim().toLowerCase() ===
+          "member advance / member deposit",
+      )?.gl_credit_account;
 
       setGlMemberAdvance(Number(MemberAdvance));
     } catch (err) {
@@ -300,7 +353,7 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
 
       const payload = {
         billIds,
-        bills: billsPayload, 
+        bills: billsPayload,
         paymentMode,
         paymentDate: paymentDate.format("YYYY-MM-DD"),
         financialYearId,
@@ -322,11 +375,12 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
         glDiscount,
         glMemberAdvance,
         selectedCount: selectedRowKeys.length,
-        glDiscountCreditAccount
+        glDiscountCreditAccount,
+        availableAdvance
       };
 
-      console.log("Payload:",payload);
-      
+      console.log("Payload:", payload);
+
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
       message.success(res.data);
       setSelectedRowKeys([]);
@@ -448,15 +502,19 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
         `${BASE_URL}/discount/pending?societyId=${societyId}&flatId=${selectedFlatId}&financialYearId=${financialYearId}`,
       );
 
-      setPendingDiscount(res.data.pendingDiscount || 0);
+      const discount = Number(res.data?.pendingDiscount || 0);
+      setPendingDiscount(discount);
+
+      return discount;
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load pending discount:", err);
       setPendingDiscount(0);
+      return 0;
     }
   };
 
   const calculateInterest = async (date: dayjs.Dayjs | null) => {
-    if (!date || selectedRowKeys.length === 0) return;
+    if (!date || selectedRowKeys.length === 0) return null;
 
     try {
       const res = await axios.post(`${BASE_URL}/billing/calculate-interest`, {
@@ -465,23 +523,30 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
         financialYearId,
       });
 
-      setPaymentInterest(res.data.interestAmount);
-      setPaymentMaintenance(res.data.maintenanceAmount);
+      const maintenance = Number(res.data.maintenanceAmount || 0);
+      const interest = Number(res.data.interestAmount || 0);
+      const penalty = Number(res.data.penaltyAmount || 0);
 
-      const discount = Math.round(
-        computeDiscount(date, res.data.maintenanceAmount),
-      );
+      setPaymentMaintenance(maintenance);
+      setPaymentInterest(interest);
+      setPaymentPenalty(penalty);
+
+      const discount = Math.round(computeDiscount(date, maintenance));
+
       setCurrentDiscount(discount);
-      setPaidAmount(
-        res.data.maintenanceAmount +
-          res.data.interestAmount -
-          (discount + pendingDiscount),
-      );
+
+      return {
+        maintenance,
+        interest,
+        penalty,
+        discount,
+      };
     } catch (err) {
+      console.error(err);
       message.error("Unable to calculate interest.");
+      return null;
     }
   };
-
   const DISCOUNT_ELIGIBLE_MONTHS = ["APRIL", "JULY", "OCTOBER", "JANUARY"];
 
   const computeDiscount = (date: dayjs.Dayjs, maintenanceAmount: number) => {
@@ -491,6 +556,7 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
     }
 
     const selectedMonths = selectedBills.map((b) => b.month);
+
     const isEligibleMonthCombo =
       selectedMonths.length === DISCOUNT_ELIGIBLE_MONTHS.length &&
       DISCOUNT_ELIGIBLE_MONTHS.every((m) => selectedMonths.includes(m));
@@ -505,16 +571,18 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
     const isEligibleCount =
       requiredCount !== null && selectedRowKeys.length === requiredCount;
 
-    const isWithinDeadline = date.isSameOrBefore(
-      dayjs(discountPolicy.paidBeforeDate),
-      "day",
-    );
+    const paidBeforeDate = dayjs(discountPolicy.paidBeforeDate);
+
+    const isWithinDeadline =
+      paidBeforeDate.isValid() && date.isSameOrBefore(paidBeforeDate, "day");
 
     const eligible =
       isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
+
     setDiscountEligible(eligible);
+
     if (eligible) {
-      return (maintenanceAmount * discountPolicy.discountPercent) / 100;
+      return (maintenanceAmount * Number(discountPolicy.discountPercent)) / 100;
     }
 
     return 0;
@@ -700,7 +768,6 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
               </div>
             </div>
 
-            {/* ================= BUTTON ================= */}
             <div style={{ marginBottom: 12 }}>
               <Button
                 type="primary"
@@ -710,9 +777,11 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                     const response = await axios.get(
                       `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
                     );
+
                     const isClosed =
                       response.data === "Closed" ||
                       response.data?.status === "Closed";
+
                     if (isClosed) {
                       message.error(
                         "This financial year is closed. You cannot add or edit records.",
@@ -725,44 +794,35 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                       );
                       return;
                     }
+                    const memberId = selectedBills[0]?.memberId;
 
-                    const maintenance = selectedBills.reduce(
-                      (s, b) =>
-                        s +
-                        (amountSelections[b.id]?.maintenance !== false
-                          ? b.maintenanceAmount || 0
-                          : 0),
+                    if (!memberId) {
+                      message.error("Member not found for selected bill");
+                      return;
+                    }
+                    const loadedPendingDiscount = await loadPendingDiscount();
+                    const loadedAdvance = await loadAvailableAdvance(memberId);
+                    const result = await calculateInterest(paymentDate);
+                    if (!result) {
+                      return;
+                    }
+                    const totalDiscount =
+                      result.discount + loadedPendingDiscount;
+
+                    const billAmount = Math.max(
+                      result.maintenance +
+                        result.interest +
+                        result.penalty -
+                        totalDiscount,
                       0,
                     );
-
-                    const interest = selectedBills.reduce(
-                      (s, b) => s + (b.interestAmount || 0),
-                      0,
-                    );
-
-                    const penalty = selectedBills.reduce(
-                      (s, b) =>
-                        s +
-                        (amountSelections[b.id]?.penalty !== false
-                          ? b.penaltyAmount || 0
-                          : 0),
-                      0,
-                    );
-
-                    const discount = computeDiscount(paymentDate, maintenance);
-
-                    setPaymentMaintenance(maintenance);
-                    setPaymentInterest(interest);
-                    setCurrentDiscount(discount);
-                    setPaidAmount(
-                      maintenance + interest - (discount + pendingDiscount),
-                    );
-                    await loadPendingDiscount();
-                    calculateInterest(paymentDate);
+                    const advanceUsed = Math.min(loadedAdvance, billAmount);
+                    const amountToPay = Math.max(billAmount - advanceUsed, 0);
+                    setPaidAmount(amountToPay);
                     setPaymentModalOpen(true);
-                    calculateInterest(paymentDate);
                     setTransactionId(selectedFlatNo || "");
                   } catch (error) {
+                    console.error(error);
                     message.error("Unable to verify accounting year status.");
                   }
                 }}
@@ -773,8 +833,6 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                 Delete All Pending Bills
               </Button>
             </div>
-
-            {/* ================= TABLE ================= */}
             <Table
               rowKey="id"
               columns={columns}
@@ -844,11 +902,35 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                         style={{ width: "100%" }}
                         value={paymentDate}
                         format="DD-MM-YYYY"
-                        onChange={(date) => {
-                          if (date) {
-                            setPaymentDate(date);
-                            calculateInterest(date); // now also recalculates discount
-                          }
+                        onChange={async (date) => {
+                          if (!date) return;
+
+                          setPaymentDate(date);
+
+                          const result = await calculateInterest(date);
+
+                          if (!result) return;
+
+                          const billAmount = Math.max(
+                            result.maintenance +
+                              result.interest +
+                              result.penalty -
+                              result.discount -
+                              pendingDiscount,
+                            0,
+                          );
+
+                          const advanceUsed = Math.min(
+                            availableAdvance,
+                            billAmount,
+                          );
+
+                          const amountToPay = Math.max(
+                            billAmount - advanceUsed,
+                            0,
+                          );
+
+                          setPaidAmount(amountToPay);
                         }}
                       />
                     </Form.Item>
@@ -890,7 +972,8 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                           setPaidAmount(
                             paymentMaintenance +
                               paymentInterest -
-                              (value + pendingDiscount),
+                              (value + pendingDiscount) -
+                              availableAdvance,
                           );
                         }}
                       />
@@ -906,6 +989,11 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                       <Input value={totalPaymentDiscount.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>{" "}
+                  <Col xs={24} sm={12}>
+                    <Form.Item label="Available Advance">
+                      <Input value={availableAdvance.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
                   <Col xs={24} sm={12}>
                     <Form.Item label="Total">
                       <Input value={paymentTotal.toFixed(2)} readOnly />
@@ -928,11 +1016,8 @@ const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
                     </Form.Item>
                   </Col>
                   <Col xs={24} sm={12}>
-                    <Form.Item label="Advance Amount">
-                      <Input
-                        value={advanceAmount.toFixed(2)}
-                        readOnly
-                      />
+                    <Form.Item label="New Advance Amount">
+                      <Input value={advanceAmount.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
                   {paymentMode !== "CASH" && (
