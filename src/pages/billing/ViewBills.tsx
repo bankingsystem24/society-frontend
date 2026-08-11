@@ -376,7 +376,8 @@ export default function ViewBills() {
         glMemberAdvance,
         selectedCount: selectedRowKeys.length,
         glDiscountCreditAccount,
-        availableAdvance
+        availableAdvance,
+        advanceUsed
       };
 
       console.log("Payload:", payload);

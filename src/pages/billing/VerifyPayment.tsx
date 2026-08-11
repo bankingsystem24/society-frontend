@@ -48,6 +48,7 @@ interface Receipt {
   currentDiscount?: number;
   pendingDiscount?: number;
   advanceAmount?: number;
+  advanceUsed?:number;
 }
 
 interface ReceiptBill {
@@ -749,10 +750,10 @@ export default function VerifyPayemnt() {
     );
 
     const receipt = receiptResponse.data;
-
     const currentDiscount = Number(receipt.currentDiscount || 0);
     const pendingDiscount = Number(receipt.pendingDiscount || 0);
     const advanceAmount = Number(receipt.advanceAmount || 0);
+    const advanceUsed = Number(receipt.advanceUsed || 0);
 
     if (receiptNo.startsWith("RCPT")) {
       paymentTable = "billing";
@@ -793,7 +794,6 @@ export default function VerifyPayemnt() {
       message.error("GL Mapping not found");
       return;
     }
-
     const payload = {
       receiptId,
       paymentTable,
@@ -810,7 +810,8 @@ export default function VerifyPayemnt() {
       currentDiscount,
       pendingDiscount,
       advanceAmount,
-      glMemberAdvance
+      glMemberAdvance,
+      advanceUsed
     };
 
     console.log("Payload:", payload);
@@ -852,6 +853,11 @@ export default function VerifyPayemnt() {
       dataIndex: "discountAmount",
       render: (value) => `₹ ${value}`,
     },
+    {
+      title: "Advance Used",
+      dataIndex: "advanceUsed",
+      render: (value) => `₹ ${value}`,
+    },    
     {
       title: "Net Paid",
       dataIndex: "totalAmount",
