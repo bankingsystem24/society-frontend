@@ -419,8 +419,13 @@ export default function ViewBills() {
         memberId: values.memberId || null,
         financialYearId: financialYearId,
       };
+
+      console.log("Payload:",payload);
+
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, payload);
       setBills(res.data);
+      console.log("Filtered Bills:",res.data);
+
     } catch {
       message.error("Failed to filter bills");
     } finally {
@@ -953,7 +958,7 @@ export default function ViewBills() {
                       <Input
                         type="number"
                         value={paymentInterest}
-                        readOnly
+                        // readOnly
                         onChange={(e) =>
                           setPaymentInterest(Number(e.target.value) || 0)
                         }
