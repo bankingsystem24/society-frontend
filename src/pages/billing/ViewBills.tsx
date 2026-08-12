@@ -48,9 +48,13 @@ interface Bill {
   month: string;
   year: number;
   maintenanceAmount: number;
+  paidAmount: number;
+  pendingAmount: number;
   penaltyAmount: number;
   interestAmount: number;
   discountAmount: number;
+  currentDiscount?: number;
+  pendingDiscount?: number;
   totalAmount: number;
   status: string;
   dueDate: string;
@@ -125,14 +129,17 @@ export default function ViewBills() {
   const [discountPolicy, setDiscountPolicy] = useState<DiscountPolicy | null>(
     null,
   );
-  const [paidAmount, setPaidAmount] = useState(0);
+  const [alreadyPaidAmount, setAlreadyPaidAmount] = useState(0);
+  const [paymentAmount, setPaymentAmount] = useState(0);
   const [availableAdvance, setAvailableAdvance] = useState(0);
   const [maintenancePolicy, setMaintenancePolicy] =
     useState<MaintenancePolicy | null>(null);
   const [discountEligible, setDiscountEligible] = useState(false);
   const totalPaymentDiscount = currentDiscount + pendingDiscount;
+
   const billTotal = Math.max(
-    paymentMaintenance +
+    paymentMaintenance -
+      alreadyPaidAmount +
       paymentInterest +
       paymentPenalty -
       totalPaymentDiscount,
@@ -140,11 +147,10 @@ export default function ViewBills() {
   );
   const advanceUsed = Math.min(availableAdvance, billTotal);
   const paymentTotal = Math.max(billTotal - advanceUsed, 0);
-  const pendingAmount = Math.max(paymentTotal - paidAmount, 0);
-  const advanceAmount = Math.max(paidAmount - paymentTotal, 0);
+  const newAdvanceAmount = Math.max(paymentAmount - paymentTotal, 0);
   const defaultAmountSelection = {
     maintenance: true,
-    interest: true, 
+    interest: true,
     penalty: true,
     discount: true,
   };
@@ -306,7 +312,28 @@ export default function ViewBills() {
     selectedBills.length > 0 ? selectedBills[0].flatNo : null;
   const selectedFlatId =
     selectedBills.length > 0 ? selectedBills[0].flatId : null;
+  const maintenanceBalance = selectedBills.reduce(
+    (sum, bill) =>
+      sum +
+      Math.max(
+        Number(bill.maintenanceAmount || 0) - Number(bill.paidAmount || 0),
+        0,
+      ),
+    0,
+  );
 
+  const maintenancePaidNow = Math.min(
+    maintenanceBalance,
+    Math.max(
+      paymentAmount - paymentInterest - paymentPenalty + totalPaymentDiscount,
+      0,
+    ),
+  );
+
+  const pendingAfterPayment = Math.max(
+    maintenanceBalance - maintenancePaidNow,
+    0,
+  );
   const loadMembers = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/members?societyId=${societyId}`);
@@ -320,13 +347,8 @@ export default function ViewBills() {
     try {
       const billIds = selectedRowKeys.map(Number);
 
-      if (!paidAmount || paidAmount <= 0) {
-        message.error("Please enter a valid Paid Amount");
-        return;
-      }
-
-      if (!paidAmount || paidAmount <= 0) {
-        message.error("Please enter a valid Paid Amount");
+      if (!paymentAmount || paymentAmount <= 0) {
+        message.error("Please enter a valid Payment Amount");
         return;
       }
 
@@ -334,9 +356,17 @@ export default function ViewBills() {
         const sel = amountSelections[b.id] ?? defaultAmountSelection;
 
         const maintenance =
-          sel.maintenance !== false ? b.maintenanceAmount || 0 : 0;
+          sel.maintenance !== false
+            ? Math.max(
+                Number(b.maintenanceAmount || 0) - Number(b.paidAmount || 0),
+                0,
+              )
+            : 0;
+
         const interest = b.interestAmount || 0;
+
         const penalty = sel.penalty !== false ? b.penaltyAmount || 0 : 0;
+
         const discount = sel.discount !== false ? b.discountAmount || 0 : 0;
 
         const billTotal = maintenance + interest + penalty - discount;
@@ -350,7 +380,16 @@ export default function ViewBills() {
           totalAmount: billTotal,
         };
       });
-
+      const currentMaintenancePayment = Math.min(
+        maintenanceBalance,
+        Math.max(
+          paymentAmount -
+            paymentInterest -
+            paymentPenalty +
+            totalPaymentDiscount,
+          0,
+        ),
+      );
       const payload = {
         billIds,
         bills: billsPayload,
@@ -358,15 +397,25 @@ export default function ViewBills() {
         paymentDate: paymentDate.format("YYYY-MM-DD"),
         financialYearId,
         transactionId,
-        maintenanceAmount: paymentMaintenance,
+
+        // Current bill amounts
+        maintenanceAmount: currentMaintenancePayment,
         interestAmount: paymentInterest,
+
         currentDiscount,
         pendingDiscount,
         discountAmount: totalPaymentDiscount,
-        paidAmount,
-        pendingAmount,
-        advanceAmount,
+
+        // IMPORTANT:
+        // only THIS transaction's payment
+        paidAmount: paymentAmount,
+
+        // Remaining maintenance after THIS payment
+        pendingAmount: pendingAfterPayment,
+
+        advanceAmount: newAdvanceAmount,
         totalAmount: paymentTotal,
+
         glReceivable,
         glCreditAccount,
         glCashInHand,
@@ -377,19 +426,25 @@ export default function ViewBills() {
         selectedCount: selectedRowKeys.length,
         glDiscountCreditAccount,
         availableAdvance,
-        advanceUsed
+        advanceUsed,
       };
 
-      console.log("Payload:", payload);
+      console.log("Payment Payload:", payload);
 
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
+
       message.success(res.data);
+
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
       setPaymentDate(dayjs());
-      setPaidAmount(0);
+
+      setAlreadyPaidAmount(0);
+      setPaymentAmount(0);
+
       loadBills();
-    } catch {
+    } catch (error) {
+      console.error(error);
       message.error("Payment failed");
     }
   };
@@ -420,12 +475,11 @@ export default function ViewBills() {
         financialYearId: financialYearId,
       };
 
-      console.log("Payload:",payload);
+      console.log("Payload:", payload);
 
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, payload);
       setBills(res.data);
-      console.log("Filtered Bills:",res.data);
-
+      console.log("Filtered Bills:", res.data);
     } catch {
       message.error("Failed to filter bills");
     } finally {
@@ -780,6 +834,10 @@ export default function ViewBills() {
                 disabled={selectedRowKeys.length === 0}
                 onClick={async () => {
                   try {
+                    // =====================================================
+                    // 1. CHECK FINANCIAL YEAR STATUS
+                    // =====================================================
+
                     const response = await axios.get(
                       `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
                     );
@@ -794,41 +852,145 @@ export default function ViewBills() {
                       );
                       return;
                     }
+
+                    // =====================================================
+                    // 2. CHECK GL MAPPING
+                    // =====================================================
+
                     if (!glReceivable || !glCreditAccount) {
                       message.error(
                         "Monthly Maintenance GL Mapping not configured",
                       );
                       return;
                     }
+
+                    // =====================================================
+                    // 3. GET MEMBER
+                    // =====================================================
+
                     const memberId = selectedBills[0]?.memberId;
 
                     if (!memberId) {
                       message.error("Member not found for selected bill");
                       return;
                     }
+
+                    // =====================================================
+                    // 4. LOAD PENDING DISCOUNT
+                    // =====================================================
+
                     const loadedPendingDiscount = await loadPendingDiscount();
+
+                    // =====================================================
+                    // 5. LOAD AVAILABLE ADVANCE
+                    // =====================================================
+
                     const loadedAdvance = await loadAvailableAdvance(memberId);
+
+                    // =====================================================
+                    // 6. CALCULATE CURRENT INTEREST / PENALTY
+                    // =====================================================
+
                     const result = await calculateInterest(paymentDate);
+
                     if (!result) {
                       return;
                     }
+
+                    // =====================================================
+                    // 7. ORIGINAL MAINTENANCE AMOUNT
+                    //
+                    // Example:
+                    // maintenanceAmount = 3145.50
+                    //
+                    // This value NEVER changes.
+                    // =====================================================
+
+                    const selectedMaintenance = selectedBills.reduce(
+                      (sum, bill) => sum + Number(bill.maintenanceAmount || 0),
+                      0,
+                    );
+
+                    // =====================================================
+                    // 8. ALREADY PAID MAINTENANCE
+                    //
+                    // Example:
+                    // maintenanceAmount = 3145.50
+                    // paidAmount        = 1100.00
+                    // =====================================================
+
+                    const remainingMaintenance = selectedBills.reduce(
+                      (sum, bill) =>
+                        sum +
+                        Math.max(
+                          Number(bill.maintenanceAmount || 0) -
+                            Number(bill.paidAmount || 0),
+                          0,
+                        ),
+                      0,
+                    );
+
+                    // =====================================================
+                    // 10. TOTAL DISCOUNT
+                    // =====================================================
+
                     const totalDiscount =
-                      result.discount + loadedPendingDiscount;
+                      Number(result.discount || 0) +
+                      Number(loadedPendingDiscount || 0);
+
+                    // =====================================================
+                    // 11. CURRENT PAYABLE AMOUNT
+                    //
+                    // Remaining maintenance
+                    // + interest
+                    // + penalty
+                    // - discount
+                    // =====================================================
 
                     const billAmount = Math.max(
-                      result.maintenance +
-                        result.interest +
-                        result.penalty -
+                      remainingMaintenance +
+                        Number(result.interest || 0) +
+                        Number(result.penalty || 0) -
                         totalDiscount,
                       0,
                     );
-                    const advanceUsed = Math.min(loadedAdvance, billAmount);
-                    const amountToPay = Math.max(billAmount - advanceUsed, 0);
-                    setPaidAmount(amountToPay);
+
+                    // =====================================================
+                    // 12. ADVANCE USED
+                    // =====================================================
+
+                    const usedAdvance = Math.min(loadedAdvance, billAmount);
+
+                    // =====================================================
+                    // 13. PAYMENT REQUIRED NOW
+                    // =====================================================
+
+                    const amountToPay = Math.max(billAmount - usedAdvance, 0);
+
+                    // =====================================================
+                    // 14. SET PAYMENT MODAL VALUES
+                    // =====================================================
+
+                    setPaymentMaintenance(selectedMaintenance);
+
+                    setAlreadyPaidAmount(
+                      Math.max(selectedMaintenance - remainingMaintenance, 0),
+                    );
+                    setAvailableAdvance(loadedAdvance);
+
+                    setPaymentAmount(amountToPay);
+
+                    // =====================================================
+                    // 15. OPEN PAYMENT MODAL
+                    // =====================================================
+
                     setPaymentModalOpen(true);
+
+                    // Existing behavior
                     setTransactionId(selectedFlatNo || "");
                   } catch (error) {
-                    console.error(error);
+                    console.error("Payment initialization error:", error);
+
                     message.error("Unable to verify accounting year status.");
                   }
                 }}
@@ -884,11 +1046,14 @@ export default function ViewBills() {
               onCancel={() => setPaymentModalOpen(false)}
               onOk={handlePay}
               okText="Pay Now"
-              okButtonProps={{ disabled: !paidAmount || paidAmount <= 0 }}
+              width={800}
+              okButtonProps={{
+                disabled: !paymentAmount || paymentAmount <= 0,
+              }}
             >
               <Form layout="vertical">
                 <Row gutter={16}>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Payment Method">
                       <Select
                         value={paymentMode}
@@ -902,7 +1067,7 @@ export default function ViewBills() {
                       />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Payment Date" required>
                       <DatePicker
                         style={{ width: "100%" }}
@@ -917,12 +1082,20 @@ export default function ViewBills() {
 
                           if (!result) return;
 
+                          const remainingMaintenance = Math.max(
+                            paymentMaintenance - alreadyPaidAmount,
+                            0,
+                          );
+
+                          const totalDiscount =
+                            Number(result.discount || 0) +
+                            Number(pendingDiscount || 0);
+
                           const billAmount = Math.max(
-                            result.maintenance +
-                              result.interest +
-                              result.penalty -
-                              result.discount -
-                              pendingDiscount,
+                            remainingMaintenance +
+                              Number(result.interest || 0) +
+                              Number(result.penalty || 0) -
+                              totalDiscount,
                             0,
                           );
 
@@ -936,24 +1109,27 @@ export default function ViewBills() {
                             0,
                           );
 
-                          setPaidAmount(amountToPay);
+                          setPaymentAmount(amountToPay);
                         }}
                       />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Maintenance">
-                      <Input
-                        type="number"
-                        value={paymentMaintenance}
-                        readOnly
-                        onChange={(e) =>
-                          setPaymentMaintenance(Number(e.target.value) || 0)
-                        }
-                      />
+                      <Input value={paymentMaintenance.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
+                    <Form.Item label="Already Paid">
+                      <Input value={alreadyPaidAmount.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Form.Item label="Maintenance Balance">
+                      <Input value={maintenanceBalance.toFixed(2)} readOnly />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Interest">
                       <Input
                         type="number"
@@ -965,7 +1141,7 @@ export default function ViewBills() {
                       />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Current Discount">
                       <Input
                         type="number"
@@ -975,59 +1151,77 @@ export default function ViewBills() {
 
                           setCurrentDiscount(value);
 
-                          setPaidAmount(
-                            paymentMaintenance +
-                              paymentInterest -
-                              (value + pendingDiscount) -
-                              availableAdvance,
+                          const remainingMaintenance = Math.max(
+                            paymentMaintenance - alreadyPaidAmount,
+                            0,
                           );
+
+                          const billAmount = Math.max(
+                            remainingMaintenance +
+                              paymentInterest +
+                              paymentPenalty -
+                              (value + pendingDiscount),
+                            0,
+                          );
+
+                          const advanceUsed = Math.min(
+                            availableAdvance,
+                            billAmount,
+                          );
+
+                          const amountToPay = Math.max(
+                            billAmount - advanceUsed,
+                            0,
+                          );
+
+                          setPaymentAmount(amountToPay);
                         }}
                       />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Pending Discount">
                       <Input value={pendingDiscount.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Total Discount">
                       <Input value={totalPaymentDiscount.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>{" "}
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Available Advance">
                       <Input value={availableAdvance.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="Total">
                       <Input value={paymentTotal.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
-                    <Form.Item label="Paid Amount">
+                  <Col xs={24} sm={8}>
+                    <Form.Item label="Payment Amount">
                       <Input
                         type="number"
-                        value={paidAmount}
+                        value={paymentAmount}
                         onChange={(e) =>
-                          setPaidAmount(Number(e.target.value) || 0)
+                          setPaymentAmount(Number(e.target.value) || 0)
                         }
                       />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
-                    <Form.Item label="Pending Amount">
-                      <Input value={pendingAmount.toFixed(2)} readOnly />
+                  <Col xs={24} sm={8}>
+                    <Form.Item label="Balance After Payment">
+                      <Input value={pendingAfterPayment.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} sm={12}>
+                  <Col xs={24} sm={8}>
                     <Form.Item label="New Advance Amount">
-                      <Input value={advanceAmount.toFixed(2)} readOnly />
+                      <Input value={newAdvanceAmount.toFixed(2)} readOnly />
                     </Form.Item>
                   </Col>
                   {paymentMode !== "CASH" && (
-                    <Col xs={24} sm={12}>
+                    <Col xs={24} sm={8}>
                       <Form.Item
                         label="Transaction Id"
                         initialValue={"flatNo"}
