@@ -10,6 +10,7 @@ import {
   Col,
   Layout,
   Modal,
+  InputNumber,
 } from "antd";
 import axios from "axios";
 import { apiPost } from "../../api/axios";
@@ -22,15 +23,14 @@ import MemberSidebar from "../../components/layout/MemberSidebar";
 import Sidebar from "../../components/layout/Sidebar";
 import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
+import "./BillGenerate.css";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const { Content } = Layout;
 
 const role = sessionStorage.getItem("role");
-const financialYearId = Number(
-  sessionStorage.getItem("financialYearId")
-);
+const financialYearId = Number(sessionStorage.getItem("financialYearId"));
 
 interface Flat {
   id: number;
@@ -42,19 +42,19 @@ interface Flat {
 
 const BillGenerate: React.FC = () => {
   const [loading, setLoading] = useState(false);
-
-  // Existing GL mapping
+  const [generatingFinancialYear, setGeneratingFinancialYear] = useState(false);
+  const [generatingAdditional, setGeneratingAdditional] = useState(false);
+  const [generatingFlat, setGeneratingFlat] = useState(false);
   const [maintenanceMappingExists, setMaintenanceMappingExists] =
     useState(false);
 
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
 
-  // Flats
   const [flats, setFlats] = useState<Flat[]>([]);
   const [selectedFlatId, setSelectedFlatId] = useState<number | null>(null);
   const [flatsLoading, setFlatsLoading] = useState(false);
-
+  const [additionalPercentage, setAdditionalPercentage] = useState<number>(10);
   const societyId = Number(sessionStorage.getItem("societyId"));
 
   useEffect(() => {
@@ -69,21 +69,18 @@ const BillGenerate: React.FC = () => {
   const loadGlMapping = async () => {
     try {
       const res = await axios.get(
-        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`
+        `${BASE_URL}/gl/master/mapping?societyId=${societyId}`,
       );
 
       const mapping = res.data.find(
         (item: any) =>
-          item.description?.trim().toLowerCase() ===
-          "monthly maintenance"
+          item.description?.trim().toLowerCase() === "monthly maintenance",
       );
 
       if (!mapping) {
         setMaintenanceMappingExists(false);
 
-        message.error(
-          "Monthly Maintenance GL Mapping not configured"
-        );
+        message.error("Monthly Maintenance GL Mapping not configured");
 
         return;
       }
@@ -110,7 +107,7 @@ const BillGenerate: React.FC = () => {
       setFlatsLoading(true);
 
       const response = await axios.get(
-        `${BASE_URL}/flats?societyId=${societyId}`
+        `${BASE_URL}/flats?societyId=${societyId}`,
       );
 
       setFlats(response.data || []);
@@ -122,10 +119,6 @@ const BillGenerate: React.FC = () => {
       setFlatsLoading(false);
     }
   };
-
-  // ============================================================
-  // GENERATE ALL FINANCIAL YEAR BILLS
-  // ============================================================
 
   const generateFinancialYearBills = () => {
     Modal.confirm({
@@ -141,33 +134,29 @@ const BillGenerate: React.FC = () => {
       onOk: async () => {
         try {
           const response = await axios.get(
-            `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`
+            `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
           );
 
           const isClosed =
-            response.data === "Closed" ||
-            response.data?.status === "Closed";
+            response.data === "Closed" || response.data?.status === "Closed";
 
           if (isClosed) {
             message.error(
-              "This financial year is closed. You cannot generate bills."
+              "This financial year is closed. You cannot generate bills.",
             );
 
             return;
           }
 
           if (!glReceivable || !glCreditAccount) {
-            message.error(
-              "Monthly Maintenance GL Mapping not configured"
-            );
+            message.error("Monthly Maintenance GL Mapping not configured");
 
             return;
           }
 
           setLoading(true);
 
-          const financialYear =
-            sessionStorage.getItem("financialYear");
+          const financialYear = sessionStorage.getItem("financialYear");
 
           const year = financialYear
             ? Number(financialYear.substring(0, 4))
@@ -176,9 +165,7 @@ const BillGenerate: React.FC = () => {
           const payload = {
             year,
             societyId,
-            createdBy: Number(
-              sessionStorage.getItem("userId")
-            ),
+            createdBy: Number(sessionStorage.getItem("userId")),
             financialYearId,
             glReceivable,
             glCreditAccount,
@@ -186,16 +173,14 @@ const BillGenerate: React.FC = () => {
 
           const generationResponse = await apiPost(
             "/billing/generate-financial-year-bills",
-            payload
+            payload,
           );
 
           message.success(generationResponse);
         } catch (err) {
           console.error(err);
 
-          message.error(
-            "Failed to generate maintenance bills."
-          );
+          message.error("Failed to generate maintenance bills.");
         } finally {
           setLoading(false);
         }
@@ -203,9 +188,59 @@ const BillGenerate: React.FC = () => {
     });
   };
 
-  // ============================================================
-  // GENERATE BILL FOR SELECTED FLAT
-  // ============================================================
+  const generateAdditionalBill = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+      );
+
+      const isClosed =
+        response.data === "Closed" || response.data?.status === "Closed";
+
+      if (isClosed) {
+        message.error(
+          "This financial year is closed. You cannot generate bills.",
+        );
+
+        return;
+      }
+
+      if (!glReceivable || !glCreditAccount) {
+        message.error("Monthly Maintenance GL Mapping not configured");
+
+        return;
+      }
+
+      setLoading(true);
+
+      const financialYear = sessionStorage.getItem("financialYear");
+
+      const year = financialYear
+        ? Number(financialYear.substring(0, 4))
+        : new Date().getFullYear();
+
+      const payload = {
+        year,
+        societyId,
+        createdBy: Number(sessionStorage.getItem("userId")),
+        financialYearId,
+        glReceivable,
+        glCreditAccount,
+        additionalPercentage,
+      };
+
+      const generationResponse = await apiPost(
+        "/billing/generate-additional-bills",
+        payload,
+      );
+
+      message.success(generationResponse);
+    } catch {
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const generateSelectedFlatBill = () => {
     if (!selectedFlatId) {
@@ -215,17 +250,13 @@ const BillGenerate: React.FC = () => {
     }
 
     if (!maintenanceMappingExists) {
-      message.error(
-        "Monthly Maintenance GL Mapping not configured"
-      );
+      message.error("Monthly Maintenance GL Mapping not configured");
 
       return;
     }
 
     if (!glReceivable || !glCreditAccount) {
-      message.error(
-        "Monthly Maintenance GL Mapping not configured"
-      );
+      message.error("Monthly Maintenance GL Mapping not configured");
 
       return;
     }
@@ -244,16 +275,15 @@ const BillGenerate: React.FC = () => {
         try {
           // Check financial year status first
           const response = await axios.get(
-            `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`
+            `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
           );
 
           const isClosed =
-            response.data === "Closed" ||
-            response.data?.status === "Closed";
+            response.data === "Closed" || response.data?.status === "Closed";
 
           if (isClosed) {
             message.error(
-              "This financial year is closed. You cannot generate bills."
+              "This financial year is closed. You cannot generate bills.",
             );
 
             return;
@@ -261,8 +291,7 @@ const BillGenerate: React.FC = () => {
 
           setLoading(true);
 
-          const financialYear =
-            sessionStorage.getItem("financialYear");
+          const financialYear = sessionStorage.getItem("financialYear");
 
           const year = financialYear
             ? Number(financialYear.substring(0, 4))
@@ -272,9 +301,7 @@ const BillGenerate: React.FC = () => {
             year,
             societyId,
             flatId: selectedFlatId,
-            createdBy: Number(
-              sessionStorage.getItem("userId")
-            ),
+            createdBy: Number(sessionStorage.getItem("userId")),
             financialYearId,
             glReceivable,
             glCreditAccount,
@@ -288,12 +315,12 @@ const BillGenerate: React.FC = () => {
            */
           const generationResponse = await apiPost(
             "/billing/generate-flat-bill",
-            payload
+            payload,
           );
 
           message.success(
             generationResponse ||
-              "Bill generated successfully for selected flat."
+              "Bill generated successfully for selected flat.",
           );
         } catch (err: any) {
           console.error(err);
@@ -354,97 +381,118 @@ const BillGenerate: React.FC = () => {
         )}
 
         <Content>
-          {/* ================================================== */}
-          {/* EXISTING FULL YEAR GENERATION */}
-          {/* ================================================== */}
-
-          <Card
-            title={`Generate Maintenance (FY: ${
-              sessionStorage.getItem("financialYear") || "N/A"
-            })`}
-            style={{ marginBottom: 20 }}
-          >
-            <Row gutter={[24, 16]}>
-              <Col xs={24} md={6}>
-                <Button
-                  type="primary"
-                  loading={loading}
-                  disabled={!maintenanceMappingExists}
-                  block
-                  onClick={generateFinancialYearBills}
+          <div>
+            <Card
+              className="bill-generation-card"
+              title={
+                <div
                   style={{
-                    height: "auto",
-                    whiteSpace: "normal",
-                    lineHeight: "20px",
-                    padding: "8px 16px",
+                    display: "flex",
+                    marginTop: 40,
+                    alignItems: "center",
+                    gap: 16,
+                    flexWrap: "wrap",
                   }}
                 >
-                  Generate Maintenance Bills
-                </Button>
-              </Col>
-            </Row>
-          </Card>
+                  <span>
+                    Generate Maintenance (FY:{" "}
+                    {sessionStorage.getItem("financialYear") || "N/A"} ) :
+                  </span>
 
-          {/* ================================================== */}
-          {/* ADDITIONAL SELECTED FLAT GENERATION */}
-          {/* ================================================== */}
-
-          <Card
-            title="Additional Bill Generation"
-            style={{ marginBottom: 20 }}
-          >
-            <Row gutter={[24, 16]} align="middle">
-              {/* FLAT SELECT */}
-              <Col xs={24} md={8}>
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Select Flat"
-                  loading={flatsLoading}
-                  value={selectedFlatId}
-                  onChange={(value) => {
-                    setSelectedFlatId(
-                      value ? Number(value) : null
-                    );
-                  }}
-                  style={{ width: "100%" }}
-                  optionFilterProp="label"
-                  options={flats.map((flat) => ({
-                    value: flat.id,
-
-                    label:
-                      flat.flatNumber ||
-                      flat.flatNo ||
-                      flat.number ||
-                      flat.name ||
-                      `Flat ${flat.id}`,
-                  }))}
-                />
-              </Col>
-
-              {/* GENERATE BUTTON */}
-              <Col xs={24} md={6}>
-                <Button
-                  type="primary"
-                  loading={loading}
-                  disabled={
-                    !maintenanceMappingExists ||
-                    !selectedFlatId
-                  }
-                  block
-                  onClick={generateSelectedFlatBill}
+                  <Button
+                    type="primary"
+                    loading={generatingFinancialYear}
+                    disabled={!maintenanceMappingExists}
+                    onClick={generateFinancialYearBills}
+                    style={{
+                      height: "auto",
+                      whiteSpace: "normal",
+                      lineHeight: "20px",
+                      padding: "8px 16px",
+                    }}
+                  >
+                    Generate Maintenance Bills
+                  </Button>
+                </div>
+              }
+              style={{ marginBottom: 20 }}
+            />
+            <Card
+              className="bill-generation-card"
+              title={
+                <div
                   style={{
-                    height: "auto",
-                    whiteSpace: "normal",
-                    lineHeight: "20px",
-                    padding: "8px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 16,
+                    width: "100%",
                   }}
                 >
-                  Generate Bill for Selected Flat
-                </Button>
-              </Col>
-            </Row>
-          </Card>
+                  <span>Generate Bills for Single / New Flats : </span>
+
+                  <Select
+                    showSearch
+                    allowClear
+                    placeholder="Select Flat"
+                    loading={flatsLoading}
+                    value={selectedFlatId}
+                    onChange={(value) => {
+                      setSelectedFlatId(value ? Number(value) : null);
+                    }}
+                    style={{ width: 250 }}
+                    optionFilterProp="label"
+                    options={flats.map((flat) => ({
+                      value: flat.id,
+                      label:
+                        flat.flatNumber ||
+                        flat.flatNo ||
+                        flat.number ||
+                        flat.name ||
+                        `Flat ${flat.id}`,
+                    }))}
+                  />
+
+                  <Button
+                    type="primary"
+                    loading={generatingFlat}
+                    disabled={!maintenanceMappingExists || !selectedFlatId}
+                    onClick={generateSelectedFlatBill}
+                    style={{
+                      height: "auto",
+                      whiteSpace: "normal",
+                      lineHeight: "20px",
+                      padding: "8px 16px",
+                    }}
+                  >
+                    Generate Bill for Selected Flat
+                  </Button>
+                </div>
+              }
+              style={{ marginBottom: 20 }}
+            />
+            <Card
+              className="bill-generation-card"
+              title={
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <span>Generate Additional Bill for all Flats :</span>
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={additionalPercentage}
+                    onChange={(value) => setAdditionalPercentage(value ?? 0)}
+                    addonAfter="%"
+                    style={{ width: 120 }}
+                  />
+                  <Button loading={generatingAdditional}
+                  type="primary" onClick={generateAdditionalBill}>
+                    Generate Additional Bill
+                  </Button>
+                </div>
+              }
+              style={{ marginBottom: 20 }}
+            />
+          </div>
         </Content>
       </Layout>
     </Layout>

@@ -1,0 +1,13 @@
+.bill-generation-card {
+  background: #f5f5f5;
+  border: none;
+}
+
+.bill-generation-card .ant-card-head {
+  background: #f5f5f5;
+  border-bottom: none;
+}
+
+.bill-generation-card .ant-card-body {
+  background: #f5f5f5;
+}

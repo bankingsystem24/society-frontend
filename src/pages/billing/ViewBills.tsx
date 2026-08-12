@@ -322,18 +322,18 @@ export default function ViewBills() {
     0,
   );
 
-const totalAmountSettled = paymentAmount + advanceUsed;
+  const totalAmountSettled = paymentAmount + advanceUsed;
 
-const maintenancePaidNow = Math.min(
-  maintenanceBalance,
-  Math.max(
-    totalAmountSettled -
-      paymentInterest -
-      paymentPenalty +
-      totalPaymentDiscount,
-    0,
-  ),
-);
+  const maintenancePaidNow = Math.min(
+    maintenanceBalance,
+    Math.max(
+      totalAmountSettled -
+        paymentInterest -
+        paymentPenalty +
+        totalPaymentDiscount,
+      0,
+    ),
+  );
 
   const pendingAfterPayment = Math.max(
     maintenanceBalance - maintenancePaidNow,
@@ -369,11 +369,8 @@ const maintenancePaidNow = Math.min(
             : 0;
 
         const interest = b.interestAmount || 0;
-
         const penalty = sel.penalty !== false ? b.penaltyAmount || 0 : 0;
-
         const discount = sel.discount !== false ? b.discountAmount || 0 : 0;
-
         const billTotal = maintenance + interest + penalty - discount;
 
         return {
@@ -591,12 +588,17 @@ const maintenancePaidNow = Math.min(
       const maintenance = Number(res.data.maintenanceAmount || 0);
       const interest = Number(res.data.interestAmount || 0);
       const penalty = Number(res.data.penaltyAmount || 0);
+      const maintenanceForDiscount = Number(
+        res.data.maintenanceForDiscount || 0,
+      );
 
       setPaymentMaintenance(maintenance);
       setPaymentInterest(interest);
       setPaymentPenalty(penalty);
 
-      const discount = Math.round(computeDiscount(date, maintenance));
+      const discount = Math.round(
+        computeDiscount(date, maintenanceForDiscount),
+      );
 
       setCurrentDiscount(discount);
 
@@ -615,6 +617,8 @@ const maintenancePaidNow = Math.min(
   const DISCOUNT_ELIGIBLE_MONTHS = ["APRIL", "JULY", "OCTOBER", "JANUARY"];
 
   const computeDiscount = (date: dayjs.Dayjs, maintenanceAmount: number) => {
+    console.log("Maintenance for Discount Amount", maintenanceAmount);
+
     if (!discountPolicy || !discountPolicy.active) {
       setDiscountEligible(false);
       return 0;
@@ -623,7 +627,7 @@ const maintenancePaidNow = Math.min(
     const selectedMonths = selectedBills.map((b) => b.month);
 
     const isEligibleMonthCombo =
-      selectedMonths.length === DISCOUNT_ELIGIBLE_MONTHS.length &&
+      selectedMonths.length >= DISCOUNT_ELIGIBLE_MONTHS.length &&
       DISCOUNT_ELIGIBLE_MONTHS.every((m) => selectedMonths.includes(m));
 
     const requiredCount =
@@ -634,7 +638,7 @@ const maintenancePaidNow = Math.min(
           : null;
 
     const isEligibleCount =
-      requiredCount !== null && selectedRowKeys.length === requiredCount;
+      requiredCount !== null && selectedRowKeys.length >= requiredCount;
 
     const paidBeforeDate = dayjs(discountPolicy.paidBeforeDate);
 
@@ -646,6 +650,14 @@ const maintenancePaidNow = Math.min(
 
     setDiscountEligible(eligible);
 
+    console.log("Eligible ?:", eligible);
+    console.log(
+      "Current Discount:",
+      (
+        (maintenanceAmount * Number(discountPolicy.discountPercent)) /
+        100
+      ).toFixed(2),
+    );
     if (eligible) {
       return (maintenanceAmount * Number(discountPolicy.discountPercent)) / 100;
     }
@@ -839,10 +851,6 @@ const maintenancePaidNow = Math.min(
                 disabled={selectedRowKeys.length === 0}
                 onClick={async () => {
                   try {
-                    // =====================================================
-                    // 1. CHECK FINANCIAL YEAR STATUS
-                    // =====================================================
-
                     const response = await axios.get(
                       `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
                     );
@@ -857,73 +865,28 @@ const maintenancePaidNow = Math.min(
                       );
                       return;
                     }
-
-                    // =====================================================
-                    // 2. CHECK GL MAPPING
-                    // =====================================================
-
                     if (!glReceivable || !glCreditAccount) {
                       message.error(
                         "Monthly Maintenance GL Mapping not configured",
                       );
                       return;
                     }
-
-                    // =====================================================
-                    // 3. GET MEMBER
-                    // =====================================================
-
                     const memberId = selectedBills[0]?.memberId;
-
                     if (!memberId) {
                       message.error("Member not found for selected bill");
                       return;
                     }
-
-                    // =====================================================
-                    // 4. LOAD PENDING DISCOUNT
-                    // =====================================================
-
                     const loadedPendingDiscount = await loadPendingDiscount();
-
-                    // =====================================================
-                    // 5. LOAD AVAILABLE ADVANCE
-                    // =====================================================
-
                     const loadedAdvance = await loadAvailableAdvance(memberId);
-
-                    // =====================================================
-                    // 6. CALCULATE CURRENT INTEREST / PENALTY
-                    // =====================================================
-
                     const result = await calculateInterest(paymentDate);
 
                     if (!result) {
                       return;
                     }
-
-                    // =====================================================
-                    // 7. ORIGINAL MAINTENANCE AMOUNT
-                    //
-                    // Example:
-                    // maintenanceAmount = 3145.50
-                    //
-                    // This value NEVER changes.
-                    // =====================================================
-
                     const selectedMaintenance = selectedBills.reduce(
                       (sum, bill) => sum + Number(bill.maintenanceAmount || 0),
                       0,
                     );
-
-                    // =====================================================
-                    // 8. ALREADY PAID MAINTENANCE
-                    //
-                    // Example:
-                    // maintenanceAmount = 3145.50
-                    // paidAmount        = 1100.00
-                    // =====================================================
-
                     const remainingMaintenance = selectedBills.reduce(
                       (sum, bill) =>
                         sum +
@@ -934,24 +897,9 @@ const maintenancePaidNow = Math.min(
                         ),
                       0,
                     );
-
-                    // =====================================================
-                    // 10. TOTAL DISCOUNT
-                    // =====================================================
-
                     const totalDiscount =
                       Number(result.discount || 0) +
                       Number(loadedPendingDiscount || 0);
-
-                    // =====================================================
-                    // 11. CURRENT PAYABLE AMOUNT
-                    //
-                    // Remaining maintenance
-                    // + interest
-                    // + penalty
-                    // - discount
-                    // =====================================================
-
                     const billAmount = Math.max(
                       remainingMaintenance +
                         Number(result.interest || 0) +
@@ -960,38 +908,15 @@ const maintenancePaidNow = Math.min(
                       0,
                     );
 
-                    // =====================================================
-                    // 12. ADVANCE USED
-                    // =====================================================
-
                     const usedAdvance = Math.min(loadedAdvance, billAmount);
-
-                    // =====================================================
-                    // 13. PAYMENT REQUIRED NOW
-                    // =====================================================
-
                     const amountToPay = Math.max(billAmount - usedAdvance, 0);
-
-                    // =====================================================
-                    // 14. SET PAYMENT MODAL VALUES
-                    // =====================================================
-
                     setPaymentMaintenance(selectedMaintenance);
-
                     setAlreadyPaidAmount(
                       Math.max(selectedMaintenance - remainingMaintenance, 0),
                     );
                     setAvailableAdvance(loadedAdvance);
-
                     setPaymentAmount(amountToPay);
-
-                    // =====================================================
-                    // 15. OPEN PAYMENT MODAL
-                    // =====================================================
-
                     setPaymentModalOpen(true);
-
-                    // Existing behavior
                     setTransactionId(selectedFlatNo || "");
                   } catch (error) {
                     console.error("Payment initialization error:", error);
