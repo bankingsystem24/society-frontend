@@ -322,13 +322,18 @@ export default function ViewBills() {
     0,
   );
 
-  const maintenancePaidNow = Math.min(
-    maintenanceBalance,
-    Math.max(
-      paymentAmount - paymentInterest - paymentPenalty + totalPaymentDiscount,
-      0,
-    ),
-  );
+const totalAmountSettled = paymentAmount + advanceUsed;
+
+const maintenancePaidNow = Math.min(
+  maintenanceBalance,
+  Math.max(
+    totalAmountSettled -
+      paymentInterest -
+      paymentPenalty +
+      totalPaymentDiscount,
+    0,
+  ),
+);
 
   const pendingAfterPayment = Math.max(
     maintenanceBalance - maintenancePaidNow,
