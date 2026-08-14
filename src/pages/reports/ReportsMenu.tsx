@@ -41,7 +41,7 @@ const ReportsMenu = () => {
           <AuditorSidebar />
         )}
       </Layout.Sider>
-
+ 
       {/* MAIN AREA */}
       <Layout style={{ minWidth: 0 }}>
         {/* HEADER (NO EXTRA DIV) */}
@@ -224,10 +224,10 @@ const ReportsMenu = () => {
                   key: "memberreport",
                   label: "Members",
                   children: [
-                    // {
-                    //   key: "/reports/member-register",
-                    //   label: "Member Register",
-                    // },
+                    {
+                      key: "/reports/maintenance-register",
+                      label: "Maintenance Register",
+                    },
                     {
                       key: "/reports/flat-wise-members",
                       label: "Flat Wise Members",

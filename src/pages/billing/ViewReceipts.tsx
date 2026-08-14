@@ -145,7 +145,7 @@ export default function ViewReceipts() {
   const loadReceiptDetails = async (receiptId: number) => {
     try {
       setLoading(true);
-     
+
       const detailsres = await axios.get(
         `${BASE_URL}/receipts/details/${receiptId}`,
       );
@@ -174,6 +174,65 @@ export default function ViewReceipts() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteReceipt = (receipt: Receipt) => {
+    Modal.confirm({
+      title: "Delete Receipt?",
+      content: (
+        <div>
+          <p>
+            Are you sure you want to delete receipt{" "}
+            <strong>{receipt.receiptNo}</strong>?
+          </p>
+
+          <p style={{ color: "red" }}>This will:</p>
+
+          <ul>
+            <li>Delete the journal entry</li>
+            <li>Delete journal entry lines</li>
+            <li>Delete receipt-bill mappings</li>
+            <li>Revert billing to PENDING</li>
+            <li>Delete the receipt</li>
+          </ul>
+
+          <p>
+            <strong>This action cannot be undone.</strong>
+          </p>
+        </div>
+      ),
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+
+      onOk: async () => {
+        try {
+          setLoading(true);
+          await axios.delete(`${BASE_URL}/receipts/${receipt.id}`);
+          setBillingOpen(false);
+          setContributionOpen(false);
+          setSinkingFundOpen(false);
+          setSelectedReceipt(null);
+          setReceiptBills([]);
+          await loadReceipts();
+          Modal.success({
+            title: "Receipt Deleted",
+            content: `Receipt ${receipt.receiptNo} was deleted successfully.`,
+          });
+        } catch (error: any) {
+          console.error("Delete receipt error:", error);
+
+          Modal.error({
+            title: "Delete Failed",
+            content:
+              error?.response?.data?.message ||
+              "Unable to delete receipt. Please try again.",
+          });
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
   const handleBillingPrint = (receipt: Receipt | null) => {
@@ -334,23 +393,23 @@ export default function ViewReceipts() {
         </tbody>
         </table>
 
-<table>
-  <thead>
-    <tr>
-      <th>Month</th>
-      <th>Year</th>
-      <th>Maintenance Paid</th>
-      <th>Interest Paid</th>
-      <th>Penalty Paid</th>
-      <th>Total Paid</th>
-      <th>Status</th>
-    </tr>
-  </thead>
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Maintenance Paid</th>
+              <th>Interest Paid</th>
+              <th>Penalty Paid</th>
+              <th>Total Paid</th>
+              <th>Status</th>
+            </tr>
+          </thead>
 
-  <tbody>
-    ${rows}
-  </tbody>
-</table>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
 
           <br/><br/>
 
@@ -742,6 +801,24 @@ export default function ViewReceipts() {
     {
       title: "Transaction Id",
       dataIndex: "transactionId",
+    },
+    {
+      title: "Action",
+      key: "action",
+      fixed: "right",
+      render: (_, record) =>
+        (role === "ADMIN" || role=== "AUDITOR") ? (
+          <Button
+            danger
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteReceipt(record);
+            }}
+          >
+            Delete
+          </Button>
+        ) : null,
     },
   ];
 
