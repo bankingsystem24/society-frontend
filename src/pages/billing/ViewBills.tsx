@@ -287,7 +287,6 @@ export default function ViewBills() {
           `${BASE_URL}/flats/member?societyId=${societyId}&ownerMemberId=${memberId}`,
         );
         setFlats(res.data);
-        console.log("res", res.data);
       } else {
         const res = await axios.get(`${BASE_URL}/flats?societyId=${societyId}`);
         setFlats(res.data);
@@ -468,11 +467,7 @@ export default function ViewBills() {
         availableAdvance,
         advanceUsed,
       };
-
-      console.log("Payment Payload:", payload);
-
       const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
-
       message.success(res.data);
 
       setSelectedRowKeys([]);
@@ -515,11 +510,8 @@ export default function ViewBills() {
         financialYearId: financialYearId,
       };
 
-      console.log("Payload:", payload);
-
       const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, payload);
       setBills(res.data);
-      console.log("Filtered Bills:", res.data);
     } catch {
       message.error("Failed to filter bills");
     } finally {
@@ -655,8 +647,6 @@ export default function ViewBills() {
   const DISCOUNT_ELIGIBLE_MONTHS = ["APRIL", "JULY", "OCTOBER", "JANUARY"];
 
   const computeDiscount = (date: dayjs.Dayjs, maintenanceAmount: number) => {
-    console.log("Maintenance for Discount Amount", maintenanceAmount);
-
     if (!discountPolicy || !discountPolicy.active) {
       setDiscountEligible(false);
       return 0;
@@ -674,32 +664,17 @@ export default function ViewBills() {
         : maintenancePolicy?.billingFrequency === "QUARTERLY"
           ? 4
           : null;
-
     const isEligibleCount =
       requiredCount !== null && selectedRowKeys.length >= requiredCount;
-
     const paidBeforeDate = dayjs(discountPolicy.paidBeforeDate);
-
     const isWithinDeadline =
       paidBeforeDate.isValid() && date.isSameOrBefore(paidBeforeDate, "day");
-
     const eligible =
       isEligibleCount && isEligibleMonthCombo && isWithinDeadline;
-
     setDiscountEligible(eligible);
-
-    console.log("Eligible ?:", eligible);
-    console.log(
-      "Current Discount:",
-      (
-        (maintenanceAmount * Number(discountPolicy.discountPercent)) /
-        100
-      ).toFixed(2),
-    );
     if (eligible) {
       return (maintenanceAmount * Number(discountPolicy.discountPercent)) / 100;
     }
-
     return 0;
   };
 

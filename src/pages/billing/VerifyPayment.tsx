@@ -814,7 +814,6 @@ export default function VerifyPayemnt() {
       advanceUsed
     };
 
-    console.log("Payload:", payload);
     try {
       await axios.put(`${BASE_URL}/receipts/confirm`, payload);
       message.success("Payment confirmed successfully");

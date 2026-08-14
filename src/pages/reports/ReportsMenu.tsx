@@ -277,6 +277,10 @@ const ReportsMenu = () => {
                   key: "administrationreports",
                   label: "Administration",
                   children: [
+                    { 
+                        key: "/reports/society-maintenance-ledger", 
+                        label: "Society Maintenance Ledger" 
+                    },
                     // { 
                     //     key: "/reports/flat-register", 
                     //     label: "Flat Register" },

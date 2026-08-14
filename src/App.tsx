@@ -85,6 +85,7 @@ import MaintenancePolicy from "./pages/billing/MaintenancePolicy";
 import InterestPolicy from "./pages/billing/InterestPolicy";
 import MemberDiscountEntry from "./pages/billing/MemberDiscountEntry";
 import MemberMaintenanceLedger from "./pages/reports/MemberMaintenanceLedger";
+import SocietyMaintenanceLedger from "./pages/reports/SocietyMaintenanceLedger";
 
 export default function App() {
   return (
@@ -173,6 +174,7 @@ export default function App() {
           <Route path="sinking-register" element={<SinkingFundRegister />}/>
           <Route path="contribution-register" element={<ContributionRegister />} />
           <Route path="member-maintenance-register" element={<MemberMaintenanceLedger />} /> 
+          <Route path="society-maintenance-ledger" element={<SocietyMaintenanceLedger />} /> 
         </Route>
       </Route>
     </Routes>
