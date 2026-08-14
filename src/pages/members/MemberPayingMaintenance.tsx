@@ -255,7 +255,7 @@ const MemberPayingMaintenance: React.FC = () => {
     }
 
     const billRef = `BILL-${Date.now()}`;
-    const societyUpiId = upi; // from DB/API
+    const societyUpiId = upi; 
 
     const qr = `upi://pay?pa=${societyUpiId}
     &pn=${encodeURIComponent(societyName ?? "")}

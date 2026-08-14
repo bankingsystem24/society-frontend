@@ -166,7 +166,12 @@ export default function ViewBills() {
       }
     >
   >({});
-
+  const memberId = Number(sessionStorage.getItem("memberId"));
+  const role = sessionStorage.getItem("role");
+  const upi = sessionStorage.getItem("upi");
+  const [upiUrl, setUpiUrl] = useState("");
+  const societyName = sessionStorage.getItem("societyName");
+   
   useEffect(() => {
     loadFlats();
     loadBills();
@@ -277,8 +282,16 @@ export default function ViewBills() {
 
   const loadFlats = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/flats?societyId=${societyId}`);
-      setFlats(res.data);
+      if (role == "MEMBER" && memberId != null) {
+        const res = await axios.get(
+          `${BASE_URL}/flats/member?societyId=${societyId}&ownerMemberId=${memberId}`,
+        );
+        setFlats(res.data);
+        console.log("res", res.data);
+      } else {
+        const res = await axios.get(`${BASE_URL}/flats?societyId=${societyId}`);
+        setFlats(res.data);
+      }
     } catch {
       message.error("Failed to load flats");
     }
@@ -287,19 +300,34 @@ export default function ViewBills() {
   const loadBills = async () => {
     try {
       setLoading(true);
-      const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
-        societyId: societyId,
-        financialYearId: financialYearId,
-      });
+      if (role == "MEMBER" && memberId != null) {
+        const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
+          societyId: societyId,
+          financialYearId: financialYearId,
+          memberId: memberId,
+        });
 
-      const sortedBills = res.data.sort((a: any, b: any) =>
-        a.flatNo.localeCompare(b.flatNo, undefined, {
-          numeric: true,
-          sensitivity: "base",
-        }),
-      );
+        const sortedBills = res.data.sort((a: any, b: any) =>
+          a.flatNo.localeCompare(b.flatNo, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          }),
+        );
+        setBills(sortedBills);
+      } else {
+        const res = await axios.post(`${BASE_URL}/billing/viewAllBills`, {
+          societyId: societyId,
+          financialYearId: financialYearId,
+        });
 
-      setBills(sortedBills);
+        const sortedBills = res.data.sort((a: any, b: any) =>
+          a.flatNo.localeCompare(b.flatNo, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          }),
+        );
+        setBills(sortedBills);
+      }
     } catch {
       message.error("Failed to load bills");
     } finally {
@@ -347,6 +375,16 @@ export default function ViewBills() {
       message.error("Failed to load members");
     }
   };
+  
+  const billRef = `BILL-${Date.now()}`;
+  const societyUpiId = upi; 
+  const amount=0;
+  const qr = `upi://pay?pa=${societyUpiId}
+      &pn=${encodeURIComponent(societyName ?? "")}
+      &am=${1}
+      // &am=${amount.toFixed(2)}
+      &cu=INR
+      &tn=${billRef}`;
 
   const handlePay = async () => {
     try {
@@ -917,7 +955,12 @@ export default function ViewBills() {
                     setAvailableAdvance(loadedAdvance);
                     setPaymentAmount(amountToPay);
                     setPaymentModalOpen(true);
-                    setTransactionId(selectedFlatNo || "");
+                    if(memberId == null || Number.isNaN(memberId) && role !== "MEMBER"){
+                      setTransactionId(selectedFlatNo || "");
+                    } else {
+                      setTransactionId("");
+                    }
+                    
                   } catch (error) {
                     console.error("Payment initialization error:", error);
 
@@ -925,11 +968,14 @@ export default function ViewBills() {
                   }
                 }}
               >
-                Payment Received by Admin ({selectedRowKeys.length})
+                Payment Received by Admin ({selectedRowKeys.length}) 
               </Button>
-              <Button danger style={{ marginLeft: 40 }}>
-                Delete All Pending Bills
-              </Button>
+              {(memberId == null || Number.isNaN(memberId)) && role !== "MEMBER" && (
+                
+                <Button danger style={{ marginLeft: 40 }}>
+                  Delete All Pending Bills 
+                </Button>
+              )}
             </div>
             <Table
               rowKey="id"
@@ -1064,7 +1110,7 @@ export default function ViewBills() {
                       <Input
                         type="number"
                         value={paymentInterest}
-                        // readOnly
+                        readOnly={role === "MEMBER"}
                         onChange={(e) =>
                           setPaymentInterest(Number(e.target.value) || 0)
                         }
@@ -1076,6 +1122,7 @@ export default function ViewBills() {
                       <Input
                         type="number"
                         value={currentDiscount}
+                        readOnly={role === "MEMBER"}
                         onChange={(e) => {
                           const value = Number(e.target.value) || 0;
 

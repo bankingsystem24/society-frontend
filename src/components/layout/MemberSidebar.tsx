@@ -59,8 +59,13 @@ const MemberSidebar: React.FC = () => {
             icon: <DashboardOutlined />,
             label: "Dashboard",
           },
+          // {
+          //   key: "/member-paying-maintenance",
+          //   icon: <DollarOutlined />,
+          //   label: "Pending Maint.",
+          // },
           {
-            key: "/member-paying-maintenance",
+            key: "/view-bills",
             icon: <DollarOutlined />,
             label: "Pending Maint.",
           },
