@@ -84,6 +84,7 @@ import BalanceSheet from "./pages/accounting/BalanceSheet";
 import MaintenancePolicy from "./pages/billing/MaintenancePolicy";
 import InterestPolicy from "./pages/billing/InterestPolicy";
 import MemberDiscountEntry from "./pages/billing/MemberDiscountEntry";
+import MemberMaintenanceLedger from "./pages/reports/MemberMaintenanceLedger";
 
 export default function App() {
   return (
@@ -171,6 +172,7 @@ export default function App() {
           <Route path="maintenance-register" element={<MaintenanceRegister />} />
           <Route path="sinking-register" element={<SinkingFundRegister />}/>
           <Route path="contribution-register" element={<ContributionRegister />} />
+          <Route path="member-maintenance-register" element={<MemberMaintenanceLedger />} /> 
         </Route>
       </Route>
     </Routes>

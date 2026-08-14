@@ -225,7 +225,7 @@ const ReportsMenu = () => {
                   label: "Members",
                   children: [
                     {
-                      key: "/reports/maintenance-register",
+                      key: "/reports/member-maintenance-register",
                       label: "Maintenance Register",
                     },
                     {
