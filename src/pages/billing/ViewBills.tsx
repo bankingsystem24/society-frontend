@@ -29,15 +29,11 @@ import SuperAdminHeader from "../../components/layout/SuperAdminHeader";
 import SuperAdminSidebar from "../../components/layout/SuperAdminSidebar";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import { apiGet } from "../../api/axios";
-
 dayjs.extend(isSameOrBefore);
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const { Content } = Layout;
-const role = sessionStorage.getItem("role");
-
 interface Flat {
   id: number;
   flatNo: string;
@@ -82,21 +78,38 @@ interface MaintenancePolicy {
   active?: boolean;
 }
 
-const months = [
-  "APRIL",
-  "MAY",
-  "JUNE",
-  "JULY",
-  "AUGUST",
-  "SEPTEMBER",
-  "OCTOBER",
-  "NOVEMBER",
-  "DECEMBER",
-  "JANUARY",
-  "FEBRUARY",
-  "MARCH",
-];
 
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id?: string;
+  handler: (response: any) => void;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  theme?: {
+    color?: string;
+  };
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
 export default function ViewBills() {
   const [loading, setLoading] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
@@ -169,9 +182,8 @@ export default function ViewBills() {
   const memberId = Number(sessionStorage.getItem("memberId"));
   const role = sessionStorage.getItem("role");
   const upi = sessionStorage.getItem("upi");
-  const [upiUrl, setUpiUrl] = useState("");
   const societyName = sessionStorage.getItem("societyName");
-   
+
   useEffect(() => {
     loadFlats();
     loadBills();
@@ -181,12 +193,223 @@ export default function ViewBills() {
     loadMaintenancePolicy();
   }, []);
 
-  useEffect(() => {}, [
-    glCashInHand,
-    glBankAccount,
-    glInterestIncome,
-    glDiscount,
-  ]);
+  const buildBillsPayload = () => {
+    return selectedBills.map((b) => {
+      const sel = amountSelections[b.id] ?? defaultAmountSelection;
+
+      const maintenance =
+        sel.maintenance !== false
+          ? Math.max(
+              Number(b.maintenanceAmount || 0) -
+                Number(b.paidAmount || 0),
+              0,
+            )
+          : 0;
+
+      const interest = Number(b.interestAmount || 0);
+
+      const penalty =
+        sel.penalty !== false
+          ? Number(b.penaltyAmount || 0)
+          : 0;
+
+      const discount =
+        sel.discount !== false
+          ? Number(b.discountAmount || 0)
+          : 0;
+
+      const totalAmount =
+        maintenance +
+        interest +
+        penalty -
+        discount;
+
+      return {
+        billId: b.id,
+        maintenanceAmount: maintenance,
+        interestAmount: interest,
+        penaltyAmount: penalty,
+        discountAmount: discount,
+        totalAmount,
+      };
+    });
+  };
+
+  const buildPaymentPayload = () => {
+    const billIds = selectedRowKeys.map(Number);
+    const billsPayload = buildBillsPayload();
+
+    const currentMaintenancePayment = Math.min(
+      maintenanceBalance,
+      Math.max(
+        paymentAmount -
+          paymentInterest -
+          paymentPenalty +
+          totalPaymentDiscount,
+        0,
+      ),
+    );
+
+    return {
+      billIds,
+      bills: billsPayload,
+      paymentMode,
+      paymentDate: paymentDate.format("YYYY-MM-DD"),
+      financialYearId,
+      transactionId,
+
+      maintenanceAmount: currentMaintenancePayment,
+      interestAmount: paymentInterest,
+
+      currentDiscount,
+      pendingDiscount,
+      discountAmount: totalPaymentDiscount,
+
+      paidAmount: paymentAmount,
+      pendingAmount: pendingAfterPayment,
+
+      advanceAmount: newAdvanceAmount,
+      totalAmount: paymentTotal,
+
+      glReceivable,
+      glCreditAccount,
+      glCashInHand,
+      glBankAccount,
+      glInterestIncome,
+      glDiscount,
+      glMemberAdvance,
+      glDiscountCreditAccount,
+
+      selectedCount: selectedRowKeys.length,
+
+      availableAdvance,
+      advanceUsed,
+    };
+  };
+
+  const handleRazorpay = async () => {
+    try {
+      console.log("========== RAZORPAY PAYMENT START ==========");
+
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+      if (!razorpayKey) {
+        message.error("Razorpay key is missing. Check your .env file.");
+        return;
+      }
+
+      if (!paymentAmount || paymentAmount <= 0) {
+        message.error("Please enter a valid Payment Amount");
+        return;
+      }
+
+      const payload = buildPaymentPayload();
+
+      console.log(
+        "Payload before Razorpay:",
+        JSON.stringify(payload, null, 2),
+      );
+
+      const options: RazorpayOptions = {
+        key: razorpayKey,
+        amount: Math.round(paymentAmount * 100),
+        currency: "INR",
+        name: societyName || "Housing Society",
+        description: `Maintenance Payment - ${selectedFlatNo || ""}`,
+
+        prefill: {
+          name: selectedBills[0]?.memberName || "",
+        },
+
+        notes: {
+          societyId: String(societyId),
+          financialYearId: String(financialYearId),
+          billIds: selectedRowKeys.map(Number).join(","),
+        },
+
+        theme: {
+          color: "#1677ff",
+        },
+
+        handler: async (response: any) => {
+          console.log("========== RAZORPAY SUCCESS ==========");
+          console.log(
+            "Razorpay response:",
+            JSON.stringify(response, null, 2),
+          );
+
+          try {
+            const finalPayload = {
+              ...payload,
+              transactionId: response.razorpay_payment_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id || null,
+              razorpaySignature: response.razorpay_signature || null,
+              paymentMode: "UPI",
+            };
+
+            console.log("========== member payment ==========");
+            console.log("URL:", `${BASE_URL}/billing/pay`);
+            console.log("METHOD: PUT");
+            console.log(
+              "FINAL PAYLOAD:",
+              JSON.stringify(finalPayload, null, 2),
+            );
+
+            const res = await axios.put(`${BASE_URL}/billing/pay`,finalPayload,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              },
+            );
+
+            console.log("========== BACKEND RESPONSE ==========");
+            console.log("Status:", res.status);
+            console.log("Response:", res.data);
+
+            message.success("Payment successful");
+
+            setSelectedRowKeys([]);
+            setPaymentModalOpen(false);
+            setPaymentDate(dayjs());
+            setAlreadyPaidAmount(0);
+            setPaymentAmount(0);
+            setTransactionId("");
+
+            await loadBills();
+          } catch (error: any) {
+            console.error("========== BILLING PAY ERROR ==========");
+            console.error("Message:", error?.message);
+            console.error("Status:", error?.response?.status);
+            console.error("Response:", error?.response?.data);
+            console.error("Request URL:", error?.config?.url);
+            console.error("Request Method:", error?.config?.method);
+            console.error("Full error:", error);
+            console.error("========================================");
+
+            message.error(
+              "Payment was successful, but payment record could not be saved.",
+            );
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            console.log("Razorpay checkout closed");
+          },
+        },
+      };
+
+      console.log("Opening Razorpay with options:", options);
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error: any) {
+      console.error("Razorpay initialization error:", error);
+      message.error("Unable to initialize Razorpay payment.");
+    }
+  };
 
   const loadAvailableAdvance = async (memberId: number) => {
     try {
@@ -374,10 +597,10 @@ export default function ViewBills() {
       message.error("Failed to load members");
     }
   };
-  
+
   const billRef = `BILL-${Date.now()}`;
-  const societyUpiId = upi; 
-  const amount=0;
+  const societyUpiId = upi;
+  const amount = 0;
   const qr = `upi://pay?pa=${societyUpiId}
       &pn=${encodeURIComponent(societyName ?? "")}
       &am=${1}
@@ -387,99 +610,46 @@ export default function ViewBills() {
 
   const handlePay = async () => {
     try {
-      const billIds = selectedRowKeys.map(Number);
-
       if (!paymentAmount || paymentAmount <= 0) {
         message.error("Please enter a valid Payment Amount");
         return;
       }
 
-      const billsPayload = selectedBills.map((b) => {
-        const sel = amountSelections[b.id] ?? defaultAmountSelection;
-
-        const maintenance =
-          sel.maintenance !== false
-            ? Math.max(
-                Number(b.maintenanceAmount || 0) - Number(b.paidAmount || 0),
-                0,
-              )
-            : 0;
-
-        const interest = b.interestAmount || 0;
-        const penalty = sel.penalty !== false ? b.penaltyAmount || 0 : 0;
-        const discount = sel.discount !== false ? b.discountAmount || 0 : 0;
-        const billTotal = maintenance + interest + penalty - discount;
-
-        return {
-          billId: b.id,
-          maintenanceAmount: maintenance,
-          interestAmount: interest,
-          penaltyAmount: penalty,
-          discountAmount: discount,
-          totalAmount: billTotal,
-        };
-      });
-      const currentMaintenancePayment = Math.min(
-        maintenanceBalance,
-        Math.max(
-          paymentAmount -
-            paymentInterest -
-            paymentPenalty +
-            totalPaymentDiscount,
-          0,
-        ),
+      const payload = buildPaymentPayload();
+      const response = await axios.put(
+        `${BASE_URL}/billing/pay`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
       );
-      const payload = {
-        billIds,
-        bills: billsPayload,
-        paymentMode,
-        paymentDate: paymentDate.format("YYYY-MM-DD"),
-        financialYearId,
-        transactionId,
 
-        // Current bill amounts
-        maintenanceAmount: currentMaintenancePayment,
-        interestAmount: paymentInterest,
+      console.log("========== BACKEND RESPONSE ==========");
+      console.log("Status:", response.status);
+      console.log("Response:", response.data);
 
-        currentDiscount,
-        pendingDiscount,
-        discountAmount: totalPaymentDiscount,
-
-        // IMPORTANT:
-        // only THIS transaction's payment
-        paidAmount: paymentAmount,
-
-        // Remaining maintenance after THIS payment
-        pendingAmount: pendingAfterPayment,
-
-        advanceAmount: newAdvanceAmount,
-        totalAmount: paymentTotal,
-
-        glReceivable,
-        glCreditAccount,
-        glCashInHand,
-        glBankAccount,
-        glInterestIncome,
-        glDiscount,
-        glMemberAdvance,
-        selectedCount: selectedRowKeys.length,
-        glDiscountCreditAccount,
-        availableAdvance,
-        advanceUsed,
-      };
-      const res = await axios.put(`${BASE_URL}/billing/pay`, payload);
-      message.success(res.data);
+      message.success(response.data);
 
       setSelectedRowKeys([]);
       setPaymentModalOpen(false);
       setPaymentDate(dayjs());
-
       setAlreadyPaidAmount(0);
       setPaymentAmount(0);
+      setTransactionId("");
 
-      loadBills();
-    } catch (error) {
-      console.error(error);
+      await loadBills();
+    } catch (error: any) {
+      console.error("========== ADMIN PAYMENT ERROR ==========");
+      console.error("Message:", error?.message);
+      console.error("Status:", error?.response?.status);
+      console.error("Response:", error?.response?.data);
+      console.error("Request URL:", error?.config?.url);
+      console.error("Request Method:", error?.config?.method);
+      console.error("Full error:", error);
+      console.error("========================================");
+
       message.error("Payment failed");
     }
   };
@@ -696,6 +866,104 @@ export default function ViewBills() {
     (s, b) => s + (b.discountAmount || 0),
     0,
   );
+  const initializePayment = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
+      );
+
+      const isClosed =
+        response.data === "Closed" || response.data?.status === "Closed";
+
+      if (isClosed) {
+        message.error(
+          "This financial year is closed. You cannot add or edit records.",
+        );
+        return false;
+      }
+
+      if (!glReceivable || !glCreditAccount) {
+        message.error("Monthly Maintenance GL Mapping not configured");
+        return false;
+      }
+
+      const selectedMemberId = selectedBills[0]?.memberId;
+
+      if (!selectedMemberId) {
+        message.error("Member not found for selected bill");
+        return false;
+      }
+
+      const loadedPendingDiscount = await loadPendingDiscount();
+
+      const loadedAdvance = await loadAvailableAdvance(selectedMemberId);
+
+      const result = await calculateInterest(paymentDate);
+
+      if (!result) {
+        return false;
+      }
+
+      const selectedMaintenance = selectedBills.reduce(
+        (sum, bill) => sum + Number(bill.maintenanceAmount || 0),
+        0,
+      );
+
+      const remainingMaintenance = selectedBills.reduce(
+        (sum, bill) =>
+          sum +
+          Math.max(
+            Number(bill.maintenanceAmount || 0) - Number(bill.paidAmount || 0),
+            0,
+          ),
+        0,
+      );
+
+      const totalDiscount =
+        Number(result.discount || 0) + Number(loadedPendingDiscount || 0);
+
+      const billAmount = Math.max(
+        remainingMaintenance +
+          Number(result.interest || 0) +
+          Number(result.penalty || 0) -
+          totalDiscount,
+        0,
+      );
+
+      const usedAdvance = Math.min(loadedAdvance, billAmount);
+
+      const amountToPay = Math.max(billAmount - usedAdvance, 0);
+
+      setPaymentMaintenance(selectedMaintenance);
+
+      setAlreadyPaidAmount(
+        Math.max(selectedMaintenance - remainingMaintenance, 0),
+      );
+
+      setAvailableAdvance(loadedAdvance);
+
+      setPaymentAmount(amountToPay);
+
+      if (
+        selectedMemberId == null ||
+        (Number.isNaN(selectedMemberId) && role !== "MEMBER")
+      ) {
+        setTransactionId(selectedFlatNo || "");
+      } else {
+        setTransactionId("");
+      }
+
+      setPaymentModalOpen(true);
+
+      return true;
+    } catch (error) {
+      console.error("Payment initialization error:", error);
+
+      message.error("Unable to verify accounting year status.");
+
+      return false;
+    }
+  };
 
   const grandTotal = totalsSource.reduce((s, b) => s + (b.totalAmount || 0), 0);
   return (
@@ -859,98 +1127,33 @@ export default function ViewBills() {
             </div>
 
             <div style={{ marginBottom: 12 }}>
-              <Button
-                type="primary"
-                disabled={selectedRowKeys.length === 0}
-                onClick={async () => {
-                  try {
-                    const response = await axios.get(
-                      `${BASE_URL}/accounting-year/${societyId}/year/${financialYearId}/status`,
-                    );
+              {(memberId == null || Number.isNaN(memberId)) &&
+                role !== "MEMBER" && (
+                  <Button
+                    type="primary"
+                    disabled={selectedRowKeys.length === 0}
+                    onClick={initializePayment}
+                  >
+                    Payment Received by Admin ({selectedRowKeys.length})
+                  </Button>
+                )}
+              {(memberId == null || Number.isNaN(memberId)) &&
+                role !== "MEMBER" && (
+                  <Button danger style={{ marginLeft: 40 }}>
+                    Delete All Pending Bills
+                  </Button>
+                )}
 
-                    const isClosed =
-                      response.data === "Closed" ||
-                      response.data?.status === "Closed";
-
-                    if (isClosed) {
-                      message.error(
-                        "This financial year is closed. You cannot add or edit records.",
-                      );
-                      return;
-                    }
-                    if (!glReceivable || !glCreditAccount) {
-                      message.error(
-                        "Monthly Maintenance GL Mapping not configured",
-                      );
-                      return;
-                    }
-                    const memberId = selectedBills[0]?.memberId;
-                    if (!memberId) {
-                      message.error("Member not found for selected bill");
-                      return;
-                    }
-                    const loadedPendingDiscount = await loadPendingDiscount();
-                    const loadedAdvance = await loadAvailableAdvance(memberId);
-                    const result = await calculateInterest(paymentDate);
-
-                    if (!result) {
-                      return;
-                    }
-                    const selectedMaintenance = selectedBills.reduce(
-                      (sum, bill) => sum + Number(bill.maintenanceAmount || 0),
-                      0,
-                    );
-                    const remainingMaintenance = selectedBills.reduce(
-                      (sum, bill) =>
-                        sum +
-                        Math.max(
-                          Number(bill.maintenanceAmount || 0) -
-                            Number(bill.paidAmount || 0),
-                          0,
-                        ),
-                      0,
-                    );
-                    const totalDiscount =
-                      Number(result.discount || 0) +
-                      Number(loadedPendingDiscount || 0);
-                    const billAmount = Math.max(
-                      remainingMaintenance +
-                        Number(result.interest || 0) +
-                        Number(result.penalty || 0) -
-                        totalDiscount,
-                      0,
-                    );
-
-                    const usedAdvance = Math.min(loadedAdvance, billAmount);
-                    const amountToPay = Math.max(billAmount - usedAdvance, 0);
-                    setPaymentMaintenance(selectedMaintenance);
-                    setAlreadyPaidAmount(
-                      Math.max(selectedMaintenance - remainingMaintenance, 0),
-                    );
-                    setAvailableAdvance(loadedAdvance);
-                    setPaymentAmount(amountToPay);
-                    setPaymentModalOpen(true);
-                    if(memberId == null || Number.isNaN(memberId) && role !== "MEMBER"){
-                      setTransactionId(selectedFlatNo || "");
-                    } else {
-                      setTransactionId("");
-                    }
-                    
-                  } catch (error) {
-                    console.error("Payment initialization error:", error);
-
-                    message.error("Unable to verify accounting year status.");
-                  }
-                }}
-              >
-                Payment Received by Admin ({selectedRowKeys.length}) 
-              </Button>
-              {(memberId == null || Number.isNaN(memberId)) && role !== "MEMBER" && (
-                
-                <Button danger style={{ marginLeft: 40 }}>
-                  Delete All Pending Bills 
-                </Button>
-              )}
+              {(memberId != null || Number.isNaN(memberId)) &&
+                role === "MEMBER" && (
+                  <Button
+                    type="primary"
+                    disabled={selectedRowKeys.length === 0}
+                    onClick={initializePayment}
+                  >
+                    Razorpay
+                  </Button>
+                )}
             </div>
             <Table
               rowKey="id"
@@ -995,8 +1198,8 @@ export default function ViewBills() {
               title="Select Payment Method"
               open={paymentModalOpen}
               onCancel={() => setPaymentModalOpen(false)}
-              onOk={handlePay}
-              okText="Pay Now"
+              onOk={role === "MEMBER" ? handleRazorpay : handlePay}
+              okText={role === "MEMBER" ? "Pay with Razorpay" : "Pay Now"}
               width={800}
               okButtonProps={{
                 disabled: !paymentAmount || paymentAmount <= 0,
