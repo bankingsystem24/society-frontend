@@ -87,6 +87,7 @@ import MemberDiscountEntry from "./pages/billing/MemberDiscountEntry";
 import MemberMaintenanceLedger from "./pages/reports/MemberMaintenanceLedger";
 import SocietyMaintenanceLedger from "./pages/reports/SocietyMaintenanceLedger";
 import MemberAdvance from "./pages/billing/MemberAdvance";
+import ParkingDepositEntry from "./pages/society/ParkingDepositEntry";
 
 export default function App() {
   return (
@@ -150,6 +151,7 @@ export default function App() {
         <Route path="/payments" element={<Payments />} />
         <Route path="/reports-menu" element={<ReportsMenu />} />
         <Route path="/arrears" element={<ArrearsEntry />} />
+        <Route path="/parking-deposit" element={<ParkingDepositEntry />} />
         <Route element={<SuperAdminLayout />}>
           <Route path="/superadmindashboard" element={<SuperAdminDashboard />} />
           <Route path="/superadminusers" element={<SuperAdminUsers />} />

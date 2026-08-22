@@ -136,6 +136,10 @@ const AuditorSidebar: React.FC = () => {
                 key: "/member-advance",
                 label: "Advance",
               },
+              { 
+                key: "/parking-deposit",
+                label: "Parking Deposit",
+              },              
             ],
           },
           {
