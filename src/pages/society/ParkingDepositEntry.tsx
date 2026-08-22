@@ -547,11 +547,7 @@ const loadFlats = async () => {
                   </Select.Option>
 
                   <Select.Option value="BANK">
-                    Bank Transfer
-                  </Select.Option>
-
-                  <Select.Option value="CHEQUE">
-                    Cheque
+                    Bank
                   </Select.Option>
 
                   <Select.Option value="UPI">
