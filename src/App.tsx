@@ -86,6 +86,7 @@ import InterestPolicy from "./pages/billing/InterestPolicy";
 import MemberDiscountEntry from "./pages/billing/MemberDiscountEntry";
 import MemberMaintenanceLedger from "./pages/reports/MemberMaintenanceLedger";
 import SocietyMaintenanceLedger from "./pages/reports/SocietyMaintenanceLedger";
+import MemberAdvance from "./pages/billing/MemberAdvance";
 
 export default function App() {
   return (
@@ -130,6 +131,7 @@ export default function App() {
         <Route path="/gl-balances" element={<GlOpeningBalance />} />
         <Route path="/add-expenses" element={<Expenses />} />
         <Route path="/income" element={<Income />} />
+        <Route path="/member-advance" element={<MemberAdvance />} />
         <Route path="/transfer" element={<Transfer />} />
         <Route path="/vendors" element={<Vendors />} />
         <Route path="/bill-generate" element={<BillGenerate />} />

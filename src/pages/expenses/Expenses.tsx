@@ -115,7 +115,7 @@ const Expenses: React.FC = () => {
       );
       setGlList(
         (res.data || []).filter(
-          (gl: any) => gl.groupName === "EXPENSES" && gl.parentGlCode != null,
+          (gl: any) =>  gl.parentGlCode != null,
         ),
       );
     } catch {

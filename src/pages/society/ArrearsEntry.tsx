@@ -43,11 +43,14 @@ interface FinancialYear {
 
 interface Arrears {
   id: number;
+  flatId: number;
   flatNo: string;
   ownerName: string;
   maintenanceAmount: number;
   dueDate: string;
   status: string;
+  type: string;
+  billType?: string;
 }
 
 const ArrearsEntry: React.FC = () => {
@@ -68,6 +71,7 @@ const ArrearsEntry: React.FC = () => {
   const [ownerSearch, setOwnerSearch] = useState("");
   const [glReceivable, setGlReceivable] = useState<number>(0);
   const [glCreditAccount, setGlCreditAccount] = useState<number>(0);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [maintenanceMappingExists, setMaintenanceMappingExists] =
     useState(false);
   const role = sessionStorage.getItem("role");
@@ -93,6 +97,21 @@ const ArrearsEntry: React.FC = () => {
 
     setFilteredArrears(filtered);
   }, [flatSearch, ownerSearch, arrears]);
+
+  const handleEdit = (record: Arrears) => {
+    setEditingId(record.id);
+    form.setFieldsValue({
+      flatId: record.flatId,
+      amount: record.maintenanceAmount,
+      dueDate: dayjs(record.dueDate),
+      type: record.type || record.billType,
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const loadGlMapping = async () => {
     try {
@@ -172,24 +191,30 @@ const ArrearsEntry: React.FC = () => {
         penaltyAmount: 0,
         discountAmount: 0,
         dueDate: values.dueDate.format("YYYY-MM-DD"),
-        billType: "ARREARS",
+        billType: values.type,
         month: dayjs(values.dueDate).format("MMMM").toUpperCase(),
         year: dayjs(values.dueDate).year(),
         createdBy: Number(userId),
         glReceivable,
         glCreditAccount,
       };
-      await axios.post(`${BASE_URL}/billing/arrears`, payload);
-      message.success("Opening arrears created successfully");
+      if (editingId) {
+        await axios.put(`${BASE_URL}/billing/arrears/${editingId}`, payload);
+        message.success("Opening arrears updated successfully");
+      } else {
+        await axios.post(`${BASE_URL}/billing/arrears`, payload);
+        message.success("Opening arrears created successfully");
+      }
       loadArrears();
       form.resetFields();
+      setEditingId(null);
     } catch (err) {
       message.error("Failed to save arrears");
     }
   };
+
   const handleDeleteUnpaidRecords = async () => {
     try {
-
       const pendingIds = filteredArrears
         .filter((item) => item.status === "PENDING")
         .map((item) => item.id);
@@ -236,6 +261,20 @@ const ArrearsEntry: React.FC = () => {
     {
       title: "Status",
       dataIndex: "status",
+    },
+    {
+      title: "Action",
+      key: "action",
+      fixed: "right" as const,
+      render: (_: any, record: Arrears) => (
+        <Button
+          type="primary"
+          onClick={() => handleEdit(record)}
+          disabled={record.status !== "PENDING"}
+        >
+          Edit
+        </Button>
+      ),
     },
   ];
 
@@ -286,41 +325,39 @@ const ArrearsEntry: React.FC = () => {
               width: "100%",
             }}
           >
-            <Form layout="vertical" form={form} onFinish={onFinish}>
+            <Form
+              layout="vertical"
+              form={form}
+              onFinish={onFinish}
+              initialValues={{
+                type: "TENANT",
+              }}
+            >
               <Row gutter={16}>
                 <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-                  <Form.Item
-                    label="Flat"
-                    name="flatId"
-                    rules={[{ required: true }]}
+                <Form.Item
+                  label="Flat"
+                  name="flatId"
+                  rules={[{ required: true, message: "Please select flat" }]}
+                >
+                  <Select
+                    ref={flatRef}
+                    showSearch
+                    optionFilterProp="children"
+                    placeholder="Select Flat"
+                    disabled={editingId !== null}
                   >
-                    <Select
-                      ref={flatRef}
-                      showSearch
-                      optionFilterProp="children"
-                      placeholder="Select Flat"
-                      onChange={() => {
-                        amountRef.current?.focus();
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          amountRef.current?.focus();
-                        }
-                      }}
-                    >
-                      {flats.map((f) => (
-                        <Select.Option key={f.id} value={f.id}>
-                          {f.flatNo} - {f.ownerName}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-
+                    {flats.map((f) => (
+                      <Select.Option key={f.id} value={f.id}>
+                        {f.flatNo} - {f.ownerName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>  
+              </Col>
                 <Col xs={24} sm={12} md={12} lg={6} xl={6}>
                   <Form.Item
-                    label="Opening Amount"
+                    label="Amount"
                     name="amount"
                     rules={[{ required: true }]}
                   >
@@ -380,11 +417,35 @@ const ArrearsEntry: React.FC = () => {
                     />
                   </Form.Item>
                 </Col>
+                <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+                  <Form.Item
+                    label="Type"
+                    name="type"
+                    rules={[{ required: true, message: "Please select type" }]}
+                  >
+                    <Select>
+                      <Select.Option value="ARREARS">Arrears</Select.Option>
 
+                      <Select.Option value="TENANT">Tenant</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
                 <Col span={6} style={{ alignContent: "center" }}>
                   <Button ref={saveButtonRef} type="primary" htmlType="submit">
-                    Save Opening Arrears
+                    {editingId ? "Update Opening Arrears" : "Save Opening Arrears"}
                   </Button>
+                    {editingId && (
+                      <Button
+                        style={{ marginLeft: 8 }}
+                        onClick={() => {
+                          form.resetFields();
+                          form.setFieldsValue({ type: "TENANT" });
+                          setEditingId(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
                 </Col>
               </Row>
             </Form>
@@ -460,7 +521,7 @@ const ArrearsEntry: React.FC = () => {
               columns={columns}
               dataSource={filteredArrears}
               bordered
-              pagination={{ pageSize: 10, responsive: true, }}
+              pagination={{ pageSize: 10, responsive: true }}
             />
           </Card>
         </Content>

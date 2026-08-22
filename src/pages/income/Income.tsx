@@ -97,7 +97,7 @@ const Income: React.FC = () => {
       setGlList(
         (res.data || []).filter(
           (gl: any) =>
-            (gl.groupName === "INCOME" || gl.groupName === "OTHER INCOME") &&
+            
             gl.parentGlCode != null,
         ),
       );

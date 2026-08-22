@@ -363,11 +363,6 @@ export default function ViewBills() {
                 },
               },
             );
-
-            console.log("========== BACKEND RESPONSE ==========");
-            console.log("Status:", res.status);
-            console.log("Response:", res.data);
-
             message.success("Payment successful");
 
             setSelectedRowKeys([]);
@@ -379,15 +374,7 @@ export default function ViewBills() {
 
             await loadBills();
           } catch (error: any) {
-            console.error("========== BILLING PAY ERROR ==========");
-            console.error("Message:", error?.message);
-            console.error("Status:", error?.response?.status);
-            console.error("Response:", error?.response?.data);
-            console.error("Request URL:", error?.config?.url);
-            console.error("Request Method:", error?.config?.method);
             console.error("Full error:", error);
-            console.error("========================================");
-
             message.error(
               "Payment was successful, but payment record could not be saved.",
             );
@@ -423,6 +410,7 @@ export default function ViewBills() {
 
       const advance = Number(res.data || 0);
       setAvailableAdvance(advance);
+
 
       return advance;
     } catch (error) {
@@ -625,11 +613,6 @@ export default function ViewBills() {
           },
         },
       );
-
-      console.log("========== BACKEND RESPONSE ==========");
-      console.log("Status:", response.status);
-      console.log("Response:", response.data);
-
       message.success(response.data);
 
       setSelectedRowKeys([]);
@@ -641,15 +624,7 @@ export default function ViewBills() {
 
       await loadBills();
     } catch (error: any) {
-      console.error("========== ADMIN PAYMENT ERROR ==========");
-      console.error("Message:", error?.message);
-      console.error("Status:", error?.response?.status);
-      console.error("Response:", error?.response?.data);
-      console.error("Request URL:", error?.config?.url);
-      console.error("Request Method:", error?.config?.method);
       console.error("Full error:", error);
-      console.error("========================================");
-
       message.error("Payment failed");
     }
   };
